@@ -20,10 +20,8 @@ class XAPI_NewContractDataGen
     {
 
         EXU_ContractTemplateNum contractTemplateNum = 'TST_Template';
-        EXU_BillingPlanNum      billingPlanNum      = 'TST_Billing';  
-        EXU_DeliveryCategory    deliveryCategory    = 'TST_Category';     
+        EXU_BillingPlanNum      billingPlanNum      = 'TST_Billing';     
 
-        // Step 1: BillingPlan first (ContractTemplate depends on it)
         EXU_BillingPlan billingPlan, newBillingPlan;
         select firstonly billingPlan;
         select firstonly newBillingPlan
@@ -36,7 +34,6 @@ class XAPI_NewContractDataGen
             info(strFmt("Inserted BillingPlan: %1", billingPlanNum));
         }
 
-        // Step 2: ContractTemplate (depends on BillingPlan)
         EXU_ContractTemplate contractTemplate, newContractTemplate;
         select firstonly contractTemplate
             where contractTemplate.ContractType == EXU_ContractType::Installation;
@@ -49,19 +46,6 @@ class XAPI_NewContractDataGen
             newContractTemplate.BillingPlanNum      = billingPlanNum; 
             newContractTemplate.insert();
             info(strFmt("Inserted ContractTemplate: %1", contractTemplateNum));
-        }
-
-        // Step 3: DeliveryCategory (independent)
-        EXU_DeliveryCategoryTable deliveryCategoryTable, newDeliveryCategoryTable;
-        select firstonly deliveryCategoryTable;
-        select firstonly newDeliveryCategoryTable
-             where newDeliveryCategoryTable.DeliveryCategory == deliveryCategory;
-        if (deliveryCategoryTable.RecId && !newDeliveryCategoryTable.RecId)
-        {
-            buf2Buf(deliveryCategoryTable, newDeliveryCategoryTable);
-            newDeliveryCategoryTable.DeliveryCategory = deliveryCategory;
-            newDeliveryCategoryTable.insert();
-            info(strFmt("Inserted DeliveryCategory: %1", deliveryCategory));
         }
 
     }
