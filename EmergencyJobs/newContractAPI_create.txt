@@ -1,0 +1,30 @@
+{
+EXU_ContractTemplateNum contractTemplateNum = 'TST_Template';
+EXU_BillingPlanNum      billingPlanNum      = 'TST_Billing';     
+
+EXU_BillingPlan billingPlan, newBillingPlan;
+select firstonly billingPlan;
+select firstonly newBillingPlan
+    where newBillingPlan.BillingPlanNum == billingPlanNum;
+if (billingPlan.RecId && !newBillingPlan.RecId)
+{
+    buf2Buf(billingPlan, newBillingPlan);
+    newBillingPlan.BillingPlanNum = billingPlanNum;
+    newBillingPlan.insert();
+    info(strFmt("Inserted BillingPlan: %1", billingPlanNum));
+}
+
+EXU_ContractTemplate contractTemplate, newContractTemplate;
+select firstonly contractTemplate
+    where contractTemplate.ContractType == EXU_ContractType::Installation;
+select firstonly newContractTemplate
+    where newContractTemplate.ContractTemplateNum == contractTemplateNum;
+if (contractTemplate.RecId && !newContractTemplate.RecId)
+{
+    buf2Buf(contractTemplate, newContractTemplate);
+    newContractTemplate.ContractTemplateNum = contractTemplateNum;
+    newContractTemplate.BillingPlanNum      = billingPlanNum; 
+    newContractTemplate.insert();
+    info(strFmt("Inserted ContractTemplate: %1", contractTemplateNum));
+}
+}

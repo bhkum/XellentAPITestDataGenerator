@@ -1,0 +1,30 @@
+{
+EXU_ContractTemplateNum contractTemplateNum = 'TST_Template';
+EXU_BillingPlanNum      billingPlanNum      = 'TST_Billing';
+
+EXU_ContractTemplate contractTemplate;
+select firstonly forUpdate contractTemplate
+where contractTemplate.ContractTemplateNum == contractTemplateNum;
+if (contractTemplate.RecId)
+{
+    contractTemplate.delete();
+    info(strFmt("Deleted ContractTemplate: %1", contractTemplateNum));
+}
+else
+{
+    warning(strFmt("ContractTemplate not found: %1", contractTemplateNum));
+}
+
+EXU_BillingPlan billingPlan;
+select firstonly forUpdate billingPlan
+where billingPlan.BillingPlanNum == billingPlanNum;
+if (billingPlan.RecId)
+{
+    billingPlan.delete();
+    info(strFmt("Deleted BillingPlan: %1", billingPlanNum));
+}
+else
+{
+    warning(strFmt("BillingPlan not found: %1", billingPlanNum));
+}
+}
