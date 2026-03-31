@@ -1,0 +1,35 @@
+
+
+Dimension values 
+
+If technical 
+
+change the alternative cusotmer number 
+
+#Section - Blocker
+
+During creation of installation 
+ public EGS_API_DataContract_ResponseBase createInstallations(EGS_API_DataContract_newInstallations _newInstallations)
+    {
+        DataAreaId dataAreaId = _newInstallations.parmDataAreaId() ? _newInstallations.parmDataAreaId() :curExt();
+    
+        if (!isConfigurationKeyEnabled(configurationKeyNum(EXU_API_Elsmart)))
+        {
+            throw error('API för Elsmart ej aktiverat');
+        }    
+        
+        changecompany(dataAreaId)
+        {
+            this.installations = _newInstallations;
+            this.doCreteInstallations();
+        }
+        
+        return this.response;
+    }
+
+    Cause:
+    hi, it seems that elsmart key is not activated there. I don't want to change it as there may be some reason for it. Many "new*" APIs are called through CI (inner logging system), but you don't need to worry about it as typical call is made within CI a few steps later
+
+
+    Fix:
+    Enable elsmart in Dev (not in test) Heab and evida.
