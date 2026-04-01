@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_API_CallAutomator</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_API_CallAutomator
+{
+   
+    str bearerToken;
+
+
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>RunFullWorkflow</Name>
+				<Source><![CDATA[
+    /// Main entry: runs all steps in sequence
+    public void RunFullWorkflow()
+    {
+        // Step 0: Get access token
+        this.bearerToken = this.GetAccessToken();
+
+        if (strLen(bearerToken) == 0)
+        {
+            error("Failed to get access token!");
+            return;
+        }
+
+        // Step 1: Create customer
+        str customerJson = '{ "_newCustomers": { "Customers": [ { "Name": "TST_Name", "CustGroup": "TST_CustGrp", "PartyType": "Organization", "AdditionalName": "TST_AdditionalName", "AlternativeCustomerCode": "CPR", "AlternativeCustomerNumber": "200901179515", "Phone": "00098773699", "Email": "TST_email@gmail.com", "Dimensions": [ { "Name": "Aktivitet", "Value": "000" } ], "PaymMode": "TST_PaymMd", "TargetSystem": "TST_NewSystem3", "address": { "Street": "TST_Leveranspunkt", "City": "TST_Stockholm", "ZipCode": "10005", "CountryRegionId": "TST" } } ], "DataAreaId": "kem" } }';
+        info("Creating customer...");
+        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newCustomerAPI", customerJson);
+
+        // Step 2: Create contract
+        str contractJson = '{ "_request": { "dataAreaId":"kem", "contractNum":"", "custAccount":"917587", "contractType":"Installation", "attachmentNum":"19723", "deliveryCategory":"TST_DelCa", "contractTemplateNum":"TST_Template", "contractStartDate":"1/1/2026", "contractEndDate":"1/31/2027", "billingPlanNum":"TST_Billing", "ContractPart": {} } }';
+        info("Creating contract...");
+        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newContractAPI", contractJson);
+
+        // Step 3: Create contract part
+        str contractPartJson = '{ "_newContractParts": { "NewContractPart": [ { "AlternativeCustomerNumber": "122192312017797", "AccountNum": "309018", "ContractNum": "10443243", "ContractCodeDescription": "TST", "GroupOldProduct": { "ProductNum": "TST", "DeliveryGroupNum_RateCode": "TST", "CompanyId": "TST", "DeliveryCategory": "TST_ElNät", "InstAgreeNum": "TST_11525201", "StartDate": "2023-04-23", "EndDate": "1900-01-01" }, "GroupNewProduct": { "ProductNum": "TST_Tid Lantbr", "DeliveryGroupNum_RateCode": "TST", "AMRCode": "TST", "AgreementLength": 0, "StartDate": "2023-05-01", "EndDate": "1900-01-01", "PurchasePriceCode": "" }, "Source": "Energiportalen_1", "EnvironmentCode": "TST", "SendConfirmationLetter": "TST", "ContractPartPriceManagements": [ { "PriceManagementCode": "TST", "PurchasePrice": 0, "SalesPrice": 0, "SalesChargeDeduction": 0, "FixedRate": 0 } ], "ContractPartFixedServices": [ { "ServiceType": "TST", "Text": "TST", "Billing": "0", "AgreementLength": 0, "StartDate": "1900-01-01", "EndDate": "1900-01-01", "Quantity": 0, "Price": 0, "AlternateText": "TST", "OfferStartDate": "2021-12-01" } ], "ContractPartIndividualServices": [ { "Itemid": "TST", "AgreementLength": "0", "StartDate": "1900-01-01", "EndDate": "1900-01-01", "OfferStartDate": "2021-12-01", "PriceManagementCode": "TST", "PurchasePrice": 0, "SalesChargeDeduction": 0, "FixedRate": 0 } ], "ContractPartSecuredVolumeDate": [ { "StartDate": "2024-01-01", "EndDate": "2024-01-31", "FixedRate": 1.0204, "ForecastedVolumekWh": 5000, "SecuredVolumeInPercent": 80 } ] } ], "DataAreaId": "kem" } }';
+        info("Creating contract part...");
+        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newContractPartAPI", contractPartJson);
+
+        // Step 4: Create installation
+        str installationJson = '{ "_request": { "dataAreaId": "OAB", "NewInstallations": [ { "Instnum": "", "InstReadingMethodNum": "TST_GroupNum", "ReadingPlanNum": "TST_GroupNum", "StreetNum": "TST_Street", "HouseNoStart": 2, "HouseNoEnd": 2, "Floor": 2, "Apartment":3, "HouseLetterStart": "TST_D", "HouseLetterEnd": "TST_F", "AddrLocation": "TST_AddrLocation", "CountyNum": "TST_County", "InstBBRNum": "TST_BBRNum", "BBRInformationId":"", "ConsumptionPerYear": 1299, "TechnicTxt1": "ABC", "PositionName": "TST_PosName", "DelPointTechnicalNo": "TST_TechNo", "AvailableQty": 0, "DelPointGroupCode1": "TST_DelPointGrpCode1", "X_coordinate": "124.567", "Y_coordinate": "125.678", "DeliveryGroupNum_UtilityArea": "", "TechnicGroup1": "TST_TechGroup1", "TechnicGroup2": "TST_TechGroup2", "TechnicGroup3": "TST_TechGroup3", "TechnicGroup4": "TST_TechGroup4", "delPoints": [ { "MeteringPoint": "", "netArea": "kem", "CategoryNum": "TST_Catgry", "deliveryCategory": "TST_DelCat", "name": "TST_DelPointName", "ReadingSystem":"Xellent" } ], "BBRInformation": { "District": "TST_Discrict", "Block": "TST_Block", "CountyNum": "", "Plot": "TST_Plot", "HybridHeatingInstallationYear": 2026, "HeatingSystem": "TST_HEatingSystem", "BuildingType": "TST_BuildingType", "PriorityClass": 10, "NumberOfBuildings": 2, "NumOfAppartments": 5, "BuildOrderingYear": 2018, "BuildingClassification": "TST_BuildingClassification", "BuildUseCode": "TST_BuildUseCode", "ResidentArea": 10, "BuildArea": 20, "BuildingVolume": 39, "BuildingNumber": 40, "HeatingVolume": 10 } } ] } }';
+        info("Creating installation...");
+        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newInstallationAPI", installationJson);
+
+        info("Workflow complete!");
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>GetAccessToken</Name>
+				<Source><![CDATA[
+    private str GetAccessToken()
+    {
+        System.Net.HttpWebRequest request;
+        System.Net.HttpWebResponse response;
+        System.IO.StreamWriter streamWriter;
+        System.IO.StreamReader streamReader;
+        str url = "https://login.microsoftonline.com/" + tenantId + "/oauth2/token";
+        str postData;
+        str responseText;
+        System.Text.RegularExpressions.Regex regex;
+        System.Text.RegularExpressions.Match match;
+
+        System.Uri uri = new System.Uri("http://dummy"); // helper for encoding
+        System.String encodedSecret = System.Net.WebUtility::UrlEncode(clientSecret);
+
+        postData = "grant_type=client_credentials"
+           + "&client_id=" + clientId
+           + "&client_secret=" + encodedSecret
+           + "&resource=" + resourceUrl;
+
+        info("===== TOKEN REQUEST START =====");
+        info("URL: " + url);
+        info("POST DATA: " + postData);
+
+        try
+        {
+            request = System.Net.WebRequest::Create(url) as System.Net.HttpWebRequest;
+            request.set_Method("POST");
+            request.set_ContentType("application/x-www-form-urlencoded");
+
+            streamWriter = new System.IO.StreamWriter(request.GetRequestStream());
+            streamWriter.Write(postData);
+            streamWriter.Flush();
+            streamWriter.Close();
+
+            response = request.GetResponse() as System.Net.HttpWebResponse;
+            streamReader = new System.IO.StreamReader(response.GetResponseStream());
+            responseText = streamReader.ReadToEnd();
+            streamReader.Close();
+
+            info("Token SUCCESS response: " + responseText);
+        }
+        catch (Exception::CLRError)
+        {
+            System.Exception ex = CLRInterop::getLastException();
+            System.Net.WebException webEx;
+            System.IO.StreamReader errorReader;
+            str errorText = "";
+
+            if (ex is System.Net.WebException)
+            {
+                webEx = ex as System.Net.WebException;
+
+                if (webEx.get_Response())
+                {
+                    errorReader = new System.IO.StreamReader(webEx.get_Response().GetResponseStream());
+                    errorText = errorReader.ReadToEnd();
+                    errorReader.Close();
+                }
+            }
+
+            error("❌ TOKEN ERROR (CLR): " + ex.ToString());
+            error("❌ TOKEN ERROR RESPONSE: " + errorText);
+            info("===== TOKEN REQUEST FAILED =====");
+
+            return "";
+        }
+
+        regex = new System.Text.RegularExpressions.Regex("\"access_token\"\\s*:\\s*\"([^\"]+)\"");
+        match = regex.Match(responseText);
+
+        if (match.Success)
+        {
+            info("✅ Access token extracted successfully");
+            return match.Groups.get_Item(1).get_Value();
+        }
+
+        error("❌ Access token not found in response!");
+        return "";
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>sendPostRequest</Name>
+				<Source><![CDATA[
+    public void sendPostRequest(str url, str json)
+    {
+        System.Net.HttpWebRequest request;
+        System.Net.HttpWebResponse response;
+        System.IO.StreamWriter streamWriter;
+        System.IO.StreamReader streamReader;
+
+        info("===== API CALL START =====");
+        info("URL: " + url);
+        info("Request JSON: " + json);
+
+        try
+        {
+            request = System.Net.WebRequest::Create(url) as System.Net.HttpWebRequest;
+            request.set_Method("POST");
+            request.set_ContentType("application/json");
+            request.get_Headers().Add("Authorization", "Bearer " + bearerToken);
+
+            streamWriter = new System.IO.StreamWriter(request.GetRequestStream());
+            streamWriter.Write(json);
+            streamWriter.Flush();
+            streamWriter.Close();
+
+            response = request.GetResponse() as System.Net.HttpWebResponse;
+            streamReader = new System.IO.StreamReader(response.GetResponseStream());
+
+            info("✅ API SUCCESS RESPONSE: " + streamReader.ReadToEnd());
+            streamReader.Close();
+        }
+        catch (Exception::CLRError)
+        {
+            System.Exception ex = CLRInterop::getLastException();
+            System.Net.WebException webEx;
+            System.IO.StreamReader errorReader;
+            str errorText = "";
+
+            if (ex is System.Net.WebException)
+            {
+                webEx = ex as System.Net.WebException;
+
+                if (webEx.get_Response())
+                {
+                    errorReader = new System.IO.StreamReader(webEx.get_Response().GetResponseStream());
+                    errorText = errorReader.ReadToEnd();
+                    errorReader.Close();
+                }
+            }
+
+            error("❌ API ERROR: " + ex.ToString());
+            error("❌ API ERROR RESPONSE: " + errorText);
+        }
+
+        info("===== API CALL END =====");
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>callCreateCustAPI</Name>
+				<Source><![CDATA[
+    public void callCreateCustAPI()
+    {
+        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newCustomerAPI", this.getJsonBody_Cust());
+
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>callInstallationAPI</Name>
+				<Source><![CDATA[
+    public void callInstallationAPI()
+    {
+        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newInstallationAPI", this.getJsonBody_Installation());
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>callContractAPI</Name>
+				<Source><![CDATA[
+    public void callContractAPI(CustAccount _custAccount, str _attachmentNum, str _deliveryCategory)
+    {
+        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newContractAPI", 
+            this.getJsonBody_Contract(_custAccount, _attachmentNum, _deliveryCategory));
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>getJsonBody_Cust</Name>
+				<Source><![CDATA[
+    private str getJsonBody_Cust()
+    {
+        return @'{
+ 
+    "_newCustomers": {
+        "Customers": [
+            {
+                "Name": "TST_Name",
+                "CustGroup": "TST_CustGrp",
+                "PartyType": "Organization",
+                "AdditionalName": "TST_AdditionalName",
+                "AlternativeCustomerCode": "CPR",
+                "AlternativeCustomerNumber": "196708106049",
+                "Phone": "00098773699",
+                "CellularPhone": "",
+                "Email": "TST_email@gmail.com",
+                "Dimensions": [
+                    {
+                         "Name": "Aktivitet",
+                        "Value": "000"
+                    }
+                ],
+                "PaymMode": "TST_PaymMd",
+                "TechnicGroup1": "",
+                "TechnicGroup2": "",
+                "TechnicGroup3": "",
+                "TechnicGroup4": "",
+                "TechnicDate1": "1900-01-01",
+                "TechnicDate2": "1900-01-01",
+                "TechnicDate3": "1900-01-01",
+                "TechnicDate4": "1900-01-01",
+                "TechnicReal1": 0,
+                "TechnicReal2": 0,
+                "TechnicReal3": 0,
+                "TechnicReal4": 0,
+                "TechnicTxt1": "",
+                "TechnicTxt2": "",
+                "TechnicTxt3": "",
+                "TechnicTxt4": "",
+                "TechnicMemo1": "",
+                "TechnicMemo2": "",
+                "TargetSystem": "TST_NewSystem3",
+                "address": {
+                    "Street": "TST_Leveranspunkt",
+                    "City": "TST_Stockholm",
+                    "ZipCode": "10005",
+                    "CountryRegionId": "TST"
+                }
+            }
+        ],
+        "DataAreaId": "OAB"
+    }
+  }';
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>getJsonBody_Installation</Name>
+				<Source><![CDATA[
+    private str getJsonBody_Installation()
+    {
+        return @'{
+    "_request": {
+        "dataAreaId": "OAB",
+        "NewInstallations": [
+            {
+                "Instnum": "",
+                "InstReadingMethodNum": "TST_GroupNum",
+                "ReadingPlanNum": "TST_GroupNum",
+                "StreetNum": "TST_Street",
+                "HouseNoStart": 2,
+                "HouseNoEnd": 2,
+                "Floor": 2,
+                "Apartment":3,
+                "HouseLetterStart": "TST_D",
+                "HouseLetterEnd":  "TST_F",
+                "AddrLocation": "TST_AddrLocation",
+                "CountyNum": "TST_County",
+                "InstBBRNum": "TST_BBRNum",
+                "BBRInformationId":"",
+                "ConsumptionPerYear": 1299,
+                "TechnicTxt1": "ABC",
+                "PositionName": "TST_PosName",
+                "DelPointTechnicalNo": "TST_TechNo",
+                "AvailableQty": 0,
+                "DelPointGroupCode1": "TST_DelPointGrpCode1",
+                "X_coordinate": "124.567",
+                "Y_coordinate": "125.678",
+                "DeliveryGroupNum_UtilityArea": "",
+                "TechnicGroup1": "TST_TechGroup1",
+                "TechnicGroup2": "TST_TechGroup2",
+                "TechnicGroup3": "TST_TechGroup3",
+                "TechnicGroup4": "TST_TechGroup4",
+                "delPoints": [
+                    {
+                        "MeteringPoint": "",
+                        "netArea": "OAB",
+                        "CategoryNum": "TST_Catgry",
+                        "deliveryCategory": "TST_DelCat",
+                        "name": "TST_DelPointName",
+                        "ReadingSystem":"Xellent"
+                    }
+                ],
+                "BBRInformation": {
+                    "District": "TST_Discrict",
+                    "Block": "TST_Block",
+                    "CountyNum": "",
+                    "Plot": "TST_Plot",
+                    "HybridHeatingInstallationYear": 2026,
+                    "HeatingSystem": "TST_HEatingSystem",
+                    "BuildingType": "TST_BuildingType",
+                    "PriorityClass": 10,
+                    "NumberOfBuildings": 2,
+                    "NumOfAppartments": 5,
+                    "BuildOrderingYear": 2018,
+                    "BuildingClassification": "TST_BuildingClassification",
+                    "BuildUseCode": "TST_BuildUseCode",
+                    "ResidentArea": 10,
+                    "BuildArea": 20,
+                    "BuildingVolume": 39,
+                    "BuildingNumber": 40,
+                    "HeatingVolume": 10
+                }
+            }
+        ]
+    }';
+}
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>getJsonBody_Contract</Name>
+				<Source><![CDATA[
+private str getJsonBody_Contract(CustAccount _custAccount, str _attachmentNum, str _deliveryCategory)
+{
+    str body =  @'{
+    "_request":
+    {
+        "dataAreaId":"OAB",
+        "contractNum":"",
+        "custAccount":"%1",
+        "contractType":"Installation",
+        "attachmentNum":"%2",
+        "deliveryCategory":"%3",
+        "contractTemplateNum":"TST_Template",
+        "contractStartDate":"1/1/2026",
+        "contractEndDate":"1/31/2027",
+        "billingPlanNum":"TST_Billing",
+        "ContractPart":
+         {
+        }
+    }';
+    return strFmt(body, _custAccount, _attachmentNum, _deliveryCategory );
+}
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>construct</Name>
+				<Source><![CDATA[
+public static XAPI_API_CallAutomator construct()
+    {
+        XAPI_API_CallAutomator apiAuto = new XAPI_API_CallAutomator();
+        return apiAuto;
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

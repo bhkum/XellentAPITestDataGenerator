@@ -15,8 +15,10 @@
     <ProjectGuid>{e1ac4e45-e0a3-4a71-9516-9e1a7e8b2b6a}</ProjectGuid>
     <Name>InitalStupProject</Name>
     <RootNamespace>InitalStupProject</RootNamespace>
-    <StartupObject>XAPI_NewContractDelDataGen</StartupObject>
-    <StartupType>Class</StartupType>
+    <StartupObject>
+    </StartupObject>
+    <StartupType>
+    </StartupType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <Configuration>Debug</Configuration>
@@ -35,18 +37,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Classes\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="AxClass\XAPI_NewContractDataGen">
-      <SubType>Content</SubType>
-      <Name>XAPI_NewContractDataGen</Name>
-      <Link>Classes\XAPI_NewContractDataGen</Link>
-    </Content>
-    <Content Include="AxClass\XAPI_NewContractDelDataGen">
-      <SubType>Content</SubType>
-      <Name>XAPI_NewContractDelDataGen</Name>
-      <Link>Classes\XAPI_NewContractDelDataGen</Link>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
   <Import Project="$(BuildTasksDirectory)\Microsoft.Dynamics.Framework.Tools.BuildTasks.17.0.targets" />

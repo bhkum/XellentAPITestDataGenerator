@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_AutomateScripts</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_AutomateScripts
+{
+    
+    private CustAccount accNum;
+    private EXU_InstNum instNum;
+    private EXU_ContractNum contractNum;
+    
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    public static void main(Args _args)
+    {
+        CustAccount accNum = "";
+        XAPI_AutomateScripts automateScripts = XAPI_AutomateScripts::construct(accNum);
+        
+        automateScripts.execute();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>deleteAll</Name>
+				<Source><![CDATA[
+    private void deleteAll()
+    {
+        
+        // Delete Contract Parts
+        EXU_ContractTable contractTable = EXU_ContractTable::find(contractNum, true);
+        if(contractTable.RecId)
+        {
+            ttsbegin;
+            contractTable.delete();
+            ttscommit;
+            info(strFmt("Deleted Contract: %1", contractNum));
+        }
+        else
+        {
+            info("No Contract Number provided — skipped deleting Contract and Contract Parts.");
+        }
+
+        
+        // Delete Installations
+        EXU_Installation inst = EXU_Installation::find(instNum, true);
+
+        if(inst.RecId)
+        {
+            ttsbegin;
+            inst.delete();
+            ttscommit;
+            info(strFmt("Deleted Installations for Customer: %1", accNum));
+        }
+        else
+        {
+            info("No Customer Account provided — skipped deleting Installations.");
+        }
+        
+        // Delete Customer
+        CustTable custTable = CustTable::find(accNum, true);
+
+        if (custTable.RecId)
+        {
+            ttsbegin;
+            custTable.delete();
+            ttscommit;
+            info(strFmt("Deleted Customer: %1", accNum));
+        }
+        else
+        {
+            info(strFmt("Customer '%1' does not exist — skipped.", accNum));
+        }
+        
+        
+        XAPI_NewContractDelDataGen::main(null);
+        XAPI_NewInstallationDelDataGen::main(null);
+        XAPI_NewCustomerDelDataGen::main(null);
+
+
+
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>execute</Name>
+				<Source><![CDATA[
+    public void execute()
+    {
+       // this.deleteAll();
+
+        XAPI_API_CallAutomator auto = XAPI_API_CallAutomator::construct();
+
+        // 1. Create Customer
+        XAPI_NewCustomerDataGen::main(null);
+        auto.callCreateCustAPI();
+
+        // 2. Create Installation for the Customer
+        //XAPI_NewInstallationDataGen::main(null);
+        //auto.callInstallationAPI();
+
+        // 3. Create Contract for the Installation
+        //XAPI_NewContractDataGen::main(null);
+        //auto.callContractAPI(accNum, instNum, EXU_UtilityInstallation::find(instNum).DeliveryCategory);
+
+
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>parmCustomerAccount</Name>
+				<Source><![CDATA[
+    public CustAccount parmCustomerAccount(CustAccount _accNum = accNum)
+    {
+        accNum = _accNum;
+        return accNum;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>parmInstNum</Name>
+				<Source><![CDATA[
+    public EXU_InstNum parmInstNum(EXU_InstNum _instNum = instNum)
+    {
+        instNum = _instNum;
+        return instNum;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>parmContractNum</Name>
+				<Source><![CDATA[
+    public EXU_ContractNum parmContractNum(EXU_ContractNum _contractNum = contractNum)
+    {
+        contractNum = _contractNum;
+        return contractNum;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>construct</Name>
+				<Source><![CDATA[
+    public static XAPI_AutomateScripts construct(CustAccount _accNum) 
+    {
+        XAPI_AutomateScripts instance = new XAPI_AutomateScripts();
+        instance.parmCustomerAccount(_accNum);
+        return instance;
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

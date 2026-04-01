@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_NewContractPartDataGen</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_NewContractPartDataGen
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Class entry point. The system will call this method when a designated menu 
+    /// is selected or when execution starts and this class is set as the startup class.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
+    public static void main(Args _args)
+    {
+        EXU_ContractPartTable       newContractPart;
+        EXU_ContractTable           contractTable;
+
+        // --- Configuration ---
+        EXU_ContractNum         contractNum         = '9367906';
+        EXU_ProductNum          productNum          = 'F_FP';
+        EXU_CompanyId           companyId           = 'oab';
+        EXU_DeliveryCategory    deliveryCategory    = 'TST_DelCat';
+        TransDate               startDate           = str2date('2028-01-01', 321);
+        TransDate               endDate             = str2date('2028-12-31', 321);
+        EXU_AgreementLength     agreementLength     = 12;
+        // ---------------------
+
+        contractTable = EXU_ContractTable::find(contractNum);
+        if (!contractTable.RecId)
+        {
+            error(strfmt("TST: Contract %1 not found", contractNum));
+            return;
+        }
+
+        ttsbegin;
+        try
+        {
+            newContractPart.clear();
+            newContractPart.initValue();
+
+            newContractPart.ContractNum                 = contractNum;
+            newContractPart.InstAgreeNum                = contractTable.AttachmentNum; // Sourced directly from contract
+            newContractPart.ContractType                = contractTable.ContractType;
+            newContractPart.DeliveryCategory            = deliveryCategory;
+            newContractPart.CompanyId                   = companyId;
+            newContractPart.ProductNum                  = productNum;
+            newContractPart.Startdate                   = startDate;
+            newContractPart.EndDate                     = endDate;
+            newContractPart.AgreementLength             = agreementLength;
+            newContractPart.FactorBlockCalc             = 1;
+
+            if (!newContractPart.validateWrite())
+            {
+                ttsabort;
+                error("TST: validateWrite failed - check infolog");
+                return;
+            }
+
+            newContractPart.insert(false);
+            ttscommit;
+
+            info(strfmt("TST: Contract part created. RecId: %1, InstAgreeNum: %2",
+            newContractPart.RecId,
+            newContractPart.InstAgreeNum));
+        }
+        catch (Exception::Error)
+        {
+            ttsabort;
+            error("TST: Unexpected error during insert");
+        }
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>
