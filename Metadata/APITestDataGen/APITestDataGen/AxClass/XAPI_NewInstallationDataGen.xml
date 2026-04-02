@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_NewInstallationDataGen</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_NewInstallationDataGen
+{
+ 
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Class entry point. The system will call this method when a designated menu 
+    /// is selected or when execution starts and this class is set as the startup class.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
+    public static void main(Args _args)
+    {
+
+        EXU_CountyNum countyNum = 'TST_County';
+        EXU_StreetNum streetNum = 'TST_Street';
+
+        AddressZipCodeId zipCodeId = '9999';
+        str cityName = 'TST_City';
+        str addrLocation = 'TST_AddrLoc';
+
+        EXU_InstParameters instParameters = EXU_InstParameters::find();
+
+        AddressCountryRegionId countryRegionId = instParameters.CountryRegionId;
+
+        LogisticsAddressZipCode zipCode = LogisticsAddressZipCode::findZipCodeCountryRegion(zipCodeId, countryRegionId);
+        if (!zipCode.RecId)
+        {
+            zipCode.clear();
+            zipCode.ZipCode          = zipCodeId;
+            zipCode.City             = cityName;
+            zipCode.CountryRegionId  = countryRegionId;
+            zipCode.insert();
+            info(strFmt("Inserted ZipCode: %1", zipCodeId));
+        }
+
+
+        EXU_County exuCounty = EXU_County::find(countryRegionId, countyNum);
+        if (!exuCounty.RecId)
+        {
+            exuCounty.clear();
+            exuCounty.CountryRegionId = countryRegionId;
+            exuCounty.CountyNum       = countyNum;
+            exuCounty.CountyName      = countyNum;
+            exuCounty.insert();
+            info(strFmt("Inserted County: %1", countyNum));
+        }
+
+        EXU_Street exuStreet = EXU_Street::find(countryRegionId, countyNum, streetNum);
+        if (!exuStreet.RecId)
+        {
+            exuStreet.clear();
+            exuStreet.CountryRegionId = countryRegionId;
+            exuStreet.CountyNum       = countyNum;
+            exuStreet.StreetNum       = streetNum;
+            exuStreet.StreetName      = streetNum;
+            exuStreet.insert();
+            info(strFmt("Inserted Street: %1", streetNum));
+        }
+
+        EXU_StreetAddrNumber streetAddr;
+        select firstonly streetAddr
+    where streetAddr.CountryRegionId   == countryRegionId
+       && streetAddr.CountyNum         == countyNum
+       && streetAddr.StreetNum         == streetNum
+       && streetAddr.StreetAddrCPRType == EXU_StreetAddrCPRType::ZipCode;
+
+        if (!streetAddr.RecId)
+        {
+            streetAddr.clear();
+            streetAddr.CountryRegionId   = countryRegionId;
+            streetAddr.CountyNum         = countyNum;
+            streetAddr.StreetNum         = streetNum;
+            streetAddr.AddrIntervalCode  = EXU_AddrIntervalCode::All;
+            streetAddr.AddrIntervalStart = 1;
+            streetAddr.AddrIntervalEnd   = 999;
+            streetAddr.StreetAddrCPRType = EXU_StreetAddrCPRType::ZipCode;
+            streetAddr.ZipCodeId         = zipCodeId;
+            streetAddr.insert();
+            info(strFmt("Inserted StreetAddrNumber (ZipCode): %1, %2, %3", countryRegionId, countyNum, streetNum));
+        }
+
+        EXU_StreetAddrNumber streetAddrLoc;
+        select firstonly streetAddrLoc
+    where streetAddrLoc.CountryRegionId   == countryRegionId
+       && streetAddrLoc.CountyNum         == countyNum
+       && streetAddrLoc.StreetNum         == streetNum
+       && streetAddrLoc.StreetAddrCPRType == EXU_StreetAddrCPRType::AddrLocation;
+
+        if (!streetAddrLoc.RecId)
+        {
+            streetAddrLoc.clear();
+            streetAddrLoc.CountryRegionId   = countryRegionId;
+            streetAddrLoc.CountyNum         = countyNum;
+            streetAddrLoc.StreetNum         = streetNum;
+            streetAddrLoc.AddrIntervalCode  = EXU_AddrIntervalCode::All;
+            streetAddrLoc.AddrIntervalStart = 1;
+            streetAddrLoc.AddrIntervalEnd   = 999;
+            streetAddrLoc.StreetAddrCPRType = EXU_StreetAddrCPRType::AddrLocation;
+            streetAddrLoc.AddrLocation      = addrLocation;
+            streetAddrLoc.insert();
+            info(strFmt("Inserted StreetAddrNumber (AddrLocation): %1, %2, %3", countryRegionId, countyNum, streetNum));
+        }
+
+        info("Address data creation complete.");
+
+        EXU_DeliveryCategory deliveryCategory = "TST_DelCat";
+        EXU_CategoryNum categoryNum = "TST_Catgry";
+
+        EXU_DeliveryCategoryTable deliveryCategoryTable, newDeliveryCategoryTable;
+
+        select firstonly deliveryCategoryTable;
+        select firstonly newDeliveryCategoryTable where newDeliveryCategoryTable.DeliveryCategory == deliveryCategory;
+
+        if (!newDeliveryCategoryTable.RecId)
+        {
+            buf2Buf(deliveryCategoryTable, newDeliveryCategoryTable);
+
+            newDeliveryCategoryTable.DeliveryCategory = deliveryCategory;
+            newDeliveryCategoryTable.CategoryNum = categoryNum;
+            newDeliveryCategoryTable.UseExtDelPoint = NoYes::No;
+            newDeliveryCategoryTable.Attachment = EXU_DeliveryCategoryAttachment::Installation;
+            newDeliveryCategoryTable.CompanyId = curExt();
+
+            newDeliveryCategoryTable.insert();
+            info(strFmt("Inserted DeliveryCategory: %1", deliveryCategory));
+        }
+
+        EXU_Category exuCategory, newExuCategory;
+
+        select firstonly exuCategory;
+        select firstonly newExuCategory where newExuCategory.CategoryNum == categoryNum;
+
+        if (!newExuCategory.RecId)
+        {
+            buf2Buf(exuCategory, newExuCategory);
+
+            newExuCategory.CategoryNum = categoryNum;
+            newExuCategory.DeliveryCategory = deliveryCategory;
+
+            newExuCategory.insert();
+            info(strFmt("Inserted Category: %1", categoryNum));
+        }
+
+        EXU_DeliveryRelationTable deliveryRelationTable, newDeliveryRelationTable;
+
+        select firstonly deliveryRelationTable
+    where deliveryRelationTable.NumberSequenceCode_ExtDelPointNum != 0;
+        select firstonly newDeliveryRelationTable where newDeliveryRelationTable.DeliveryCategory == deliveryCategory;
+
+        if (!newDeliveryRelationTable.RecId)
+        {
+            buf2Buf(deliveryRelationTable, newDeliveryRelationTable);
+
+            newDeliveryRelationTable.DeliveryCategory = deliveryCategory;
+            newDeliveryRelationTable.CompanyId = curExt();
+
+            newDeliveryRelationTable.insert();
+            info(strFmt("Inserted DeliveryRelationTable: %1", deliveryCategory));
+        }
+
+
+        EXU_GroupCode groupCode = EXU_GroupCode::ReadingMethod;
+        EXU_GroupName groupName = 'TST_GroupName';
+        EXU_GroupNum groupNum = 'TST_GroupNum';
+
+        EXU_GroupTable groupTable, newGroupTable;
+
+        select firstonly groupTable;
+        select firstonly newGroupTable
+    where newGroupTable.GroupCode == groupCode
+       && newGroupTable.GroupNum  == groupNum;
+
+        if (!newGroupTable.RecId)
+        {
+            buf2Buf(groupTable, newGroupTable);
+            newGroupTable.GroupCode = groupCode;
+            newGroupTable.GroupNum  = groupNum;
+            newGroupTable.GroupName = groupName;
+            newGroupTable.insert();
+            info(strFmt("Inserted GroupTable: %1, %2", groupCode, groupNum));
+        }
+
+        EXU_ReadingPlan readingPlan, newReadingPlan;
+
+        select firstonly readingPlan;
+        select firstonly newReadingPlan where newReadingPlan.ReadingPlanNum == groupNum;
+
+        if (!newReadingPlan.RecId)
+        {
+            buf2Buf(readingPlan, newReadingPlan);
+
+            newReadingPlan.ReadingPlanNum = groupNum;
+
+            newReadingPlan.insert();
+            info(strFmt("Inserted ReadingPlan: %1", groupNum));
+        }
+
+        EXU_SupplyNum supplyNum = "TST_SupplyNum";
+        EXU_SupplyModel supplyModel, newSupplyModel;
+
+        select firstonly supplyModel;
+        select firstonly newSupplyModel where newSupplyModel.SupplyNum == supplyNum;
+
+        if (!newSupplyModel.RecId)
+        {
+            buf2Buf(supplyModel, newSupplyModel);
+
+            newSupplyModel.SupplyNum = supplyNum;
+
+            newSupplyModel.insert();
+            info(strFmt("Inserted SupplyModel: %1", supplyNum));
+        }
+
+        EXU_ElsmartParam elsmartParam, newElsmartParam;
+        EGS_Readingsystem readingSystem = EGS_Readingsystem::Xellent;
+
+        select firstonly elsmartParam;
+        select firstonly newElsmartParam where newElsmartParam.DeliveryCategory == deliveryCategory && newElsmartParam.EGS_ReadingSystem == readingSystem;
+
+        if (!newElsmartParam.RecId)
+        {
+            buf2Buf(elsmartParam, newElsmartParam);
+
+            newElsmartParam.DeliveryCategory = deliveryCategory;
+            newElsmartParam.EGS_ReadingSystem = readingSystem;
+            newElsmartParam.SupplyNum = supplyNum;
+
+            if (!newElsmartParam.ReadingPlanNum)
+            {
+                newElsmartParam.ReadingPlanNum = groupNum;
+            }
+
+            newElsmartParam.insert();
+            info(strFmt("Inserted ElsmartParam: %1", deliveryCategory));
+        }
+
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>
