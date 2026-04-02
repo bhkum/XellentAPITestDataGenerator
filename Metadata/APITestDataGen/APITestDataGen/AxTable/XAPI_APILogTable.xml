@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxTable xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APILogTable</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+public class XAPI_APILogTable extends common
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>shouldThrowExceptionOnZeroDelete</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Determines if concurrent deletes should throw exception.
+    /// </summary>
+    /// <returns>true, if exception should be thrown; otherwise, false.</returns>
+    public boolean shouldThrowExceptionOnZeroDelete()
+    {
+        return true;
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+	<SubscriberAccessLevel>
+		<Read>Allow</Read>
+	</SubscriberAccessLevel>
+	<AllowRowVersionChangeTracking>Yes</AllowRowVersionChangeTracking>
+	<DeleteActions />
+	<FieldGroups>
+		<AxTableFieldGroup>
+			<Name>AutoReport</Name>
+			<Fields>
+				<AxTableFieldGroupField>
+					<DataField>LogNum</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
+					<DataField>ApiName</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
+					<DataField>Key</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
+					<DataField>Value</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
+					<DataField>Message</DataField>
+				</AxTableFieldGroupField>
+			</Fields>
+		</AxTableFieldGroup>
+		<AxTableFieldGroup>
+			<Name>AutoLookup</Name>
+			<Fields />
+		</AxTableFieldGroup>
+		<AxTableFieldGroup>
+			<Name>AutoIdentification</Name>
+			<AutoPopulate>Yes</AutoPopulate>
+			<Fields>
+				<AxTableFieldGroupField>
+					<DataField>LogNum</DataField>
+				</AxTableFieldGroupField>
+			</Fields>
+		</AxTableFieldGroup>
+		<AxTableFieldGroup>
+			<Name>AutoSummary</Name>
+			<Fields />
+		</AxTableFieldGroup>
+		<AxTableFieldGroup>
+			<Name>AutoBrowse</Name>
+			<Fields />
+		</AxTableFieldGroup>
+	</FieldGroups>
+	<Fields>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>LogNum</Name>
+			<ExtendedDataType>Num</ExtendedDataType>
+			<Label>Log Number</Label>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldEnum">
+			<Name>ApiName</Name>
+			<Label>API Name</Label>
+			<EnumType>XAPI_APIS</EnumType>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>Key</Name>
+			<ExtendedDataType>Description</ExtendedDataType>
+			<Label>Key</Label>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>Value</Name>
+			<ExtendedDataType>Description</ExtendedDataType>
+			<Label>Value</Label>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>Message</Name>
+			<ExtendedDataType>Description</ExtendedDataType>
+			<Label>Message</Label>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldContainer">
+			<Name>InfologData</Name>
+			<ExtendedDataType>InfologData</ExtendedDataType>
+		</AxTableField>
+	</Fields>
+	<FullTextIndexes />
+	<Indexes />
+	<Mappings />
+	<Relations />
+	<StateMachines />
+</AxTable>
