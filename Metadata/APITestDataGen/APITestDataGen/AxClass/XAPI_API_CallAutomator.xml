@@ -7,7 +7,8 @@ class XAPI_API_CallAutomator
 {
    
     str bearerToken;
-    
+   
+    Num logNum;
 }
 ]]></Declaration>
 		<Methods>
@@ -99,7 +100,7 @@ class XAPI_API_CallAutomator
 			<Method>
 				<Name>sendPostRequest</Name>
 				<Source><![CDATA[
-    public void sendPostRequest(str url, str json)
+    public str sendPostRequest(str url, str json)
     {
         // ✅ FIX 1: Auto-fetch token if missing
         if (strLen(bearerToken) == 0)
@@ -109,7 +110,7 @@ class XAPI_API_CallAutomator
             if (strLen(bearerToken) == 0)
             {
                 error("❌ Cannot call API — failed to obtain access token.");
-                return;
+                return '';
             }
         }
 
@@ -139,8 +140,10 @@ class XAPI_API_CallAutomator
             response = request.GetResponse() as System.Net.HttpWebResponse;
             streamReader = new System.IO.StreamReader(response.GetResponseStream());
 
-            info("✅ API SUCCESS RESPONSE: " + streamReader.ReadToEnd());
+            str responseText = streamReader.ReadToEnd();
+            info("✅ API SUCCESS RESPONSE: " + responseText);
             streamReader.Close();
+            return responseText;
         }
         catch (Exception::CLRError)
         {
@@ -166,6 +169,7 @@ class XAPI_API_CallAutomator
         }
 
         info("===== API CALL END =====");
+        return '';
     }
 
 ]]></Source>
@@ -190,7 +194,13 @@ class XAPI_API_CallAutomator
         configMap.insert('<DimensionValue>', dv.DisplayValue);
 
         var body = this.prepareBody(XAPI_APIS::CreateCustomer, configMap);
-        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newCustomerAPI", body);
+        str responseTxt = this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newCustomerAPI", body);
+
+        EGS_API_DataContract_Response res =FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseTxt);
+        
+        this.log(XAPI_APIS::CreateCustomer, "CustAccount", res.parmMessage());
+       
+
 
     }
 
@@ -205,7 +215,11 @@ class XAPI_API_CallAutomator
         configMap.insert('<DataAreaId>', curExt());
         configMap.insert('<netArea>', curExt());
         var body = this.prepareBody(XAPI_APIS::CreateInstallation, configMap);
-        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newInstallationAPI", body);
+        str responseTxt = this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newInstallationAPI", body);
+
+        EGS_API_DataContract_Response_Installation res =FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response_Installation), responseTxt);
+        
+        this.log(XAPI_APIS::CreateInstallation, "InstNum", res.parmInstallationNum());
     }
 
 ]]></Source>
@@ -215,10 +229,54 @@ class XAPI_API_CallAutomator
 				<Source><![CDATA[
     public void callContractAPI(CustAccount _custAccount, str _attachmentNum, str _deliveryCategory)
     {
+        XAPI_APILogTable lotTable;
         Map configMap = new Map(Types::String, Types::String);
+
+        configMap.insert('<DataAreaId>', curExt());
+        
+        select firstonly Key from lotTable
+        where lotTable.ApiName == XAPI_APIS::CreateInstallation
+            && lotTable.Key == 'CustAccount';
+        
+        configMap.insert('<custAccount>', lotTable.Value);
+
+
+        
+        select firstonly Key from lotTable
+        where lotTable.ApiName == XAPI_APIS::CreateInstallation
+            && lotTable.Key == 'InstNum';
+        configMap.insert('<InstNum>', lotTable.Value);
+
+        EXU_UtilityInstallation uinst;
+        select firstonly uinst
+            where uinst.InstNum == lotTable.Value;
+
+        configMap.insert('<deliveryCategory>', uinst.DeliveryCategory);
+
         var body = this.prepareBody(XAPI_APIS::CreateContract, configMap);
-        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newContractAPI",
+        str responseTxt = this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newContractAPI",
             body);
+
+        EGS_API_DataContract_Response res =FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseTxt);
+        
+        this.log(XAPI_APIS::CreateContract, "ContractNum", res.parmMessage());
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>log</Name>
+				<Source><![CDATA[
+    private void log(XAPI_APIS _api, str _key, str _value)
+    {
+        XAPI_APILogTable logTable;
+
+        logTable.clear();
+        logTable.ApiName = _api;
+        logTable.Key = _key;
+        logTable.Value = _value;
+        logTable.insert();
+    
     }
 
 ]]></Source>

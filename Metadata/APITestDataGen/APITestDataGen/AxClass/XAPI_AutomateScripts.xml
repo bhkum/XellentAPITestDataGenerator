@@ -20,7 +20,27 @@ class XAPI_AutomateScripts
     {
         CustAccount accNum = "";
         XAPI_AutomateScripts automateScripts = XAPI_AutomateScripts::construct(accNum);
+
+        XAPI_APILogTable lotTable;
+
+                
+        select firstonly Key from lotTable
+            where lotTable.ApiName == XAPI_APIS::CreateCustomer
+            && lotTable.Key == 'CustAccount';
+        automateScripts.parmCustomerAccount(lotTable.Value);
         
+        select firstonly Key from lotTable
+        where lotTable.ApiName == XAPI_APIS::CreateInstallation
+            && lotTable.Key == 'InstNum';
+        automateScripts.parmInstNum( lotTable.Value);
+        
+        select firstonly Key from lotTable
+            where lotTable.ApiName == XAPI_APIS::CreateContract
+            && lotTable.Key == 'ContractNum';
+        automateScripts.parmContractNum(lotTable.Value);
+
+        delete_from lotTable;
+
         automateScripts.execute();
     }
 
@@ -32,13 +52,14 @@ class XAPI_AutomateScripts
     private void deleteAll()
     {
         
+       
+        ttsbegin;
         // Delete Contract Parts
         EXU_ContractTable contractTable = EXU_ContractTable::find(contractNum, true);
         if(contractTable.RecId)
         {
-            ttsbegin;
+
             contractTable.delete();
-            ttscommit;
             info(strFmt("Deleted Contract: %1", contractNum));
         }
         else
@@ -48,28 +69,59 @@ class XAPI_AutomateScripts
 
         
         // Delete Installations
+
+        //EXU_DeliveryCategoryTable delCat;    
+        EXU_DelPoint delPoint;
+         select firstonly forupdate delPoint
+            where delPoint.AttachmentNum == instNum;
+
+        if(delPoint.RecId)
+        {
+            delPoint.delete();
+            info(strFmt("Deleted Delivery Points for Customer: %1", accNum));
+        }
+        else
+        {
+            info("No Customer Account provided — skipped deleting Delivery Points.");
+        }
+        
+
+        EXU_UtilityInstallation uinst;
+        select firstonly forupdate uinst
+            where uinst.InstNum == instNum;
+
+        if(uinst.RecId)
+        {
+           
+            uinst.delete();
+            
+            info(strFmt("Deleted Utility Installations for Customer: %1", accNum));
+        }
+        else
+        {
+            info("No Customer Account provided — skipped deleting Utility Installations.");
+        }
+        
+
         EXU_Installation inst = EXU_Installation::find(instNum, true);
 
         if(inst.RecId)
         {
-            ttsbegin;
             inst.delete();
-            ttscommit;
             info(strFmt("Deleted Installations for Customer: %1", accNum));
         }
         else
         {
             info("No Customer Account provided — skipped deleting Installations.");
         }
+
         
         // Delete Customer
         CustTable custTable = CustTable::find(accNum, true);
 
         if (custTable.RecId)
         {
-            ttsbegin;
             custTable.delete();
-            ttscommit;
             info(strFmt("Deleted Customer: %1", accNum));
         }
         else
@@ -82,7 +134,7 @@ class XAPI_AutomateScripts
         XAPI_NewInstallationDelDataGen::main(null);
         XAPI_NewCustomerDelDataGen::main(null);
 
-
+        ttscommit;
 
     }
 
@@ -93,21 +145,23 @@ class XAPI_AutomateScripts
 				<Source><![CDATA[
     public void execute()
     {
-       // this.deleteAll();
+        this.deleteAll();
 
-        XAPI_API_CallAutomator auto = XAPI_API_CallAutomator::construct();
+        xapi_api_callautomator auto = xapi_api_callautomator::construct();
 
-        // 1. Create Customer
-        //XAPI_NewCustomerDataGen::main(null);
-        //auto.callCreateCustAPI();
+        // 1. create customer
+        xapi_newcustomerdatagen::main(null);
+        auto.callcreatecustapi();
 
-        // 2. Create Installation for the Customer
-        //XAPI_NewInstallationDataGen::main(null);
-        //auto.callInstallationAPI();
+        // 2. create installation for the customer
+        xapi_newinstallationdatagen::main(null);
+        auto.callinstallationapi();
 
-        // 3. Create Contract for the Installation
-        XAPI_NewContractDataGen::main(null);
-        auto.callContractAPI("", "", "");
+        // 3. create contract for the installation
+        xapi_newcontractdatagen::main(null);
+        auto.callcontractapi("", "", "");
+
+
 
 
     }
