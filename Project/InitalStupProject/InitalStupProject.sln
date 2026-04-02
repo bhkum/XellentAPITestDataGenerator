@@ -49,6 +49,13 @@ Project("{FC65038C-1B2F-41E1-A629-BED71D161FFF}") = "AutomateScripts (VAR) [API 
 		{E027CA92-88D3-40D2-8CDF-FB1AA5964FE2} = {E027CA92-88D3-40D2-8CDF-FB1AA5964FE2}
 	EndProjectSection
 EndProject
+Project("{FC65038C-1B2F-41E1-A629-BED71D161FFF}") = "XAPI_Enum (VAR) [API Test Data Gen]", "XAPI_Enum\XAPI_Enum.rnrproj", "{3A4D9DE8-2B4B-484C-BF45-A9CFDC1231A5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{531C61DE-1FEA-4372-B9B6-8867A55807F2} = {531C61DE-1FEA-4372-B9B6-8867A55807F2}
+		{81A14666-FD6E-4E96-8996-375E16329E3D} = {81A14666-FD6E-4E96-8996-375E16329E3D}
+		{E027CA92-88D3-40D2-8CDF-FB1AA5964FE2} = {E027CA92-88D3-40D2-8CDF-FB1AA5964FE2}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +75,8 @@ Global
 		{C1B94E42-CD78-47C4-8CB9-57A8EB1F9F3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C2C3A8F-4344-490F-AFDD-DF99D897BDB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4C2C3A8F-4344-490F-AFDD-DF99D897BDB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A4D9DE8-2B4B-484C-BF45-A9CFDC1231A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A4D9DE8-2B4B-484C-BF45-A9CFDC1231A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
