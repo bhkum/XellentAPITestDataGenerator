@@ -62,15 +62,14 @@ class XAPI_API_CallAutomator
         System.IO.StreamWriter streamWriter;
         System.IO.StreamReader streamReader;
         str url = "https://login.microsoftonline.com/" + tenantId + "/oauth2/token";
-        str postData;
+        //str postData;
         str responseText;
         System.Text.RegularExpressions.Regex regex;
         System.Text.RegularExpressions.Match match;
 
         System.Uri uri = new System.Uri("http://dummy"); // helper for encoding
-        System.String encodedSecret = System.Net.WebUtility::UrlEncode(clientSecret);
-
-        postData = "grant_type=client_credentials"
+        str encodedSecret = System.Net.WebUtility::UrlEncode(clientSecret);
+        str postData = "grant_type=client_credentials"
            + "&client_id=" + clientId
            + "&client_secret=" + encodedSecret
            + "&resource=" + resourceUrl;
@@ -143,6 +142,18 @@ class XAPI_API_CallAutomator
 				<Source><![CDATA[
     public void sendPostRequest(str url, str json)
     {
+        // ✅ FIX 1: Auto-fetch token if missing
+        if (strLen(bearerToken) == 0)
+        {
+            bearerToken = this.GetAccessToken();
+
+            if (strLen(bearerToken) == 0)
+            {
+                error("❌ Cannot call API — failed to obtain access token.");
+                return;
+            }
+        }
+
         System.Net.HttpWebRequest request;
         System.Net.HttpWebResponse response;
         System.IO.StreamWriter streamWriter;
@@ -157,7 +168,9 @@ class XAPI_API_CallAutomator
             request = System.Net.WebRequest::Create(url) as System.Net.HttpWebRequest;
             request.set_Method("POST");
             request.set_ContentType("application/json");
-            request.get_Headers().Add("Authorization", "Bearer " + bearerToken);
+
+            // ✅ FIX 2: Use set_Headers correctly to avoid header injection issues
+            request.get_Headers().Set("Authorization", "Bearer " + bearerToken);
 
             streamWriter = new System.IO.StreamWriter(request.GetRequestStream());
             streamWriter.Write(json);
@@ -181,7 +194,7 @@ class XAPI_API_CallAutomator
             {
                 webEx = ex as System.Net.WebException;
 
-                if (webEx.get_Response())
+                if (webEx.get_Response() != null)
                 {
                     errorReader = new System.IO.StreamReader(webEx.get_Response().GetResponseStream());
                     errorText = errorReader.ReadToEnd();
@@ -359,6 +372,7 @@ class XAPI_API_CallAutomator
                 }
             }
         ]
+        }
     }';
 }
 
@@ -383,7 +397,7 @@ private str getJsonBody_Contract(CustAccount _custAccount, str _attachmentNum, s
         "contractEndDate":"1/31/2027",
         "billingPlanNum":"TST_Billing",
         "ContractPart":
-         {
+         {}
         }
     }';
     return strFmt(body, _custAccount, _attachmentNum, _deliveryCategory );
