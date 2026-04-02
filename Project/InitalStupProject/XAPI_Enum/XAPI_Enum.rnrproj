@@ -15,10 +15,11 @@
     <ProjectGuid>{3a4d9de8-2b4b-484c-bf45-a9cfdc1231a5}</ProjectGuid>
     <Name>XAPI_Enum</Name>
     <RootNamespace>XAPI_Enum</RootNamespace>
+    <StartupType>Class</StartupType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <Configuration>Debug</Configuration>
-    <DBSyncInBuild>False</DBSyncInBuild>
+    <DBSyncInBuild>True</DBSyncInBuild>
     <GenerateFormAdaptors>False</GenerateFormAdaptors>
     <Company>
     </Company>
@@ -33,12 +34,18 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Base Enums\" />
+    <Folder Include="Tables\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="AxEnum\XAPI_APIS">
       <SubType>Content</SubType>
       <Name>XAPI_APIS</Name>
       <Link>Base Enums\XAPI_APIS</Link>
+    </Content>
+    <Content Include="AxTable\XAPI_APIConfigurations">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIConfigurations</Name>
+      <Link>Tables\XAPI_APIConfigurations</Link>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />

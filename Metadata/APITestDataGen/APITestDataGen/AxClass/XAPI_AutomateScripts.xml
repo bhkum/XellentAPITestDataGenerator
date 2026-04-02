@@ -98,12 +98,12 @@ class XAPI_AutomateScripts
         XAPI_API_CallAutomator auto = XAPI_API_CallAutomator::construct();
 
         // 1. Create Customer
-        XAPI_NewCustomerDataGen::main(null);
-        auto.callCreateCustAPI();
+        //XAPI_NewCustomerDataGen::main(null);
+        //auto.callCreateCustAPI();
 
         // 2. Create Installation for the Customer
-        //XAPI_NewInstallationDataGen::main(null);
-        //auto.callInstallationAPI();
+        XAPI_NewInstallationDataGen::main(null);
+        auto.callInstallationAPI();
 
         // 3. Create Contract for the Installation
         //XAPI_NewContractDataGen::main(null);

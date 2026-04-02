@@ -7,51 +7,13 @@ class XAPI_API_CallAutomator
 {
    
     str bearerToken;
+    
 
-
+    /// Main entry: runs all steps in sequence
+   
 }
 ]]></Declaration>
 		<Methods>
-			<Method>
-				<Name>RunFullWorkflow</Name>
-				<Source><![CDATA[
-    /// Main entry: runs all steps in sequence
-    public void RunFullWorkflow()
-    {
-        // Step 0: Get access token
-        this.bearerToken = this.GetAccessToken();
-
-        if (strLen(bearerToken) == 0)
-        {
-            error("Failed to get access token!");
-            return;
-        }
-
-        // Step 1: Create customer
-        str customerJson = '{ "_newCustomers": { "Customers": [ { "Name": "TST_Name", "CustGroup": "TST_CustGrp", "PartyType": "Organization", "AdditionalName": "TST_AdditionalName", "AlternativeCustomerCode": "CPR", "AlternativeCustomerNumber": "200901179515", "Phone": "00098773699", "Email": "TST_email@gmail.com", "Dimensions": [ { "Name": "Aktivitet", "Value": "000" } ], "PaymMode": "TST_PaymMd", "TargetSystem": "TST_NewSystem3", "address": { "Street": "TST_Leveranspunkt", "City": "TST_Stockholm", "ZipCode": "10005", "CountryRegionId": "TST" } } ], "DataAreaId": "kem" } }';
-        info("Creating customer...");
-        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newCustomerAPI", customerJson);
-
-        // Step 2: Create contract
-        str contractJson = '{ "_request": { "dataAreaId":"kem", "contractNum":"", "custAccount":"917587", "contractType":"Installation", "attachmentNum":"19723", "deliveryCategory":"TST_DelCa", "contractTemplateNum":"TST_Template", "contractStartDate":"1/1/2026", "contractEndDate":"1/31/2027", "billingPlanNum":"TST_Billing", "ContractPart": {} } }';
-        info("Creating contract...");
-        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newContractAPI", contractJson);
-
-        // Step 3: Create contract part
-        str contractPartJson = '{ "_newContractParts": { "NewContractPart": [ { "AlternativeCustomerNumber": "122192312017797", "AccountNum": "309018", "ContractNum": "10443243", "ContractCodeDescription": "TST", "GroupOldProduct": { "ProductNum": "TST", "DeliveryGroupNum_RateCode": "TST", "CompanyId": "TST", "DeliveryCategory": "TST_ElNät", "InstAgreeNum": "TST_11525201", "StartDate": "2023-04-23", "EndDate": "1900-01-01" }, "GroupNewProduct": { "ProductNum": "TST_Tid Lantbr", "DeliveryGroupNum_RateCode": "TST", "AMRCode": "TST", "AgreementLength": 0, "StartDate": "2023-05-01", "EndDate": "1900-01-01", "PurchasePriceCode": "" }, "Source": "Energiportalen_1", "EnvironmentCode": "TST", "SendConfirmationLetter": "TST", "ContractPartPriceManagements": [ { "PriceManagementCode": "TST", "PurchasePrice": 0, "SalesPrice": 0, "SalesChargeDeduction": 0, "FixedRate": 0 } ], "ContractPartFixedServices": [ { "ServiceType": "TST", "Text": "TST", "Billing": "0", "AgreementLength": 0, "StartDate": "1900-01-01", "EndDate": "1900-01-01", "Quantity": 0, "Price": 0, "AlternateText": "TST", "OfferStartDate": "2021-12-01" } ], "ContractPartIndividualServices": [ { "Itemid": "TST", "AgreementLength": "0", "StartDate": "1900-01-01", "EndDate": "1900-01-01", "OfferStartDate": "2021-12-01", "PriceManagementCode": "TST", "PurchasePrice": 0, "SalesChargeDeduction": 0, "FixedRate": 0 } ], "ContractPartSecuredVolumeDate": [ { "StartDate": "2024-01-01", "EndDate": "2024-01-31", "FixedRate": 1.0204, "ForecastedVolumekWh": 5000, "SecuredVolumeInPercent": 80 } ] } ], "DataAreaId": "kem" } }';
-        info("Creating contract part...");
-        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newContractPartAPI", contractPartJson);
-
-        // Step 4: Create installation
-        str installationJson = '{ "_request": { "dataAreaId": "OAB", "NewInstallations": [ { "Instnum": "", "InstReadingMethodNum": "TST_GroupNum", "ReadingPlanNum": "TST_GroupNum", "StreetNum": "TST_Street", "HouseNoStart": 2, "HouseNoEnd": 2, "Floor": 2, "Apartment":3, "HouseLetterStart": "TST_D", "HouseLetterEnd": "TST_F", "AddrLocation": "TST_AddrLocation", "CountyNum": "TST_County", "InstBBRNum": "TST_BBRNum", "BBRInformationId":"", "ConsumptionPerYear": 1299, "TechnicTxt1": "ABC", "PositionName": "TST_PosName", "DelPointTechnicalNo": "TST_TechNo", "AvailableQty": 0, "DelPointGroupCode1": "TST_DelPointGrpCode1", "X_coordinate": "124.567", "Y_coordinate": "125.678", "DeliveryGroupNum_UtilityArea": "", "TechnicGroup1": "TST_TechGroup1", "TechnicGroup2": "TST_TechGroup2", "TechnicGroup3": "TST_TechGroup3", "TechnicGroup4": "TST_TechGroup4", "delPoints": [ { "MeteringPoint": "", "netArea": "kem", "CategoryNum": "TST_Catgry", "deliveryCategory": "TST_DelCat", "name": "TST_DelPointName", "ReadingSystem":"Xellent" } ], "BBRInformation": { "District": "TST_Discrict", "Block": "TST_Block", "CountyNum": "", "Plot": "TST_Plot", "HybridHeatingInstallationYear": 2026, "HeatingSystem": "TST_HEatingSystem", "BuildingType": "TST_BuildingType", "PriorityClass": 10, "NumberOfBuildings": 2, "NumOfAppartments": 5, "BuildOrderingYear": 2018, "BuildingClassification": "TST_BuildingClassification", "BuildUseCode": "TST_BuildUseCode", "ResidentArea": 10, "BuildArea": 20, "BuildingVolume": 39, "BuildingNumber": 40, "HeatingVolume": 10 } } ] } }';
-        info("Creating installation...");
-        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newInstallationAPI", installationJson);
-
-        info("Workflow complete!");
-    }
-
-]]></Source>
-			</Method>
 			<Method>
 				<Name>GetAccessToken</Name>
 				<Source><![CDATA[
@@ -216,7 +178,22 @@ class XAPI_API_CallAutomator
 				<Source><![CDATA[
     public void callCreateCustAPI()
     {
-        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newCustomerAPI", this.getJsonBody_Cust());
+        DimensionAttribute        da;
+        DimensionAttributeValue   dv;
+        
+        select firstonly name from da
+        order by da.Name asc
+        join DisplayValue from dv
+        where dv.DimensionAttribute == da.RecId;
+        
+        Map configMap = new Map(Types::String, Types::String);
+        configMap.insert('<DataAreaId>', curExt());
+        configMap.insert('<AlternativeCustomerNumber>', '195108224444');
+        configMap.insert('<DimensionName>', da.Name);   
+        configMap.insert('<DimensionValue>', dv.DisplayValue);
+
+        var body = this.prepareBody(XAPI_APIS::CreateCustomer, configMap);
+        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newCustomerAPI", body);
 
     }
 
@@ -227,7 +204,35 @@ class XAPI_API_CallAutomator
 				<Source><![CDATA[
     public void callInstallationAPI()
     {
-        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newInstallationAPI", this.getJsonBody_Installation());
+        Map configMap = new Map(Types::String, Types::String);
+        configMap.insert('<DataAreaId>', curExt());
+        configMap.insert('<netArea>', curExt());
+        var body = this.prepareBody(XAPI_APIS::CreateInstallation, configMap);
+        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newInstallationAPI", body);
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>prepareBody</Name>
+				<Source><![CDATA[
+    private str prepareBody(XAPI_APIS _api, Map _fields)
+    {
+        XAPI_APIConfigurations conif;
+        select firstonly conif where conif.XAPI_APIS == _api;
+
+        str body = conif.XAPI_JSON;
+
+        MapEnumerator enumerator = _fields.getEnumerator();
+        while (enumerator.moveNext())
+        {
+            str placeholder = enumerator.currentKey();
+            str value = enumerator.currentValue();
+            body = strReplace(body, placeholder, value);
+        }
+
+        info(strFmt("{BODY}: %1", body));
+        return body;
     }
 
 ]]></Source>
@@ -244,73 +249,13 @@ class XAPI_API_CallAutomator
 ]]></Source>
 			</Method>
 			<Method>
-				<Name>getJsonBody_Cust</Name>
-				<Source><![CDATA[
-    private str getJsonBody_Cust()
-    {
-        return @'{
- 
-    "_newCustomers": {
-        "Customers": [
-            {
-                "Name": "TST_Name",
-                "CustGroup": "TST_CustGrp",
-                "PartyType": "Organization",
-                "AdditionalName": "TST_AdditionalName",
-                "AlternativeCustomerCode": "CPR",
-                "AlternativeCustomerNumber": "196708106049",
-                "Phone": "00098773699",
-                "CellularPhone": "",
-                "Email": "TST_email@gmail.com",
-                "Dimensions": [
-                    {
-                         "Name": "Aktivitet",
-                        "Value": "000"
-                    }
-                ],
-                "PaymMode": "TST_PaymMd",
-                "TechnicGroup1": "",
-                "TechnicGroup2": "",
-                "TechnicGroup3": "",
-                "TechnicGroup4": "",
-                "TechnicDate1": "1900-01-01",
-                "TechnicDate2": "1900-01-01",
-                "TechnicDate3": "1900-01-01",
-                "TechnicDate4": "1900-01-01",
-                "TechnicReal1": 0,
-                "TechnicReal2": 0,
-                "TechnicReal3": 0,
-                "TechnicReal4": 0,
-                "TechnicTxt1": "",
-                "TechnicTxt2": "",
-                "TechnicTxt3": "",
-                "TechnicTxt4": "",
-                "TechnicMemo1": "",
-                "TechnicMemo2": "",
-                "TargetSystem": "TST_NewSystem3",
-                "address": {
-                    "Street": "TST_Leveranspunkt",
-                    "City": "TST_Stockholm",
-                    "ZipCode": "10005",
-                    "CountryRegionId": "TST"
-                }
-            }
-        ],
-        "DataAreaId": "OAB"
-    }
-  }';
-    }
-
-]]></Source>
-			</Method>
-			<Method>
 				<Name>getJsonBody_Installation</Name>
 				<Source><![CDATA[
     private str getJsonBody_Installation()
     {
         return @'{
     "_request": {
-        "dataAreaId": "OAB",
+        "dataAreaId": "%1",
         "NewInstallations": [
             {
                 "Instnum": "",
@@ -343,7 +288,7 @@ class XAPI_API_CallAutomator
                 "delPoints": [
                     {
                         "MeteringPoint": "",
-                        "netArea": "OAB",
+                        "netArea": "%2",
                         "CategoryNum": "TST_Catgry",
                         "deliveryCategory": "TST_DelCat",
                         "name": "TST_DelPointName",
@@ -386,12 +331,12 @@ private str getJsonBody_Contract(CustAccount _custAccount, str _attachmentNum, s
     str body =  @'{
     "_request":
     {
-        "dataAreaId":"OAB",
+        "dataAreaId":"%1",
         "contractNum":"",
-        "custAccount":"%1",
+        "custAccount":"%2",
         "contractType":"Installation",
-        "attachmentNum":"%2",
-        "deliveryCategory":"%3",
+        "attachmentNum":"%3",
+        "deliveryCategory":"%4",
         "contractTemplateNum":"TST_Template",
         "contractStartDate":"1/1/2026",
         "contractEndDate":"1/31/2027",
