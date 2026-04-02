@@ -8,9 +8,6 @@ class XAPI_API_CallAutomator
    
     str bearerToken;
     
-
-    /// Main entry: runs all steps in sequence
-   
 }
 ]]></Declaration>
 		<Methods>
@@ -214,6 +211,19 @@ class XAPI_API_CallAutomator
 ]]></Source>
 			</Method>
 			<Method>
+				<Name>callContractAPI</Name>
+				<Source><![CDATA[
+    public void callContractAPI(CustAccount _custAccount, str _attachmentNum, str _deliveryCategory)
+    {
+        Map configMap = new Map(Types::String, Types::String);
+        var body = this.prepareBody(XAPI_APIS::CreateContract, configMap);
+        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newContractAPI",
+            body);
+    }
+
+]]></Source>
+			</Method>
+			<Method>
 				<Name>prepareBody</Name>
 				<Source><![CDATA[
     private str prepareBody(XAPI_APIS _api, Map _fields)
@@ -238,122 +248,9 @@ class XAPI_API_CallAutomator
 ]]></Source>
 			</Method>
 			<Method>
-				<Name>callContractAPI</Name>
-				<Source><![CDATA[
-    public void callContractAPI(CustAccount _custAccount, str _attachmentNum, str _deliveryCategory)
-    {
-        this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newContractAPI", 
-            this.getJsonBody_Contract(_custAccount, _attachmentNum, _deliveryCategory));
-    }
-
-]]></Source>
-			</Method>
-			<Method>
-				<Name>getJsonBody_Installation</Name>
-				<Source><![CDATA[
-    private str getJsonBody_Installation()
-    {
-        return @'{
-    "_request": {
-        "dataAreaId": "%1",
-        "NewInstallations": [
-            {
-                "Instnum": "",
-                "InstReadingMethodNum": "TST_GroupNum",
-                "ReadingPlanNum": "TST_GroupNum",
-                "StreetNum": "TST_Street",
-                "HouseNoStart": 2,
-                "HouseNoEnd": 2,
-                "Floor": 2,
-                "Apartment":3,
-                "HouseLetterStart": "TST_D",
-                "HouseLetterEnd":  "TST_F",
-                "AddrLocation": "TST_AddrLocation",
-                "CountyNum": "TST_County",
-                "InstBBRNum": "TST_BBRNum",
-                "BBRInformationId":"",
-                "ConsumptionPerYear": 1299,
-                "TechnicTxt1": "ABC",
-                "PositionName": "TST_PosName",
-                "DelPointTechnicalNo": "TST_TechNo",
-                "AvailableQty": 0,
-                "DelPointGroupCode1": "TST_DelPointGrpCode1",
-                "X_coordinate": "124.567",
-                "Y_coordinate": "125.678",
-                "DeliveryGroupNum_UtilityArea": "",
-                "TechnicGroup1": "TST_TechGroup1",
-                "TechnicGroup2": "TST_TechGroup2",
-                "TechnicGroup3": "TST_TechGroup3",
-                "TechnicGroup4": "TST_TechGroup4",
-                "delPoints": [
-                    {
-                        "MeteringPoint": "",
-                        "netArea": "%2",
-                        "CategoryNum": "TST_Catgry",
-                        "deliveryCategory": "TST_DelCat",
-                        "name": "TST_DelPointName",
-                        "ReadingSystem":"Xellent"
-                    }
-                ],
-                "BBRInformation": {
-                    "District": "TST_Discrict",
-                    "Block": "TST_Block",
-                    "CountyNum": "",
-                    "Plot": "TST_Plot",
-                    "HybridHeatingInstallationYear": 2026,
-                    "HeatingSystem": "TST_HEatingSystem",
-                    "BuildingType": "TST_BuildingType",
-                    "PriorityClass": 10,
-                    "NumberOfBuildings": 2,
-                    "NumOfAppartments": 5,
-                    "BuildOrderingYear": 2018,
-                    "BuildingClassification": "TST_BuildingClassification",
-                    "BuildUseCode": "TST_BuildUseCode",
-                    "ResidentArea": 10,
-                    "BuildArea": 20,
-                    "BuildingVolume": 39,
-                    "BuildingNumber": 40,
-                    "HeatingVolume": 10
-                }
-            }
-        ]
-        }
-    }';
-}
-
-]]></Source>
-			</Method>
-			<Method>
-				<Name>getJsonBody_Contract</Name>
-				<Source><![CDATA[
-private str getJsonBody_Contract(CustAccount _custAccount, str _attachmentNum, str _deliveryCategory)
-{
-    str body =  @'{
-    "_request":
-    {
-        "dataAreaId":"%1",
-        "contractNum":"",
-        "custAccount":"%2",
-        "contractType":"Installation",
-        "attachmentNum":"%3",
-        "deliveryCategory":"%4",
-        "contractTemplateNum":"TST_Template",
-        "contractStartDate":"1/1/2026",
-        "contractEndDate":"1/31/2027",
-        "billingPlanNum":"TST_Billing",
-        "ContractPart":
-         {}
-        }
-    }';
-    return strFmt(body, _custAccount, _attachmentNum, _deliveryCategory );
-}
-
-]]></Source>
-			</Method>
-			<Method>
 				<Name>construct</Name>
 				<Source><![CDATA[
-public static XAPI_API_CallAutomator construct()
+    public static XAPI_API_CallAutomator construct()
     {
         XAPI_API_CallAutomator apiAuto = new XAPI_API_CallAutomator();
         return apiAuto;

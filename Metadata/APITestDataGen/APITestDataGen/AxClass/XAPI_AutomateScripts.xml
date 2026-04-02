@@ -102,12 +102,12 @@ class XAPI_AutomateScripts
         //auto.callCreateCustAPI();
 
         // 2. Create Installation for the Customer
-        XAPI_NewInstallationDataGen::main(null);
-        auto.callInstallationAPI();
+        //XAPI_NewInstallationDataGen::main(null);
+        //auto.callInstallationAPI();
 
         // 3. Create Contract for the Installation
-        //XAPI_NewContractDataGen::main(null);
-        //auto.callContractAPI(accNum, instNum, EXU_UtilityInstallation::find(instNum).DeliveryCategory);
+        XAPI_NewContractDataGen::main(null);
+        auto.callContractAPI("", "", "");
 
 
     }

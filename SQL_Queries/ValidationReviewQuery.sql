@@ -23,6 +23,26 @@ order by RECID desc
 */
 
 
+select eu.INSTNUM,uinst.DELIVERYCATEGORY from EXU_INSTALLATION eu
+join EXU_UTILITYINSTALLATION uinst
+on uinst.INSTNUM = eu.INSTNUM
+where eu.INSTREADINGMETHODNUM like  'TST%'
+order by eu.RECID desc
+
+select ct.CONTRACTNUM,ct.ATTACHMENTNUM, cust.ACCOUNTNUM, * from EXU_CONTRACTTABLE ct
+join EXU_INSTALLATION inst
+on inst.INSTNUM= ct.ATTACHMENTNUM
+join custtable cust
+on cust.ACCOUNTNUM = ct.CUSTACCOUNT
+where inst.INSTREADINGMETHODNUM like  'TST%'
+and cust.CUSTGROUP like  'TST%'
+
+
+
+
+
+
+--==========================================================================================
 -- General queries 
 
 select ERR_MSG,* from EGS_MASS_Input
