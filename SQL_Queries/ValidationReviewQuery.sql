@@ -1,5 +1,5 @@
 -- Customer created 
-select CUSTGROUP,* from CUSTTABLE 
+select CUSTGROUP,ACCOUNTNUM,* from CUSTTABLE 
 where CUSTGROUP = 'TST_CustGr'
 order by recid desc 
 
@@ -37,11 +37,6 @@ on cust.ACCOUNTNUM = ct.CUSTACCOUNT
 where inst.INSTREADINGMETHODNUM like  'TST%'
 and cust.CUSTGROUP like  'TST%'
 
-
-
-
-
-
 --==========================================================================================
 -- General queries 
 
@@ -62,3 +57,5 @@ where name not like '%System%'
 order by da.NAME
 
 select * from XAPI_APIConfigurations
+
+select * from XAPI_APILogTable

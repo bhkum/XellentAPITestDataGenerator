@@ -22,19 +22,18 @@ class XAPI_AutomateScripts
         XAPI_AutomateScripts automateScripts = XAPI_AutomateScripts::construct(accNum);
 
         XAPI_APILogTable lotTable;
-
                 
-        select firstonly Key from lotTable
+        select firstonly lotTable
             where lotTable.ApiName == XAPI_APIS::CreateCustomer
             && lotTable.Key == 'CustAccount';
         automateScripts.parmCustomerAccount(lotTable.Value);
         
-        select firstonly Key from lotTable
+        select firstonly lotTable
         where lotTable.ApiName == XAPI_APIS::CreateInstallation
             && lotTable.Key == 'InstNum';
         automateScripts.parmInstNum( lotTable.Value);
         
-        select firstonly Key from lotTable
+        select firstonly lotTable
             where lotTable.ApiName == XAPI_APIS::CreateContract
             && lotTable.Key == 'ContractNum';
         automateScripts.parmContractNum(lotTable.Value);
@@ -51,8 +50,6 @@ class XAPI_AutomateScripts
 				<Source><![CDATA[
     private void deleteAll()
     {
-        
-       
         ttsbegin;
         // Delete Contract Parts
         EXU_ContractTable contractTable = EXU_ContractTable::find(contractNum, true);

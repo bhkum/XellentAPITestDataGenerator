@@ -7,7 +7,10 @@ class XAPI_API_CallAutomator
 {
    
     str bearerToken;
-   
+    str tenantId = XAPI_AutomationHelper::tenantId;
+    str clientId = XAPI_AutomationHelper::clientId;
+    str clientSecret = XAPI_AutomationHelper::clientSecret;
+    str resourceUrl = XAPI_AutomationHelper::resourceUrl;
     Num logNum;
 }
 ]]></Declaration>
@@ -198,7 +201,7 @@ class XAPI_API_CallAutomator
 
         EGS_API_DataContract_Response res =FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseTxt);
         
-        this.log(XAPI_APIS::CreateCustomer, "CustAccount", res.parmMessage());
+        this.log(XAPI_APIS::CreateCustomer, "CustAccount", res.parmMessage(), responseTxt);
        
 
 
@@ -219,7 +222,7 @@ class XAPI_API_CallAutomator
 
         EGS_API_DataContract_Response_Installation res =FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response_Installation), responseTxt);
         
-        this.log(XAPI_APIS::CreateInstallation, "InstNum", res.parmInstallationNum());
+        this.log(XAPI_APIS::CreateInstallation, "InstNum", res.parmInstallationNum(), responseTxt);
     }
 
 ]]></Source>
@@ -234,15 +237,13 @@ class XAPI_API_CallAutomator
 
         configMap.insert('<DataAreaId>', curExt());
         
-        select firstonly Key from lotTable
-        where lotTable.ApiName == XAPI_APIS::CreateInstallation
+        select firstonly lotTable
+            where lotTable.ApiName == XAPI_APIS::CreateCustomer
             && lotTable.Key == 'CustAccount';
         
         configMap.insert('<custAccount>', lotTable.Value);
-
-
         
-        select firstonly Key from lotTable
+        select firstonly  lotTable
         where lotTable.ApiName == XAPI_APIS::CreateInstallation
             && lotTable.Key == 'InstNum';
         configMap.insert('<InstNum>', lotTable.Value);
@@ -259,7 +260,7 @@ class XAPI_API_CallAutomator
 
         EGS_API_DataContract_Response res =FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseTxt);
         
-        this.log(XAPI_APIS::CreateContract, "ContractNum", res.parmMessage());
+        this.log(XAPI_APIS::CreateContract, "ContractNum", res.parmMessage(), responseTxt);
     }
 
 ]]></Source>
@@ -267,7 +268,7 @@ class XAPI_API_CallAutomator
 			<Method>
 				<Name>log</Name>
 				<Source><![CDATA[
-    private void log(XAPI_APIS _api, str _key, str _value)
+    private void log(XAPI_APIS _api, str _key, str _value, str _response)
     {
         XAPI_APILogTable logTable;
 
@@ -275,6 +276,7 @@ class XAPI_API_CallAutomator
         logTable.ApiName = _api;
         logTable.Key = _key;
         logTable.Value = _value;
+        logTable.Response = _response;
         logTable.insert();
     
     }

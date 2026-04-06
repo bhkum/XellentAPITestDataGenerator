@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_AutomationHelper</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+final class XAPI_AutomationHelper
+{
+ 
+    public static str tenantId = "tenantid";
+    public static str clientId = "clientid";
+    public static str clientSecret = "clientsecret";
+    public static str resourceUrl = "url";
+
+}
+]]></Declaration>
+		<Methods />
+	</SourceCode>
+</AxClass>
