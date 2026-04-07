@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_API_AutomationFacade</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+public class XAPI_API_AutomationFacade
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>cleanUp_Contract</Name>
+				<Source><![CDATA[
+    public static void cleanUp_Contract(EXU_ContractNum _contract)
+    {
+        EXU_ContractTable contractTable = EXU_ContractTable::find(_contract, true);
+        if(contractTable.RecId)
+        {
+
+            contractTable.delete();
+            info(strFmt("Deleted Contract: %1", _contract));
+        }
+        else
+        {
+            info("No Contract Number provided — skipped deleting Contract and Contract Parts.");
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>cleanup_installation</Name>
+				<Source><![CDATA[
+    public static void cleanup_installation(EXU_InstallationNum _instNum)
+    {
+        
+        EXU_ContractTable contract;
+
+        select firstonly contract 
+            where contract.AttachmentNum == _instNum;
+
+        XAPI_API_AutomationFacade::cleanUp_Contract(contract.ContractNum);
+        
+        //EXU_DeliveryCategoryTable delCat;
+        EXU_DelPoint delPoint;
+        select firstonly forupdate delPoint
+            where delPoint.AttachmentNum == _instNum;
+
+        if(delPoint.RecId)
+        {
+            delPoint.delete();
+        }
+        else
+        {
+            info("No Customer Account provided — skipped deleting Delivery Points.");
+        }
+        
+
+        EXU_UtilityInstallation uinst;
+        select firstonly forupdate uinst
+            where uinst.InstNum == _instNum;
+
+        if(uinst.RecId)
+        {
+            uinst.delete();
+        }
+        else
+        {
+            info("No Customer Account provided — skipped deleting Utility Installations.");
+        }
+        
+
+        EXU_Installation inst = EXU_Installation::find(_instNum, true);
+
+        if(inst.RecId)
+        {
+            inst.delete();
+        }
+        else
+        {
+            info("No Customer Account provided — skipped deleting Installations.");
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>cleanup_Customer</Name>
+				<Source><![CDATA[
+    public static void cleanup_Customer(CustAccount _accNum)
+    {
+        CustTable custTable = CustTable::find(_accNum, true);
+        EXU_ContractTable contract;
+        EXU_Installation inst;
+        
+        select firstonly contract
+            where contract.CustAccount == _accNum;
+
+        XAPI_API_AutomationFacade::cleanUp_Contract(contract.ContractNum);
+        XAPI_API_AutomationFacade::cleanup_installation(contract.AttachmentNum);
+
+
+        if (custTable.RecId)
+        {
+            custTable.delete();
+            info(strFmt("Deleted Customer: %1", _accNum));
+        }
+        else
+        {
+            info(strFmt("Customer '%1' does not exist — skipped.", _accNum));
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>cleanup_dependentData</Name>
+				<Source><![CDATA[
+    public static void cleanup_dependentData()
+    {
+        XAPI_NewContractDelDataGen::main(null);
+        XAPI_NewInstallationDelDataGen::main(null);
+        XAPI_NewCustomerDelDataGen::main(null);
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>create_Customer</Name>
+				<Source><![CDATA[
+    // Creation
+    public static void create_Customer()
+    {
+        XAPI_NewCustomerDataGen::main(null);
+
+        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateCustomer);
+        api.callAPI();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>create_Installation</Name>
+				<Source><![CDATA[
+    public static void create_Installation()
+    {
+        XAPI_NewInstallationDataGen::main(null);
+
+        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateInstallation);
+        api.callAPI();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>create_Contract</Name>
+				<Source><![CDATA[
+    public static void create_Contract()
+    {
+        XAPI_NewContractDataGen::main(null);
+
+        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateContract);
+        api.callAPI();
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

@@ -61,6 +61,32 @@ class XAPI_APICaller_Contract extends XAPI_APICallerBase
 
 ]]></Source>
 			</Method>
+			<Method>
+				<Name>cleanPrevious</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    public void cleanPrevious()
+    {
+        //XAPI_API_AutomationFacade::cleanUp_Contract();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runDependency</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    public void runDependency()
+    {
+
+    }
+
+]]></Source>
+			</Method>
 		</Methods>
 	</SourceCode>
 </AxClass>

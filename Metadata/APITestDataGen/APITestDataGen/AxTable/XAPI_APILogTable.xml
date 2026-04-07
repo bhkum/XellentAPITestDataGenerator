@@ -35,7 +35,7 @@ public class XAPI_APILogTable extends common
         select firstonly logTable 
             where logTable.ApiName == _api
             && logTable.Key == _key
-            && logTable.Archived != NoYes::No;
+            && logTable.Archived == NoYes::No;
 
         return logTable;
 
@@ -64,7 +64,7 @@ public class XAPI_APILogTable extends common
         XAPI_APILogTable logTable;
 
         update_recordset logTable 
-            setting logtable.Archived == NoYes::Yes
+            setting Archived = NoYes::Yes
             where logTable.Archived == NoYes::No;
 
     }

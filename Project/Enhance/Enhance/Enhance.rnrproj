@@ -38,6 +38,7 @@
     <Folder Include="Base Enums\" />
     <Folder Include="Classes\" />
     <Folder Include="Classes\DataGeneration" />
+    <Folder Include="Classes\API Core" />
     <Folder Include="Menu Extensions\" />
     <Folder Include="Menus\" />
     <Folder Include="Tables\" />
@@ -46,27 +47,42 @@
     <Content Include="AxClass\XAPI_APICallerBase">
       <SubType>Content</SubType>
       <Name>XAPI_APICallerBase</Name>
-      <Link>Classes\XAPI_APICallerBase</Link>
+      <Link>Classes\API Core\XAPI_APICallerBase</Link>
     </Content>
     <Content Include="AxClass\XAPI_APICaller_Contract">
       <SubType>Content</SubType>
       <Name>XAPI_APICaller_Contract</Name>
-      <Link>Classes\XAPI_APICaller_Contract</Link>
+      <Link>Classes\API Core\XAPI_APICaller_Contract</Link>
     </Content>
     <Content Include="AxClass\XAPI_APICaller_Customer">
       <SubType>Content</SubType>
       <Name>XAPI_APICaller_Customer</Name>
-      <Link>Classes\XAPI_APICaller_Customer</Link>
+      <Link>Classes\API Core\XAPI_APICaller_Customer</Link>
     </Content>
     <Content Include="AxClass\XAPI_APICaller_Installation">
       <SubType>Content</SubType>
       <Name>XAPI_APICaller_Installation</Name>
-      <Link>Classes\XAPI_APICaller_Installation</Link>
+      <Link>Classes\API Core\XAPI_APICaller_Installation</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_API_AutomationFacade">
+      <SubType>Content</SubType>
+      <Name>XAPI_API_AutomationFacade</Name>
+      <Link>Classes\XAPI_API_AutomationFacade</Link>
     </Content>
     <Content Include="AxClass\XAPI_API_CallAutomator">
       <SubType>Content</SubType>
       <Name>XAPI_API_CallAutomator</Name>
       <Link>Classes\XAPI_API_CallAutomator</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_API_Create">
+      <SubType>Content</SubType>
+      <Name>XAPI_API_Create</Name>
+      <Link>Classes\XAPI_API_Create</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_API_Delete">
+      <SubType>Content</SubType>
+      <Name>XAPI_API_Delete</Name>
+      <Link>Classes\XAPI_API_Delete</Link>
     </Content>
     <Content Include="AxClass\XAPI_AutomateScripts">
       <SubType>Content</SubType>
@@ -127,6 +143,16 @@
       <SubType>Content</SubType>
       <Name>MainMenu.APITestDataGen</Name>
       <Link>Menu Extensions\MainMenu.APITestDataGen</Link>
+    </Content>
+    <Content Include="AxMenuItemAction\XAPI_API_Create">
+      <SubType>Content</SubType>
+      <Name>XAPI_API_Create</Name>
+      <Link>Action Menu Items\XAPI_API_Create</Link>
+    </Content>
+    <Content Include="AxMenuItemAction\XAPI_API_Delete">
+      <SubType>Content</SubType>
+      <Name>XAPI_API_Delete</Name>
+      <Link>Action Menu Items\XAPI_API_Delete</Link>
     </Content>
     <Content Include="AxMenuItemAction\XAPI_AutomateScripts">
       <SubType>Content</SubType>

@@ -48,7 +48,33 @@ class XAPI_APICaller_Customer extends XAPI_APICallerBase
         this.sendPostRequest();
 
         EGS_API_DataContract_Response res = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
-        this.log( "CustAccount", res.parmMessage());
+        this.log("CustAccount", res.parmMessage());
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>cleanPrevious</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    public void cleanPrevious()
+    {
+
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runDependency</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    public void runDependency()
+    {
+
     }
 
 ]]></Source>

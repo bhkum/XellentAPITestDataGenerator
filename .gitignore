@@ -48,6 +48,7 @@ Metadata/APITestDataGen/XppMetadata
 */Resources/
 Metadata/APITestDataGen/Build*
 !bin/XAI_OpenAI.dll
+/Metadata/APITestDataGen/APITestDataGen/AxClass/XAPI_AutomationHelper.xml
 
 
 # -----------------------------------------------

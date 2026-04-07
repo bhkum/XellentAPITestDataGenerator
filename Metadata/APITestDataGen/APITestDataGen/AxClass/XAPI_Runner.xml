@@ -13,9 +13,11 @@ final class XAPI_Runner
 				<Source><![CDATA[
     public static void main(Args _args)
     {
-        XAPI_Runner::createCustomer();
-        XAPI_Runner::createInstallation();
-        XAPI_Runner::createContract();
+        //XAPI_Runner::createCustomer();
+        //XAPI_Runner::createInstallation();
+        //XAPI_Runner::createContract();
+
+
     }
 
 ]]></Source>

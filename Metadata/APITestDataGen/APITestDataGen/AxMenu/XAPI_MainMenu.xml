@@ -14,6 +14,18 @@
 					<MenuItemName>XAPI_AutomateScripts</MenuItemName>
 					<MenuItemType>Action</MenuItemType>
 				</AxMenuElement>
+				<AxMenuElement xmlns=""
+					i:type="AxMenuElementMenuItem">
+					<Name>XAPI_API_Delete</Name>
+					<MenuItemName>XAPI_API_Delete</MenuItemName>
+					<MenuItemType>Action</MenuItemType>
+				</AxMenuElement>
+				<AxMenuElement xmlns=""
+					i:type="AxMenuElementMenuItem">
+					<Name>XAPI_API_Create</Name>
+					<MenuItemName>XAPI_API_Create</MenuItemName>
+					<MenuItemType>Action</MenuItemType>
+				</AxMenuElement>
 			</Elements>
 		</AxMenuElement>
 	</Elements>

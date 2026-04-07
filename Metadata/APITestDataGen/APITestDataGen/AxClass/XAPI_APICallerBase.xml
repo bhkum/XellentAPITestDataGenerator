@@ -227,6 +227,20 @@ abstract class XAPI_APICallerBase
 
 ]]></Source>
 			</Method>
+			<Method>
+				<Name>cleanPrevious</Name>
+				<Source><![CDATA[
+    abstract void cleanPrevious() {}
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runDependency</Name>
+				<Source><![CDATA[
+    abstract void runDependency() {}
+
+]]></Source>
+			</Method>
 		</Methods>
 	</SourceCode>
 </AxClass>

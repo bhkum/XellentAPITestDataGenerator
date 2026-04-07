@@ -54,7 +54,7 @@ class XAPI_AutomateScripts
 
         //EXU_DeliveryCategoryTable delCat;    
         EXU_DelPoint delPoint;
-         select firstonly forupdate delPoint
+        select firstonly forupdate delPoint
             where delPoint.AttachmentNum == instNum;
 
         if(delPoint.RecId)
