@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_AlternativeCustomerNumberGenerator</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_AlternativeCustomerNumberGenerator
+{
+    private static System.Random rnd;
+
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>initialize</Name>
+				<Source><![CDATA[
+    static void initialize()
+    {
+        if (!rnd)
+        {
+            rnd = new System.Random();
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>randRange</Name>
+				<Source><![CDATA[
+    /* =====================
+       Helpers
+       ===================== */
+
+    private static int randRange(int min, int max)
+    {
+        NordicIdUtils::initialize();
+        return rnd.Next(min, max + 1);
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>padLeft</Name>
+				<Source><![CDATA[
+    private static str padLeft(str value, int len, str ch)
+    {
+        while (strLen(value) < len)
+        {
+            value = ch + value;
+        }
+        return value;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>luhnCheckDigit</Name>
+				<Source><![CDATA[
+    private static int luhnCheckDigit(str nine)
+    {
+        str digits = nine + '0';
+        int length = strLen(digits);
+        int total = 0;
+
+        for (int i = 1; i <= length; i++)
+        {
+            int posFromRight = length - i;
+            int multiplier = (posFromRight mod 2 == 1) ? 2 : 1;
+            int value = str2Int(subStr(digits, i, 1)) * multiplier;
+            total += (value mod 10) + (value div 10);
+        }
+
+        return (10 - total mod 10) mod 10;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>luhnValid</Name>
+				<Source><![CDATA[
+    private static boolean luhnValid(str number)
+    {
+        int length = strLen(number);
+        int total = 0;
+
+        for (int i = 1; i <= length; i++)
+        {
+            int posFromRight = length - i;
+            int multiplier = (posFromRight mod 2 == 1) ? 2 : 1;
+            int value = str2Int(subStr(number, i, 1)) * multiplier;
+            total += (value mod 10) + (value div 10);
+        }
+
+        return ((10 - total mod 10) mod 10) == 0;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>generateDanishCPR</Name>
+				<Source><![CDATA[
+    /* =====================
+       Danish CPR
+       ===================== */
+
+    private static str generateDanishCPR()
+    {
+        int day   = NordicIdUtils::randRange(1, 28);
+        int month = NordicIdUtils::randRange(1, 12);
+
+        int year2d;
+        int seventh;
+
+        if (NordicIdUtils::randRange(0, 1) == 0)
+        {
+            seventh = NordicIdUtils::randRange(4, 9);
+            year2d  = NordicIdUtils::randRange(7, 36);
+        }
+        else
+        {
+            seventh = NordicIdUtils::randRange(5, 8);
+            year2d  = NordicIdUtils::randRange(7, 57);
+        }
+
+        return
+            NordicIdUtils::padLeft(int2str(day),   2, '0') +
+            NordicIdUtils::padLeft(int2str(month), 2, '0') +
+            NordicIdUtils::padLeft(int2str(year2d),2, '0') +
+            int2str(seventh) +
+            int2str(NordicIdUtils::randRange(0,9)) +
+            int2str(NordicIdUtils::randRange(0,9)) +
+            int2str(NordicIdUtils::randRange(0,9));
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>generateDanishCVR</Name>
+				<Source><![CDATA[
+    /* =====================
+       Danish CVR
+       ===================== */
+
+    private static str generateDanishCVR()
+    {
+        container weights = [2,7,6,5,4,3,2,1];
+
+        while (true)
+        {
+            str body =
+                int2str(NordicIdUtils::randRange(1,9)) +
+                int2str(NordicIdUtils::randRange(0,9)) +
+                int2str(NordicIdUtils::randRange(0,9)) +
+                int2str(NordicIdUtils::randRange(0,9)) +
+                int2str(NordicIdUtils::randRange(0,9)) +
+                int2str(NordicIdUtils::randRange(0,9)) +
+                int2str(NordicIdUtils::randRange(0,9));
+
+            int total = 0;
+            for (int i = 1; i <= 7; i++)
+            {
+                total += str2Int(subStr(body, i, 1)) * conPeek(weights, i);
+            }
+
+            int remainder = total mod 11;
+            if (remainder == 0 || remainder == 1)
+                continue;
+
+            return body + int2str(11 - remainder);
+        }
+
+        return ""; // required by compiler
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>generateSwedishCPR</Name>
+				<Source><![CDATA[
+    /* =====================
+       Swedish CPR
+       ===================== */
+
+    private static str generateSwedishCPR()
+    {
+        date startD = mkDate(1,1,1950);
+        date endD   = mkDate(31,12,2020);
+        date d      = startD + NordicIdUtils::randRange(0, endD - startD);
+
+        int yyyy = year(d);
+        str mm   = NordicIdUtils::padLeft(int2str(mthOfYr(d)), 2, '0');
+        str dd   = NordicIdUtils::padLeft(int2str(dayOfMth(d)),2, '0');
+        str nnn  = NordicIdUtils::padLeft(int2str(NordicIdUtils::randRange(1,999)),3,'0');
+
+        str last9 =
+            NordicIdUtils::padLeft(int2str(yyyy mod 100), 2, '0') + mm + dd + nnn;
+
+        return int2str(yyyy) + mm + dd + nnn +
+               int2str(NordicIdUtils::luhnCheckDigit(last9));
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>generateSwedishCVR</Name>
+				<Source><![CDATA[
+    /* =====================
+       Swedish CVR
+       ===================== */
+
+    private static str generateSwedishCVR()
+    {
+        str nine =
+            int2str(NordicIdUtils::randRange(1,9)) +
+            int2str(NordicIdUtils::randRange(0,9)) +
+            int2str(NordicIdUtils::randRange(2,9));
+
+        for (int i = 1; i <= 6; i++)
+        {
+            nine += int2str(NordicIdUtils::randRange(0,9));
+        }
+
+        return nine + int2str(NordicIdUtils::luhnCheckDigit(nine));
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>generateCPR</Name>
+				<Source><![CDATA[
+    public static str generateCPR()
+    {
+        CompanyInfo companyInfo = CompanyInfo::find();
+        EXU_AlternativeCustomerCodeValidationRule _rule =  companyInfo.EXU_DefaultAlternativeCustomerCodeValidationRule;
+        
+        if(!_rule)
+        {
+            throw Error(Error::wrongUseOfFunction(funcName()));
+        }
+
+        switch (_rule)
+        {
+            case EXU_AlternativeCustomerCodeValidationRule::Da:
+                return NordicIdUtils::generateDanishCPR();
+            case EXU_AlternativeCustomerCodeValidationRule::Sv:
+                return NordicIdUtils::generateSwedishCPR();
+            default:
+                throw Error(Error::wrongUseOfFunction(funcName()));
+                return "";
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>generateCVR</Name>
+				<Source><![CDATA[
+    public static str generateCVR()
+    {
+        CompanyInfo companyInfo = CompanyInfo::find();
+        EXU_AlternativeCustomerCodeValidationRule _rule =  companyInfo.EXU_DefaultAlternativeCustomerCodeValidationRule;
+        
+        if(!_rule)
+        {
+            throw Error(Error::wrongUseOfFunction(funcName()));
+        }
+
+        switch (_rule)
+        {
+            case EXU_AlternativeCustomerCodeValidationRule::Da:
+                return NordicIdUtils::generateDanishCVR();
+            case EXU_AlternativeCustomerCodeValidationRule::Sv:
+                return NordicIdUtils::generateSwedishCVR();
+            default:
+                throw Error(Error::wrongUseOfFunction(funcName()));
+                return "";
+        }
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>
