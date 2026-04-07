@@ -3,15 +3,12 @@ select CUSTGROUP,ACCOUNTNUM,* from CUSTTABLE
 where CUSTGROUP = 'TST_CustGr'
 order by recid desc 
 
-
 -- Installation created 
 select INSTNUM,INSTREADINGMETHODNUM,* from EXU_INSTALLATION 
 where INSTREADINGMETHODNUM like  'TST%'
 
 --where INSTOWNER = '917585'
 order by RECID desc
-
-
 
 /*
 	-- Customer
@@ -59,3 +56,17 @@ order by da.NAME
 select * from XAPI_APIConfigurations
 
 select * from XAPI_APILogTable
+
+update XAPI_APILogTable
+set archived  = 0
+
+delete from XAPI_APILogTable
+
+
+
+/*
+	0	CustAccount	917600		NULL	oab	5637144576	5637149826	1	0x00000000727A4E37	{"$id":"1","ErrorCode":"Ok","ResponseCode":"","Status":"","Message":"917600"}
+	1	InstNum	19739		NULL	oab	5637144576	5637149827	1	0x00000000727A4E55	{"$id":"1","InstallationNum":"19739","ErrorCode":"","ResponseCode":"","Status":"Ok","Message":""}
+	2	ContractNum	9367851		NULL	oab	5637144576	5637149828	1	0x00000000727A4E5A	{"$id":"1","ErrorCode":"","ResponseCode":"","Status":"Ok","Message":"9367851"}
+
+	*/
