@@ -22,6 +22,55 @@ public class XAPI_APILogTable extends common
 
 ]]></Source>
 			</Method>
+			<Method>
+				<Name>getByKey</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    public static XAPI_APILogTable getByKey(XAPI_APIS _api, str _key)
+    {
+        XAPI_APILogTable logTable;
+
+        select firstonly logTable 
+            where logTable.ApiName == _api
+            && logTable.Key == _key
+            && logTable.Archived != NoYes::No;
+
+        return logTable;
+
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>getValueByKey</Name>
+				<Source><![CDATA[
+    public static str getValueByKey(XAPI_APIS _api, str _key)
+    {
+        return XAPI_APILogTable::getByKey(_api,_key).Value;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>archive</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    public static void archive()
+    {
+        XAPI_APILogTable logTable;
+
+        update_recordset logTable 
+            setting logtable.Archived == NoYes::Yes
+            where logTable.Archived == NoYes::No;
+
+    }
+
+]]></Source>
+			</Method>
 		</Methods>
 	</SourceCode>
 	<SubscriberAccessLevel>
@@ -113,6 +162,13 @@ public class XAPI_APILogTable extends common
 			<Name>Response</Name>
 			<ExtendedDataType>DirMemo</ExtendedDataType>
 			<IgnoreEDTRelation>Yes</IgnoreEDTRelation>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldEnum">
+			<Name>Archived</Name>
+			<ExtendedDataType>NoYesId</ExtendedDataType>
+			<IgnoreEDTRelation>Yes</IgnoreEDTRelation>
+			<EnumType>NoYes</EnumType>
 		</AxTableField>
 	</Fields>
 	<FullTextIndexes />

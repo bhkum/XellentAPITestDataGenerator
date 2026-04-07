@@ -25,7 +25,6 @@ class XAPI_API_CallAutomator
         System.IO.StreamWriter streamWriter;
         System.IO.StreamReader streamReader;
         str url = "https://login.microsoftonline.com/" + tenantId + "/oauth2/token";
-        //str postData;
         str responseText;
         System.Text.RegularExpressions.Regex regex;
         System.Text.RegularExpressions.Match match;
@@ -36,10 +35,6 @@ class XAPI_API_CallAutomator
            + "&client_id=" + clientId
            + "&client_secret=" + encodedSecret
            + "&resource=" + resourceUrl;
-
-        info("===== TOKEN REQUEST START =====");
-        info("URL: " + url);
-        info("POST DATA: " + postData);
 
         try
         {
@@ -57,7 +52,6 @@ class XAPI_API_CallAutomator
             responseText = streamReader.ReadToEnd();
             streamReader.Close();
 
-            info("Token SUCCESS response: " + responseText);
         }
         catch (Exception::CLRError)
         {
@@ -77,11 +71,6 @@ class XAPI_API_CallAutomator
                     errorReader.Close();
                 }
             }
-
-            error("❌ TOKEN ERROR (CLR): " + ex.ToString());
-            error("❌ TOKEN ERROR RESPONSE: " + errorText);
-            info("===== TOKEN REQUEST FAILED =====");
-
             return "";
         }
 
@@ -90,11 +79,9 @@ class XAPI_API_CallAutomator
 
         if (match.Success)
         {
-            info("✅ Access token extracted successfully");
             return match.Groups.get_Item(1).get_Value();
         }
 
-        error("❌ Access token not found in response!");
         return "";
     }
 
@@ -105,14 +92,12 @@ class XAPI_API_CallAutomator
 				<Source><![CDATA[
     public str sendPostRequest(str url, str json)
     {
-        // ✅ FIX 1: Auto-fetch token if missing
         if (strLen(bearerToken) == 0)
         {
             bearerToken = this.GetAccessToken();
 
             if (strLen(bearerToken) == 0)
             {
-                error("❌ Cannot call API — failed to obtain access token.");
                 return '';
             }
         }
@@ -122,9 +107,6 @@ class XAPI_API_CallAutomator
         System.IO.StreamWriter streamWriter;
         System.IO.StreamReader streamReader;
 
-        info("===== API CALL START =====");
-        info("URL: " + url);
-        info("Request JSON: " + json);
 
         try
         {
@@ -132,7 +114,6 @@ class XAPI_API_CallAutomator
             request.set_Method("POST");
             request.set_ContentType("application/json");
 
-            // ✅ FIX 2: Use set_Headers correctly to avoid header injection issues
             request.get_Headers().Set("Authorization", "Bearer " + bearerToken);
 
             streamWriter = new System.IO.StreamWriter(request.GetRequestStream());
@@ -144,7 +125,6 @@ class XAPI_API_CallAutomator
             streamReader = new System.IO.StreamReader(response.GetResponseStream());
 
             str responseText = streamReader.ReadToEnd();
-            info("✅ API SUCCESS RESPONSE: " + responseText);
             streamReader.Close();
             return responseText;
         }
@@ -167,11 +147,8 @@ class XAPI_API_CallAutomator
                 }
             }
 
-            error("❌ API ERROR: " + ex.ToString());
-            error("❌ API ERROR RESPONSE: " + errorText);
         }
 
-        info("===== API CALL END =====");
         return '';
     }
 
@@ -199,12 +176,8 @@ class XAPI_API_CallAutomator
         var body = this.prepareBody(XAPI_APIS::CreateCustomer, configMap);
         str responseTxt = this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newCustomerAPI", body);
 
-        EGS_API_DataContract_Response res =FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseTxt);
-        
+        EGS_API_DataContract_Response res = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseTxt);
         this.log(XAPI_APIS::CreateCustomer, "CustAccount", res.parmMessage(), responseTxt);
-       
-
-
     }
 
 ]]></Source>
@@ -301,7 +274,6 @@ class XAPI_API_CallAutomator
             body = strReplace(body, placeholder, value);
         }
 
-        info(strFmt("{BODY}: %1", body));
         return body;
     }
 

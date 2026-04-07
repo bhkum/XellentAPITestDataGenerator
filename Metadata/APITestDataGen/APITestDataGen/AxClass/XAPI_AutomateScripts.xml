@@ -18,28 +18,13 @@ class XAPI_AutomateScripts
 				<Source><![CDATA[
     public static void main(Args _args)
     {
-        CustAccount accNum = "";
-        XAPI_AutomateScripts automateScripts = XAPI_AutomateScripts::construct(accNum);
+        XAPI_AutomateScripts automateScripts = XAPI_AutomateScripts::construct();
 
-        XAPI_APILogTable lotTable;
-                
-        select firstonly lotTable
-            where lotTable.ApiName == XAPI_APIS::CreateCustomer
-            && lotTable.Key == 'CustAccount';
-        automateScripts.parmCustomerAccount(lotTable.Value);
-        
-        select firstonly lotTable
-        where lotTable.ApiName == XAPI_APIS::CreateInstallation
-            && lotTable.Key == 'InstNum';
-        automateScripts.parmInstNum( lotTable.Value);
-        
-        select firstonly lotTable
-            where lotTable.ApiName == XAPI_APIS::CreateContract
-            && lotTable.Key == 'ContractNum';
-        automateScripts.parmContractNum(lotTable.Value);
+        automateScripts.parmCustomerAccount(XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, "CustAccount"));
+        automateScripts.parmInstNum(XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateInstallation, "InstNum"));
+        automateScripts.parmContractNum(XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateContract, "ContractNum"));
 
-        delete_from lotTable;
-
+        XAPI_APILogTable::archive();
         automateScripts.execute();
     }
 
@@ -158,9 +143,6 @@ class XAPI_AutomateScripts
         xapi_newcontractdatagen::main(null);
         auto.callcontractapi("", "", "");
 
-
-
-
     }
 
 ]]></Source>
@@ -201,10 +183,9 @@ class XAPI_AutomateScripts
 			<Method>
 				<Name>construct</Name>
 				<Source><![CDATA[
-    public static XAPI_AutomateScripts construct(CustAccount _accNum) 
+    public static XAPI_AutomateScripts construct() 
     {
         XAPI_AutomateScripts instance = new XAPI_AutomateScripts();
-        instance.parmCustomerAccount(_accNum);
         return instance;
     }
 

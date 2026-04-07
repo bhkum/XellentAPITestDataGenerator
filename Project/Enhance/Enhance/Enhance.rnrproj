@@ -16,7 +16,7 @@
     <Name>Enhance</Name>
     <RootNamespace>Enhance</RootNamespace>
     <StartupType>Class</StartupType>
-    <StartupObject>XAPI_AutomateScripts</StartupObject>
+    <StartupObject>XAPI_Runner</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <Configuration>Debug</Configuration>
@@ -43,6 +43,26 @@
     <Folder Include="Tables\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AxClass\XAPI_APICallerBase">
+      <SubType>Content</SubType>
+      <Name>XAPI_APICallerBase</Name>
+      <Link>Classes\XAPI_APICallerBase</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_APICaller_Contract">
+      <SubType>Content</SubType>
+      <Name>XAPI_APICaller_Contract</Name>
+      <Link>Classes\XAPI_APICaller_Contract</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_APICaller_Customer">
+      <SubType>Content</SubType>
+      <Name>XAPI_APICaller_Customer</Name>
+      <Link>Classes\XAPI_APICaller_Customer</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_APICaller_Installation">
+      <SubType>Content</SubType>
+      <Name>XAPI_APICaller_Installation</Name>
+      <Link>Classes\XAPI_APICaller_Installation</Link>
+    </Content>
     <Content Include="AxClass\XAPI_API_CallAutomator">
       <SubType>Content</SubType>
       <Name>XAPI_API_CallAutomator</Name>
@@ -92,6 +112,11 @@
       <SubType>Content</SubType>
       <Name>XAPI_NewInstallationDelDataGen</Name>
       <Link>Classes\DataGeneration\XAPI_NewInstallationDelDataGen</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Runner">
+      <SubType>Content</SubType>
+      <Name>XAPI_Runner</Name>
+      <Link>Classes\XAPI_Runner</Link>
     </Content>
     <Content Include="AxEnum\XAPI_APIS">
       <SubType>Content</SubType>
