@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <BuildTasksDirectory Condition=" '$(BuildTasksDirectory)' == ''">$(MSBuildProgramFiles32)\MSBuild\Microsoft\Dynamics\AX</BuildTasksDirectory>
+    <Model>APITestDataGen</Model>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <OutputPath>bin</OutputPath>
+    <SchemaVersion>2.0</SchemaVersion>
+    <GenerateCrossReferences>True</GenerateCrossReferences>
+    <RunAppCheckerRules>False</RunAppCheckerRules>
+    <LogAppcheckerDiagsAsErrors>False</LogAppcheckerDiagsAsErrors>
+    <DeployOnline>False</DeployOnline>
+    <ProjectGuid>{1b40f9af-a91e-469d-87e4-1a4124fca996}</ProjectGuid>
+    <Name>Enhance</Name>
+    <RootNamespace>Enhance</RootNamespace>
+    <StartupType>Class</StartupType>
+    <StartupObject>XAPI_Runner</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <Configuration>Debug</Configuration>
+    <DBSyncInBuild>False</DBSyncInBuild>
+    <GenerateFormAdaptors>False</GenerateFormAdaptors>
+    <Company>
+    </Company>
+    <Partition>initial</Partition>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DataEntityExpandParentChildRelations>False</DataEntityExpandParentChildRelations>
+    <DataEntityUseLabelTextAsFieldName>False</DataEntityUseLabelTextAsFieldName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Action Menu Items\" />
+    <Folder Include="Base Enums\" />
+    <Folder Include="Classes\" />
+    <Folder Include="Classes\DataGeneration" />
+    <Folder Include="Classes\API Core" />
+    <Folder Include="Menu Extensions\" />
+    <Folder Include="Menus\" />
+    <Folder Include="Tables\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="AxClass\XAPI_APICallerBase">
+      <SubType>Content</SubType>
+      <Name>XAPI_APICallerBase</Name>
+      <Link>Classes\API Core\XAPI_APICallerBase</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_APICaller_Contract">
+      <SubType>Content</SubType>
+      <Name>XAPI_APICaller_Contract</Name>
+      <Link>Classes\API Core\XAPI_APICaller_Contract</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_APICaller_Customer">
+      <SubType>Content</SubType>
+      <Name>XAPI_APICaller_Customer</Name>
+      <Link>Classes\API Core\XAPI_APICaller_Customer</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_APICaller_Installation">
+      <SubType>Content</SubType>
+      <Name>XAPI_APICaller_Installation</Name>
+      <Link>Classes\API Core\XAPI_APICaller_Installation</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_API_AutomationFacade">
+      <SubType>Content</SubType>
+      <Name>XAPI_API_AutomationFacade</Name>
+      <Link>Classes\XAPI_API_AutomationFacade</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_API_CallAutomator">
+      <SubType>Content</SubType>
+      <Name>XAPI_API_CallAutomator</Name>
+      <Link>Classes\XAPI_API_CallAutomator</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_API_Create">
+      <SubType>Content</SubType>
+      <Name>XAPI_API_Create</Name>
+      <Link>Classes\XAPI_API_Create</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_API_Delete">
+      <SubType>Content</SubType>
+      <Name>XAPI_API_Delete</Name>
+      <Link>Classes\XAPI_API_Delete</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_AutomateScripts">
+      <SubType>Content</SubType>
+      <Name>XAPI_AutomateScripts</Name>
+      <Link>Classes\XAPI_AutomateScripts</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_AutomationHelper">
+      <SubType>Content</SubType>
+      <Name>XAPI_AutomationHelper</Name>
+      <Link>Classes\XAPI_AutomationHelper</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_NewContractDataGen">
+      <SubType>Content</SubType>
+      <Name>XAPI_NewContractDataGen</Name>
+      <Link>Classes\DataGeneration\XAPI_NewContractDataGen</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_NewContractDelDataGen">
+      <SubType>Content</SubType>
+      <Name>XAPI_NewContractDelDataGen</Name>
+      <Link>Classes\DataGeneration\XAPI_NewContractDelDataGen</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_NewContractPartDataGen">
+      <SubType>Content</SubType>
+      <Name>XAPI_NewContractPartDataGen</Name>
+      <Link>Classes\DataGeneration\XAPI_NewContractPartDataGen</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_NewCustomerDataGen">
+      <SubType>Content</SubType>
+      <Name>XAPI_NewCustomerDataGen</Name>
+      <Link>Classes\DataGeneration\XAPI_NewCustomerDataGen</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_NewCustomerDelDataGen">
+      <SubType>Content</SubType>
+      <Name>XAPI_NewCustomerDelDataGen</Name>
+      <Link>Classes\DataGeneration\XAPI_NewCustomerDelDataGen</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_NewInstallationDataGen">
+      <SubType>Content</SubType>
+      <Name>XAPI_NewInstallationDataGen</Name>
+      <Link>Classes\DataGeneration\XAPI_NewInstallationDataGen</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_NewInstallationDelDataGen">
+      <SubType>Content</SubType>
+      <Name>XAPI_NewInstallationDelDataGen</Name>
+      <Link>Classes\DataGeneration\XAPI_NewInstallationDelDataGen</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Runner">
+      <SubType>Content</SubType>
+      <Name>XAPI_Runner</Name>
+      <Link>Classes\XAPI_Runner</Link>
+    </Content>
+    <Content Include="AxEnum\XAPI_APIS">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIS</Name>
+      <Link>Base Enums\XAPI_APIS</Link>
+    </Content>
+    <Content Include="AxMenuExtension\MainMenu.APITestDataGen">
+      <SubType>Content</SubType>
+      <Name>MainMenu.APITestDataGen</Name>
+      <Link>Menu Extensions\MainMenu.APITestDataGen</Link>
+    </Content>
+    <Content Include="AxMenuItemAction\XAPI_API_Create">
+      <SubType>Content</SubType>
+      <Name>XAPI_API_Create</Name>
+      <Link>Action Menu Items\XAPI_API_Create</Link>
+    </Content>
+    <Content Include="AxMenuItemAction\XAPI_API_Delete">
+      <SubType>Content</SubType>
+      <Name>XAPI_API_Delete</Name>
+      <Link>Action Menu Items\XAPI_API_Delete</Link>
+    </Content>
+    <Content Include="AxMenuItemAction\XAPI_AutomateScripts">
+      <SubType>Content</SubType>
+      <Name>XAPI_AutomateScripts</Name>
+      <Link>Action Menu Items\XAPI_AutomateScripts</Link>
+    </Content>
+    <Content Include="AxMenu\XAPI_MainMenu">
+      <SubType>Content</SubType>
+      <Name>XAPI_MainMenu</Name>
+      <Link>Menus\XAPI_MainMenu</Link>
+    </Content>
+    <Content Include="AxTable\XAPI_APIConfigurations">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIConfigurations</Name>
+      <Link>Tables\XAPI_APIConfigurations</Link>
+    </Content>
+    <Content Include="AxTable\XAPI_APILogTable">
+      <SubType>Content</SubType>
+      <Name>XAPI_APILogTable</Name>
+      <Link>Tables\XAPI_APILogTable</Link>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
+  <Import Project="$(BuildTasksDirectory)\Microsoft.Dynamics.Framework.Tools.BuildTasks.17.0.targets" />
+</Project>

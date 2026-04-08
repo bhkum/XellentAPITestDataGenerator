@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APICaller_Customer</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_APICaller_Customer extends XAPI_APICallerBase
+{
+    
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>getUrl</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    public str getUrl()
+    {
+        return resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newCustomerAPI";
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>callAPI</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    public void callAPI()
+    {
+        DimensionAttribute        da;
+        DimensionAttributeValue   dv;
+        
+        select firstonly name from da
+        order by da.Name asc
+        join DisplayValue from dv
+        where dv.DimensionAttribute == da.RecId;
+        
+        Map configMap = new Map(Types::String, Types::String);
+        configMap.insert('<DataAreaId>', curExt());
+        configMap.insert('<AlternativeCustomerNumber>', '195108224444');
+        configMap.insert('<DimensionName>', da.Name);
+        configMap.insert('<DimensionValue>', dv.DisplayValue);
+
+        this.prepareBody(configMap);
+        this.sendPostRequest();
+
+        EGS_API_DataContract_Response res = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+        this.log("CustAccount", res.parmMessage());
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>cleanPrevious</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    public void cleanPrevious()
+    {
+
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runDependency</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    public void runDependency()
+    {
+
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

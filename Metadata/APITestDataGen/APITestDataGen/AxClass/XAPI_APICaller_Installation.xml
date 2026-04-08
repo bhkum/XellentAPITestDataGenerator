@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APICaller_Installation</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_APICaller_Installation extends XAPI_APICallerBase
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>getUrl</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    public str getUrl()
+    {
+        return resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newInstallationAPI";
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>callAPI</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    public void callAPI()
+    {
+        Map configMap = new Map(Types::String, Types::String);
+        configMap.insert('<DataAreaId>', curExt());
+        configMap.insert('<netArea>', curExt());
+        this.prepareBody(configMap);
+        this.sendPostRequest();
+        EGS_API_DataContract_Response_Installation res = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response_Installation), responseText);
+        this.log("InstNum", res.parmInstallationNum());
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>cleanPrevious</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    public void cleanPrevious()
+    {
+        //XAPI_API_AutomationFacade::cleanUp_Contract(this.
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runDependency</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    public void runDependency()
+    {
+        
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

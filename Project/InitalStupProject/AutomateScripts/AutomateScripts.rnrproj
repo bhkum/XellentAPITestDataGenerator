@@ -36,6 +36,7 @@
   <ItemGroup>
     <Folder Include="Classes\" />
     <Folder Include="Classes\Creation" />
+    <Folder Include="Tables\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="AxClass\XAPI_API_CallAutomator">
@@ -47,6 +48,11 @@
       <SubType>Content</SubType>
       <Name>XAPI_AutomateScripts</Name>
       <Link>Classes\XAPI_AutomateScripts</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_AutomationHelper">
+      <SubType>Content</SubType>
+      <Name>XAPI_AutomationHelper</Name>
+      <Link>Classes\XAPI_AutomationHelper</Link>
     </Content>
     <Content Include="AxClass\XAPI_NewContractDataGen">
       <SubType>Content</SubType>
@@ -77,6 +83,11 @@
       <SubType>Content</SubType>
       <Name>XAPI_NewInstallationDelDataGen</Name>
       <Link>Classes\Creation\XAPI_NewInstallationDelDataGen</Link>
+    </Content>
+    <Content Include="AxTable\XAPI_APILogTable">
+      <SubType>Content</SubType>
+      <Name>XAPI_APILogTable</Name>
+      <Link>Tables\XAPI_APILogTable</Link>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
