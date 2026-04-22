@@ -1,0 +1,519 @@
+class EGS_API_newContractPart extends EGS_API_Interface
+{
+    #EGS_API
+
+    EGS_API_Entity_newContractPart      Entity_newContractPart;
+    str responseMsg;
+    EGS_API_DataContract_Response response;
+
+    void addXMLnewContractPart(XmlNode _node)
+    {
+    //-    readingNode = responseNode.appendChild(_node);
+    //    responseNode = rootNode.appendChild(_node);
+        document.appendChild(_node);
+    }
+
+    // JOROS20131114 SS0019918
+    void allFixedService(XmlNode _node)
+    {
+        XmlNodeList         fixedNodeList;
+        XmlNodeListIterator fixedIterator;
+        ;
+    
+        fixedNodeList=_node.selectNodes(#NODEVALUE_IN_ContractPartFixedService); // (".//ContractPartFixedService")
+        fixedIterator = new XmlNodeListIterator(fixedNodelist);
+        while (fixedIterator.more())
+        {
+            Entity_newContractPart.initMassFromFixedServiceNode(fixedIterator.value());
+            // not deleting the node here, as I don't see why it's necessary
+            fixedIterator.next();
+        }
+    }
+
+    // JOROS20131114 SS0019918
+    void allIndividualService(XmlNode _node)
+    {
+        XmlNodeList         individualNodeList;
+        XmlNodeListIterator individualIterator;
+        ;
+    
+        individualNodeList=_node.selectNodes(#NODEVALUE_IN_ContractPartIndividualService); // (".//ContractPartIndividualService")
+        individualIterator = new XmlNodeListIterator(individualNodelist);
+        while (individualIterator.more())
+        {
+            Entity_newContractPart.initPriceManagementFromNode(individualIterator.value());
+            Entity_newContractPart.initMassFromIndividualServiceNode(individualIterator.value());
+            // not deleting the node here, as I don't see why it's necessary
+            individualIterator.next();
+        }
+    }
+
+    void allNewContractPart(XmlNode _node)
+    {
+        XmlNode             instNode,instParentNode;
+        XmlNodeList         instNodeList;
+        XmlNodeListIterator instIterator;
+        int                 instItemCnt,groupCnt;
+        //--> ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+        boolean             retFlag;    // EGS_36366975YDO ink 2010-01-04
+        //<-- ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+        ;
+    
+        //--> ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+        retFlag = true; // EGS_36366975YDO ink 2010-01-04
+        //<-- ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+    
+        instNodeList=_node.selectNodes(#NODEVALUE_IN_newContractPart); // (".//newContractPart")
+        instItemCnt = instNodelist.length();
+    
+        //--> JOROS 2013-12-16 5.04 Task SS0020077_massImp reinstate this check
+        // JOROS20131115 SS0019918 -->
+        if (instItemCnt == 0)
+        {
+            responseMsg = strfmt("@EGS5669",#NODEVALUE_IN_newContractPart);
+            this.addXMLnewContractPart(this.xmlErrorResponse(this.document(),responseMsg));
+            throw Error(responseMsg);
+        }
+        //<-- JOROS 2013-12-16 5.04 Task SS0020077_massImp
+    
+        instIterator = new XmlNodeListIterator(instNodelist);
+        //--> ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+        while (retFlag && instIterator.more())
+        //<-- ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+        {
+            instNode = instIterator.value();
+            Entity_newContractPart = EGS_API_Entity_newContractPart::construct();
+            //--> ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+            retFlag = Entity_newContractPart.initFromNode(instNode);// EGS_36366975YDO ink 2010-01-04
+            if (retFlag)    // EGS_36366975YDO ink 2010-01-04
+            //<-- ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+            {
+                // JOROS 2013-11-19 5.04 Task SS0019918_coprice -->
+                // groupCnt=this.getPriceManagementCnt(instNode) + 1;
+                groupCnt = this.getSubnodeCount(instNode) + 1; // +1 is for the CONTRACT record we also make in EGS_MASS_INPUT
+                Entity_newContractPart.initMassFromNode(groupCnt);
+                this.allPriceManagement(instNode);
+    
+                this.allFixedService(instNode);
+                this.allIndividualService(instNode);
+    
+                instParentNode = instNode.parentNode();
+                instParentNode.removeChild(instNode);   // JOROS20131108 - why remove?!?
+                instIterator.next();
+            }
+        }
+    
+        this.addXMLnewContractPart(Entity_newContractPart.xmlnewContractPartResponse(this.document()));
+    
+    
+        //--> ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+        // --- EGS_36366975YDO ink 2010-01-04 --->
+        if (!retFlag)
+        {
+            responseMsg = "@EGS5628";
+            throw Error(responseMsg);
+        }
+        // <--- EGS_36366975YDO ink 2010-01-04 ---
+        //<-- ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+    
+        // JOROS 2013-11-15 5.04 Task SS0019918_coprice <--
+    
+        return;
+    }
+
+    void allNewContractParts(XmlNode _node)
+    {
+        XmlNode             instNode,instParentNode;
+        XmlNodeList         instNodeList;
+        XmlNodeListIterator instIterator;
+        int                 instItemCnt;
+        ;
+    
+        instNodeList=_node.selectNodes(#NODEVALUE_IN_newContractParts); // (".//newContractParts")
+        instItemCnt = instNodelist.length();
+    
+        if (instItemCnt == 0)
+        {
+            responseMsg = strfmt("@EGS5669",#NODEVALUE_IN_newContractParts);
+            this.addXMLnewContractPart(this.xmlErrorResponse(this.document(),responseMsg));
+            throw Error(responseMsg);
+        }
+    
+        instIterator = new XmlNodeListIterator(instNodelist);
+        while (instIterator.more())
+        {
+            instNode = instIterator.value();
+            this.allNewContractPart(instNode);
+            instParentNode = instNode.parentNode();
+            instParentNode.removeChild(instNode);
+            instIterator.next();
+        }
+    
+    //    this.addXMLnewContractPart(Entity_newContractPart.xmlnewContractPartResponse(this.document()));
+    
+        return;
+    }
+
+    void allPriceManagement(XmlNode _node)
+    {
+        XmlNode             priceNode,priceParentNode;
+        XmlNodeList         priceNodeList;
+        XmlNodeListIterator priceIterator;
+        int                 priceItemCnt;
+        ;
+    
+        priceNodeList=_node.selectNodes(#NODEVALUE_IN_ContractPartPriceManagement); // (".//ContractPartPriceManagement")
+        priceItemCnt = priceNodelist.length();
+        priceIterator = new XmlNodeListIterator(priceNodelist);
+        while (priceIterator.more())
+        {
+            priceNode = priceIterator.value();
+            Entity_newContractPart.initPriceManagementFromNode(priceNode);
+            Entity_newContractPart.initMassFromPriceManagementNode();
+            priceParentNode = priceNode.parentNode();
+            priceParentNode.removeChild(priceNode);
+            priceIterator.next();
+        }
+    
+        return;
+    }
+
+    // JOROS20131119 SS0019918 replaced by getSubnodeCount()
+    int DELgetPriceManagementCnt(XmlNode _node)
+    {
+        XmlNodeList         priceNodeList;
+        int                 priceItemCnt;
+        ;
+    
+        priceNodeList=_node.selectNodes(#NODEVALUE_IN_ContractPartPriceManagement); // (".//ContractPartPriceManagement")
+        priceItemCnt = priceNodelist.length();
+    
+        return priceItemCnt;
+    }
+
+    XMLDocument document()
+    {
+        return document;
+    }
+
+    int getPriceManagementCnt(XmlNode _node)
+    {
+        XmlNodeList         priceNodeList;
+        int                 priceItemCnt;
+        ;
+    
+        priceNodeList=_node.selectNodes(#NODEVALUE_IN_ContractPartPriceManagement); // (".//ContractPartPriceManagement")
+        priceItemCnt = priceNodelist.length();
+    
+        return priceItemCnt;
+    }
+
+    // JOROS20131119 SS0019918
+    int getSubnodeCount(XmlNode _node)
+    {
+        return _node.selectNodes(#NODEVALUE_IN_ContractPartPriceManagement).length() +
+               _node.selectNodes(#NODEVALUE_IN_ContractPartIndividualService).length() +
+               _node.selectNodes(#NODEVALUE_IN_ContractPartFixedService).length();
+    }
+
+    void initXMLnewContractPart(str _nameSpace)
+    {
+    //    XMLNode nodeAttribute;
+        ;
+        this.initXMLDocument();
+    
+    //    rootNode = document.appendChild(document.createElement(#NODEVALUE_Response)); //"Response"
+    //    rootNode.attributes().setNamedItem(this.newAttribute("xmlns", "http://edbgruppen.se/webservices/" + _nameSpace));
+    }
+
+    void new()
+    {
+    }
+
+    public str newContractPart(str _xml)
+    {
+        ;
+    
+        this.initXMLnewContractPart(#NODEVALUE_newContractPart); //"newContractPart"
+    
+        this.XmlnewContractPart(_xml);
+    
+        return this.xmlDocument(document.toString());
+    
+    }
+
+    XMLNode xmlErrorResponse(XMLDocument _document
+                            ,str _responseMessage)
+    {
+        XMLNode     fatherNode, fieldNode;
+        ;
+    
+        fatherNode = _document.createNode(XMLNodeType::ELEMENT, #NODEVALUE_Response, "");  // "Response"
+    
+        fieldNode = fatherNode.appendChild(_document.createElement(#NODEVALUE_ResponseCode));       // "ResponseCode"
+        fieldNode.appendChild(_document.createTextNode(#ResponseCode_NOT_OK));            // "Not Ok"
+        fieldNode = fatherNode.appendChild(_document.createElement(#NODEVALUE_ErrorCode));          // "ErrorCode"
+        fieldNode.appendChild(_document.createTextNode(#ResponseErrorCode_8));            // "8"
+        fieldNode = fatherNode.appendChild(_document.createElement(#NODEVALUE_ResponseMessage));    // "ResponseMessage"
+        fieldNode.appendChild(_document.createTextNode(_responseMessage));
+    
+        return fatherNode;
+    /*
+    ResponseCode
+    ErrorCode
+    ResponseMessage
+      */
+    
+    }
+
+    void XmlnewContractPart(str _xml)
+    {
+        XmlDocument             indoc;
+        XmlNode                 inRootNode,inNode,inParentNode;
+        XmlNodeList             inNodeList;
+        XmlNodeListIterator     inIterator;
+        XMLParseError           xmlError;
+        int                     inItemCnt = 0;
+    
+        try
+        {
+            ttsbegin;
+            indoc = new XMLDocument();
+    
+            indoc.loadXml(_xml);
+    //        indoc.load(_xml);
+            xmlError = indoc.parseError();
+            if (xmlError && xmlError.errorCode() != 0)
+            {
+                throw Error(xmlError.reason());
+            }
+    
+            inRootNode = indoc.documentElement();
+    
+            inNodeList = indoc.selectNodes(#NODEVALUE_IN_Request); // ("//Request")
+            inItemCnt = inNodeList.length();
+    
+            if (inItemCnt == 0)
+            {
+                responseMsg = strfmt("@EGS5669",#NODEVALUE_IN_Request);
+                this.addXMLnewContractPart(this.xmlErrorResponse(this.document(),responseMsg));
+                throw Error(responseMsg);
+            }
+    
+            inIterator = new XmlNodeListIterator(inNodeList);
+            while (inIterator.more())
+            {
+                inNode = inIterator.value();
+                this.allNewContractParts(inNode);
+                inParentNode = inNode.parentNode();
+                inParentNode.removeChild(inNode);
+                inIterator.next();
+            }
+            ttscommit;
+            return;
+        }
+        catch (Exception::Error)
+        {
+            //--> ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+            // --- EGS_36366975YDO ink 2010-01-04 --->
+            if (!responseMsg)
+            {
+                //Detail Cleanup-xxdja-09052016-Start
+                responseMsg = EXU_Infolog::get().copyLastInfologText();
+                //Detail Cleanup-xxdja-09052016-End
+                this.addXMLnewContractPart(this.xmlErrorResponse(this.document(),responseMsg));
+            }
+            // <--- EGS_36366975YDO ink 2010-01-04 ---
+            //<-- ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+    
+            return;
+        }
+    }
+
+    public static EGS_API_newContractPart construct()
+    {
+        return new EGS_API_newContractPart();
+    }
+
+    public EGS_API_DataContract_Response newContractPartAPI(EGS_API_DataContract_NewContractParts _newContractParts)
+    {
+        return this.dataNewContractPart(_newContractParts);
+    }
+
+    EGS_API_DataContract_Response dataNewContractPart(EGS_API_DataContract_NewContractParts _newContractParts)
+    {
+        ListIterator            inIterator;
+        int                     inItemCnt = 0;
+        List list = _newContractParts.parmNewContractParts();
+        EGS_API_DataContract_NewContractPart_ContractPart contractPart;
+    
+        try
+        {
+            ttsbegin;
+            response = new EGS_API_DataContract_Response();
+            if (!list || list.elements() == 0)
+            {
+                responseMsg = strfmt("@EGU:RequiredListMissing", "@EGU8589");
+                response.parmMessage(responseMsg);
+                throw Error(responseMsg);
+            }
+    
+            inIterator = new ListIterator(list);
+            while (inIterator.more())
+            {
+                contractPart = inIterator.value();
+                this.allNewContractPartData(contractPart);
+                inIterator.next();
+            }
+            ttscommit;
+            return response;
+        }
+        catch (Exception::Error)
+        {
+            if (!responseMsg)
+            {
+                responseMsg = EXU_Infolog::get().copyLastInfologText();
+                response = this.dataErrorResponse(responseMsg);
+            }
+            return response;
+        }
+    }
+
+    void allNewContractPartData(EGS_API_DataContract_NewContractPart_ContractPart _contractPart)
+    {
+        int                 instItemCnt,groupCnt;
+        boolean             retFlag; 
+        ;
+    
+        retFlag = true; 
+    
+        Entity_newContractPart = EGS_API_Entity_newContractPart::construct();
+        retFlag = Entity_newContractPart.initFromNodeData(_contractPart);
+        if (retFlag)
+        {
+            groupCnt = this.getSubnodeCountData(_contractPart) + 1;
+            Entity_newContractPart.initMassFromNode(groupCnt);
+            this.allPriceManagementData(_contractPart);    
+            this.allFixedServiceData(_contractPart);
+            this.allIndividualServiceData(_contractPart);
+            this.allSecuredVolumeFlex(_contractPart);
+            this.allSecuredVolumeDate(_contractPart);
+
+        }
+    
+        response = Entity_newContractPart.dataNewContractPartResponse();
+        if (!retFlag)
+        {
+            responseMsg = "@EGS5628";
+            throw Error(responseMsg);
+        }
+   
+        return;
+    }
+
+    EGS_API_DataContract_Response dataErrorResponse(str _responseMessage)
+    {
+        response = new EGS_API_DataContract_Response();
+   
+        response.parmResponseCode(#ResponseCode_NOT_OK);
+        response.parmErrorCode(#ResponseErrorCode_8);
+        response.parmMessage(_responseMessage);
+    
+        return response;
+    }
+
+    int getSubnodeCountData(EGS_API_DataContract_NewContractPart_ContractPart _newContractPart)
+    {
+        return _newContractPart.parmContractPartPriceManagements().elements() +
+               _newContractPart.parmContractPartFixedServices().elements() +
+               _newContractPart.parmContractPartIndividualServices().elements() + 
+               _newContractPart.parmContractPartSecuredVolumeFlex().elements() + 
+               _newContractPart.parmContractPartSecuredVolumeDate().elements();
+    }
+
+    void allPriceManagementData(EGS_API_DataContract_NewContractPart_ContractPart _newContractPart)
+    {
+        List         priceNodeList;
+        ListIterator priceIterator;
+        int          priceItemCnt;
+        EGS_API_DataContract_NewAgreement_ContractPartPriceManagement priceManagement;
+        ;
+    
+        priceNodeList =_newContractPart.parmContractPartPriceManagements();
+        priceItemCnt = priceNodelist.elements();
+        priceIterator = new ListIterator(priceNodelist);
+        while (priceIterator.more())
+        {
+            priceManagement = priceIterator.value();
+            Entity_newContractPart.initPriceManagementFromNodeDataPriceManagement(priceManagement);
+            Entity_newContractPart.initMassFromPriceManagementNode();
+            priceIterator.next();
+        }
+    
+        return;
+    }
+
+    void allFixedServiceData(EGS_API_DataContract_NewContractPart_ContractPart _newContractPart)
+    {
+        List         fixedNodeList;
+        ListIterator fixedIterator;
+        ;
+    
+        fixedNodeList =_newContractPart.parmContractPartFixedServices();
+        fixedIterator = new ListIterator(fixedNodelist);
+        while (fixedIterator.more())
+        {
+            Entity_newContractPart.initMassFromFixedServiceNodeData(fixedIterator.value());
+            fixedIterator.next();
+        }
+    }
+
+    void allIndividualServiceData(EGS_API_DataContract_NewContractPart_ContractPart _newContractPart)
+    {
+        List         individualNodeList;
+        ListIterator individualIterator;
+        ;
+    
+        individualNodeList =_newContractPart.parmContractPartIndividualServices();
+        individualIterator = new ListIterator(individualNodelist);
+        while (individualIterator.more())
+        {
+            Entity_newContractPart.initPriceManagementFromNodeDataIndividualService(individualIterator.value());
+            Entity_newContractPart.initMassFromIndividualServiceNodeData(individualIterator.value());
+            individualIterator.next();
+        }
+    }
+
+    void allSecuredVolumeFlex(EGS_API_DataContract_NewContractPart_ContractPart _newContractPart)
+    {
+        List         individualNodeList;
+        ListIterator individualIterator;
+        ;
+    
+        individualNodeList =_newContractPart.parmContractPartSecuredVolumeFlex();
+        individualIterator = new ListIterator(individualNodelist);
+        while (individualIterator.more())
+        {
+            Entity_newContractPart.initSecuredVolumeFlex(individualIterator.value());
+            Entity_newContractPart.initMassFromSecuredVolumeFlex(individualIterator.value());
+            individualIterator.next();
+        }
+    }
+
+    void allSecuredVolumeDate(EGS_API_DataContract_NewContractPart_ContractPart _newContractPart)
+    {
+        List         individualNodeList;
+        ListIterator individualIterator;
+        ;
+    
+        individualNodeList =_newContractPart.parmContractPartSecuredVolumeDate();
+        individualIterator = new ListIterator(individualNodelist);
+        while (individualIterator.more())
+        {
+            Entity_newContractPart.initSecuredVolumeDate(individualIterator.value());
+            Entity_newContractPart.initMassFromSecuredVolumeDate(individualIterator.value());
+            individualIterator.next();
+        }
+    }
+
+}
