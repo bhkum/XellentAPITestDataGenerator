@@ -1,0 +1,1216 @@
+class EGS_API_Entity_newContractPart extends EGS_API_Entity
+{
+    #EGS_API
+
+    EXU_MeteringPoint   meteringPoint;
+    int                 groupId,groupSeqNo,groupCnt;
+
+   
+
+    str AlternativeCustomerNumber       //personnummer
+        ,AccountNum                     //kundnummer
+        ,ContractNum                    //kontraktsnummer
+//    GroupOldProduct
+        ,old_ProductNum                 //produktnummer
+        ,old_DeliveryGroupNum_RateCode  //priskod
+        ,CompanyId                      //företag
+        ,DeliveryCategory               //leveransart
+        ,InstAgreeNum                   //anslutningsnummer
+        ,old_StartDate                  //startdatum
+        ,old_EndDate                    //slutdatum
+//    End GroupOldProduct    --------------------------
+//    GroupNewProduct
+        ,ProductNum                     //produktnummer
+        ,DeliveryGroupNum_RateCode      //priskod
+        ,AMRCode                        //flexpriskod
+        ,AgreementLength                //avtalslängd
+        ,StartDate                      //startdatum
+        ,EndDate                        //slutdatum
+        ,PurchasePriceCode              //inköpspriskod
+//    End GroupNewProduct    --------------------------
+        ,Source                         //källa
+//    ContractPartPriceManagement
+        ,PriceManagementCode            //prisstyrningskod
+        ,PurchasePrice                  //inköpspris
+        ,SalesPrice                     //försäljningspris
+        ,SalesChargeDeduction           //påslag
+        ,FixedRate                     //fast pris
+        ,ContractCodeDescription
+        ,EnvironmentCode,
+
+        //common for secured volume data
+        securedVolumeStartDate,
+        securedVolumeEndDate,
+        securedVolumeFixedRate,
+
+        //securedVolumeDate
+        securedVolumeForecastedVolumekWh,
+        securedVolumeInPercent,
+
+        //securedVolumeFlex
+        securedVolumeSalesChargeDeduction,
+        securedVolumeSecuredVolumeKWh,
+        securedVolumeSalesDeviatingDeduction;
+
+        List ContractPartSecuredVolumeFlex;
+
+
+    str confirmationLetter;// FRGUL 2017-02-28 EXU_SV0040303
+    str technicGroup1,technicGroup2,technicGroup3,technicGroup4; // FRGUL 2018-03-01 SV0052298
+
+
+
+    //--> ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+    boolean checkFromNode()
+    {
+        EXU_ContractTable   exu_ContractTable;
+        boolean ret;
+        ;
+    
+        ret = true;
+    
+        if (CustTable::find(this.parmAccountNum()))
+        {
+            if (this.parmContractNum())
+            {
+                exu_ContractTable = EXU_ContractTable::find(this.parmContractNum());
+                if (exu_ContractTable.RecId)
+                {
+                    if (exu_ContractTable.CustAccount == this.parmAccountNum())
+                    {
+                        // --> EXU_SV0070302 2021-04-09 MIFAL
+                        //if (!this.getContractPartRecId())
+                        if (!this.getContractPartRecId() && this.parmSource() != 'Energiportalen_1')
+                        // <-- EXU_SV0070302 2021-04-09 MIFAL
+                        {
+                            this.parmResponseMessage(strfmt("@EGS5986",this.parmContractNum(),this.parmProductNum()));
+                            ret = false;
+                        }
+                    }
+                    else
+                    {
+                        this.parmResponseMessage(strfmt("@EGS5734",this.parmContractNum(),this.parmAccountNum()));
+                        ret = false;
+                    }
+                }
+                else
+                {
+                    this.parmResponseMessage(strfmt("@EGS5626",this.parmContractNum()));
+                    ret = false;
+                }
+            }
+        }
+        else
+        {
+            this.parmResponseMessage(strfmt("@EGS5659",this.parmAccountNum()));
+            ret = false;
+        }
+        // --> FRGUL 2018-03-01 SV0052298
+        if(ret == true)
+        {
+            ret = this.validate();
+        }
+        // <-- FRGUL 2018-03-01 SV0052298
+  
+        return ret;
+    }
+
+    // JOROS 2013-11-22 5.04 Task SS0019918_coprice
+    void common_coprice_fields(EGS_MASS_Input _egs_mass_input)
+    {
+        _egs_MASS_Input.TypeId=EGS_MASS_ImportType::CO_PRICE;
+        _egs_MASS_Input.Event=EGS_MASS_EVENT::INSERT;
+        _egs_MASS_Input.Message="";
+        _egs_MASS_Input.Status=EGS_MASS_InputStatus::NEW_;
+        _egs_MASS_Input.InstDateTime = DateTimeUtil::utcNow();
+    
+        _egs_MASS_Input.Group_id=this.parmGroupId(); // def numberseq
+        _egs_MASS_Input.Group_SeqNo=this.parmGroupSeqNo(this.parmGroupSeqNo()+1);
+        _egs_MASS_Input.Group_Count=this.parmGroupCnt();
+    
+        _egs_MASS_Input.C001=this.parmProductNum();
+        _egs_MASS_Input.C004=this.parmCompanyId();
+        _egs_MASS_Input.C005=this.parmDeliveryCategory();
+        _egs_MASS_Input.C006=this.parmContractNum();
+        _egs_MASS_Input.C010=this.parmMeteringPoint();
+    }
+
+    // JOROS 2013-11-25 5.04 Task SS0019918_coprice
+    str dateTrim(str _indate)
+    {
+        int pos = strfind(_indate, 'T', 1, strlen(_indate));
+        return pos > 1 ? substr(_indate, 1, pos-1) : _indate;
+    }
+
+    str getContractPartRecId()
+    {
+        EXU_ContractPartTable   exu_ContractPartTable;
+        EXU_ContractPartEndDate exu_ContractPartEndDate; // EXU_SV0070302 MIFAL 2021-03-25
+        ;
+    
+        // --> EXU_SV0070302 MIFAL 2021-04-09
+        exu_ContractPartEndDate = str2date(this.parmold_EndDate(),321);
+
+        select firstonly exu_ContractPartTable
+               where exu_ContractPartTable.ContractNum == this.parmContractNum()
+                  && exu_ContractPartTable.InstAgreeNum == this.parmInstAgreeNum()
+                  && exu_ContractPartTable.DeliveryCategory == this.parmDeliveryCategory()
+                  && exu_ContractPartTable.CompanyId == this.parmCompanyId()
+                  && exu_ContractPartTable.ProductNum == this.parmold_ProductNum()
+                  && exu_ContractPartTable.DeliveryGroupNum_RateCode == this.parmold_DeliveryGroupNum_RateCode()
+                  && exu_ContractPartTable.Startdate == str2date(this.parmold_StartDate(),321)
+                  && exu_ContractPartTable.EndDate == str2date(this.parmold_EndDate(),321);
+        
+        if(!exu_ContractPartTable && (this.parmSource() == 'Energiportalen_4'|| this.parmSource() == 'Energiportalen_1'))
+        {
+            select firstonly exu_ContractPartTable
+                   where exu_ContractPartTable.ContractNum == this.parmContractNum()
+                      && exu_ContractPartTable.InstAgreeNum == this.parmInstAgreeNum()
+                      && exu_ContractPartTable.DeliveryCategory == this.parmDeliveryCategory()
+                      && exu_ContractPartTable.CompanyId == this.parmCompanyId()
+                      && exu_ContractPartTable.ProductNum == this.parmold_ProductNum()
+                      && exu_ContractPartTable.DeliveryGroupNum_RateCode == this.parmold_DeliveryGroupNum_RateCode()
+                      && exu_ContractPartTable.Startdate == str2date(this.parmold_StartDate(),321);
+            {
+                if(!exu_ContractPartTable && this.parmSource() == 'Energiportalen_1')
+                {
+                    select firstonly exu_ContractPartTable
+                           where exu_ContractPartTable.ContractNum == this.parmContractNum()
+                              && exu_ContractPartTable.InstAgreeNum == this.parmInstAgreeNum();
+                }
+                else 
+                {
+                    //below fake recid is just for OKAB portal, so they could craete the contract line
+                    //without actually terminating existing one
+                    if (this.parmSource() == 'Energiportalen_1')
+                    {
+                        exu_ContractPartTable.RecId = 102102;
+                    }
+                }
+            }
+
+        }
+        //select firstonly exu_ContractPartTable
+        //where exu_ContractPartTable.ContractNum == this.parmContractNum()
+        //&& exu_ContractPartTable.InstAgreeNum == this.parmInstAgreeNum()
+        //&& exu_ContractPartTable.DeliveryCategory == this.parmDeliveryCategory()
+        //&& exu_ContractPartTable.CompanyId == this.parmCompanyId()
+        //&& exu_ContractPartTable.ProductNum == this.parmold_ProductNum()
+        //&& exu_ContractPartTable.DeliveryGroupNum_RateCode == this.parmold_DeliveryGroupNum_RateCode()
+        //&& exu_ContractPartTable.Startdate == str2date(this.parmold_StartDate(),321)
+        //&& exu_ContractPartTable.EndDate == str2date(this.parmold_EndDate(),321);
+        // <-- EXU_SV0070302 MIFAL 2021-04-09
+    
+        if (exu_ContractPartTable.RecId)
+            return int642str(exu_ContractPartTable.RecId);
+        else
+            return "";
+    }
+
+    EXU_MeteringPoint getMeteringPoint()
+    {
+        EXU_DelPoint    exu_DelPoint;
+        ;
+        select firstonly exu_DelPoint
+        where exu_DelPoint.AttachmentNum == this.parmInstAgreeNum()
+        && exu_DelPoint.DeliveryCategory == this.parmDeliveryCategory()
+        && exu_DelPoint.CompanyId == this.parmCompanyId();
+    
+        if (exu_DelPoint.RecId)
+            return exu_DelPoint.MeteringPoint;
+        else
+            return "";
+    
+    }
+
+    str getTagValue(XmlNode _node,str _tag)
+    {
+        XmlNode localNode = _node.selectSingleNode(_tag);
+        ;
+        if (localNode == null)
+            return "";
+        else
+            return localNode.text();
+    }
+
+    //--> ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+    boolean initFromNode(XmlNode _node)
+    //<-- ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+    {
+    /*
+        str text(str path)
+        {
+            XmlNode localNode = _node.selectSingleNode(path);
+            if (localNode == null)
+                return "";
+    
+            else
+                return localNode.text();
+        }
+    */
+        //--> ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+        boolean ret;
+        str     wDateNull = '1900-01-01'
+        //<-- ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+        ;
+    
+        this.parmAlternativeCustomerNumber(this.getTagValue(_node,#NODEVALUE_AlternativeCustomerNumber));
+        this.parmAccountNum(this.getTagValue(_node,#NODEVALUE_AccountNum));
+        this.parmContractNum(this.getTagValue(_node,#NODEVALUE_ContractNum));
+        this.parmold_ProductNum(this.getTagValue(_node,#NODEVALUE_old_ProductNum));
+        this.parmold_DeliveryGroupNum_RateCode(this.getTagValue(_node,#NODEVALUE_old_DeliveryGroupNum_RateCode));
+        this.parmCompanyId(this.getTagValue(_node,#NODEVALUE_old_CompanyId));
+        this.parmDeliveryCategory(this.getTagValue(_node,#NODEVALUE_old_DeliveryCategory));
+        this.parmInstAgreeNum(this.getTagValue(_node,#NODEVALUE_old_InstAgreeNum));
+        this.parmold_StartDate(substr(this.getTagValue(_node,#NODEVALUE_old_StartDate),1,10));
+        this.parmold_EndDate(substr(this.getTagValue(_node,#NODEVALUE_old_EndDate),1,10));
+    
+        this.parmProductNum(this.getTagValue(_node,#NODEVALUE_new_ProductNum));
+        this.parmDeliveryGroupNum_RateCode(this.getTagValue(_node,#NODEVALUE_new_DeliveryGroupNum_RateCode));
+        this.parmAMRCode(this.getTagValue(_node,#NODEVALUE_new_AMRCode));
+        this.parmAgreementLength(this.getTagValue(_node,#NODEVALUE_new_AgreementLength));
+        this.parmStartDate(substr(this.getTagValue(_node,#NODEVALUE_new_StartDate),1,10));
+        this.parmEndDate(substr(this.getTagValue(_node,#NODEVALUE_new_EndDate),1,10));
+        this.parmPurchasePriceCode(this.getTagValue(_node,#NODEVALUE_new_PurchasePriceCode));
+    
+        this.parmSource(this.getTagValue(_node,#NODEVALUE_Source));
+        this.parmSendConfirmationLetter(this.getTagValue(_node,'SendConfirmationLetter')); // FRGUL 2017-02-28 EXU_SV0040303
+  
+ 
+    
+        //--> ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+        // --- EGS_36366975YDO ink 2010-01-04 --->
+    // --- 38255627YDO ink 2010-07-21 --->
+        if (this.parmold_StartDate() == wDateNull)
+            this.parmold_StartDate('');
+        if (this.parmold_EndDate() == wDateNull)
+            this.parmold_EndDate('');
+        if (this.parmStartDate() == wDateNull)
+            this.parmStartDate('');
+        if (this.parmEndDate() == wDateNull)
+            this.parmEndDate('');
+    // <--- 38255627YDO ink 2010-07-21 ---
+        this.parmTechnicGroup1(this.getTagValue(_node,'TechnicGroupContractPart1'));// FRGUL 2018-03-01 SV0052298
+        this.parmTechnicGroup2(this.getTagValue(_node,'TechnicGroupContractPart2'));// FRGUL 2018-03-01 SV0052298
+        this.parmTechnicGroup3(this.getTagValue(_node,'TechnicGroupContractPart3'));// FRGUL 2018-03-01 SV0052298
+        this.parmTechnicGroup4(this.getTagValue(_node,'TechnicGroupContractPart4'));// FRGUL 2018-03-01 SV0052298
+        // --> FRGUL 2018-11-05 exi_0056516
+        this.parmContractCodeDescription(this.getTagValue(_node,'ContractCodeDescription'));
+        this.parmEnvironmentCode(this.getTagValue(_node,'EnvironmentCode'));
+        // <-- FRGUL 2018-11-05 exi_0056516
+    // --- EGS_36366975YDO ink 2010-01-04 --->
+        ret = this.checkFromNode();
+    
+        if (ret)
+        {
+            this.parmResponseCode(#ResponseCode_OK);
+        }
+        else
+        {
+            this.parmResponseCode(#ResponseCode_NOT_OK);
+            this.parmResponseErrorCode(#ResponseErrorCode_4);
+        }
+        // <--- EGS_36366975YDO ink 2010-01-04 ---
+        //<-- ARS 29-03-2010 4.03.04 to 4.03.08 VAR upgrade
+    
+        return(ret);
+    }
+
+    // JOROS20131114 SS0019918
+    void initMassFromFixedServiceNode(XmlNode _node)
+    {
+        EGS_MASS_Input  egs_MASS_Input;
+        ;
+    
+        egs_MASS_Input.clear();
+    
+        this.common_coprice_fields(egs_MASS_Input);
+    
+        egs_MASS_Input.C002='1';  // is FixedService
+        egs_MASS_Input.C031=this.getTagValue(_node,#NODEVALUE_ServiceType);
+        egs_MASS_Input.C032=this.getTagValue(_node,#NODEVALUE_Text);
+        egs_MASS_Input.C033=this.getTagValue(_node,#NODEVALUE_Billing);
+        egs_MASS_Input.C034=this.getTagValue(_node,#NODEVALUE_AgreementLength);
+        egs_MASS_Input.C035=this.dateTrim(this.getTagValue(_node,#NODEVALUE_StartDate));
+        egs_MASS_Input.C036=this.dateTrim(this.getTagValue(_node,#NODEVALUE_EndDate));
+        egs_MASS_Input.C037=this.getTagValue(_node,#NODEVALUE_Quantity);
+        egs_MASS_Input.C038=this.getTagValue(_node,#NODEVALUE_Price);
+        egs_MASS_Input.C039=this.getTagValue(_node,#NODEVALUE_AlternateText);
+        egs_MASS_Input.C040=this.dateTrim(this.getTagValue(_node,#NODEVALUE_OfferStartDate));
+    
+        egs_MASS_Input.insert();
+    }
+
+    // JOROS20131115 SS0019918
+    void initMassFromIndividualServiceNode(XmlNode _node)
+    {
+        EGS_MASS_Input  egs_MASS_Input;
+        ;
+    
+        egs_MASS_Input.clear();
+    
+        this.common_coprice_fields(egs_MASS_Input);
+    
+        egs_MASS_Input.C002='2';  // is IndividualService
+        egs_MASS_Input.C013=this.parmPriceManagementCode();
+        egs_MASS_Input.C014=this.decimalConvertor(this.parmPurchasePrice(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, PrognosisConsumption));
+        egs_MASS_Input.C015=this.decimalConvertor(this.parmFixedRate(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, PrognosisConsumption));
+        egs_MASS_Input.C016=this.decimalConvertor(this.parmSalesChargeDeduction(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, PrognosisConsumption));
+        egs_MASS_Input.C031=this.getTagValue(_node,#NODEVALUE_Itemid);
+        egs_MASS_Input.C034=this.getTagValue(_node,#NODEVALUE_AgreementLength);
+        egs_MASS_Input.C035=this.dateTrim(this.getTagValue(_node,#NODEVALUE_StartDate));
+        egs_MASS_Input.C036=this.dateTrim(this.getTagValue(_node,#NODEVALUE_EndDate));
+        egs_MASS_Input.C040=this.dateTrim(this.getTagValue(_node,#NODEVALUE_OfferStartDate));
+    
+        egs_MASS_Input.insert();
+    }
+
+    void initMassFromNode(int _groupCnt)
+    {
+        EGS_MASS_Input  egs_MASS_Input;
+        NumberSeq       numberSeq;
+        
+    // set groupId = hämta nästa nummer från nummerseq
+    // set groupSeqNo = 1
+    // set groupCnt =
+    
+        numberSeq = NumberSeq::newGetNumFromCode(#NUMSEQ_MASS_GROUPID);
+        this.parmGroupId(str2int(numberSeq.num()));
+        numberSeq.used();
+    
+        egs_MASS_Input.clear();
+    
+        egs_MASS_Input.TypeId=EGS_MASS_ImportType::CONTRACT;
+        egs_MASS_Input.Event=EGS_MASS_EVENT::INSERT;
+        egs_MASS_Input.Message="";
+        egs_MASS_Input.Status=EGS_MASS_InputStatus::NEW_;
+    
+        //--> EGU DOF 15-12-2009 5.01 Task FG12044 - UTCDateTime
+        //egs_MASS_Input.InstDate=systemdateget();
+        //egs_MASS_Input.InstTime=timenow();
+        egs_MASS_Input.InstDateTime = DateTimeUtil::utcNow();
+        //<-- EGU DOF 15-12-2009 5.01 Task FG12044 - UTCDateTime
+    
+        egs_MASS_Input.Group_id=this.parmGroupId(); // def numberseq
+        egs_MASS_Input.Group_SeqNo=this.parmGroupSeqNo(1);
+        egs_MASS_Input.Group_Count=this.parmGroupCnt(_groupCnt);
+    
+        egs_MASS_Input.C001="2";
+        egs_MASS_Input.C002=this.parmAlternativeCustomerNumber();
+        egs_MASS_Input.C003=this.parmAccountNum();
+        egs_MASS_Input.C004=this.parmCompanyId();
+        egs_MASS_Input.C005=this.parmDeliveryCategory();
+        egs_MASS_Input.C006=this.parmContractNum();
+        egs_MASS_Input.C007=this.getContractPartRecId();
+        egs_MASS_Input.C008="1";
+        egs_MASS_Input.C010=this.parmMeteringPoint(this.getMeteringPoint());
+        egs_MASS_Input.C011=""; //nätområade
+        egs_MASS_Input.C014=""; //anläggningsadress
+        egs_MASS_Input.C015=""; //textfält1
+        egs_MASS_Input.C016=""; //textfält2
+        egs_MASS_Input.C019=this.parmSource();
+    // --- 38255627YDO ink 2010-07-21 --->
+        egs_MASS_Input.C027=this.parmDeliveryCategory();
+    // <--- 38255627YDO ink 2010-07-21 ---
+        // --> FRGUL 2018-11-05 exi_0056516
+        egs_MASS_Input.C029=this.parmContractCodeDescription();
+        egs_MASS_Input.C030=this.parmEnvironmentCode();
+        // <-- FRGUL 2018-11-05 exi_0056516
+        egs_MASS_Input.C031=this.parmProductNum();
+        egs_MASS_Input.C032=this.parmDeliveryGroupNum_RateCode();
+        egs_MASS_Input.C033=this.parmAMRCode();
+        egs_MASS_Input.C034=this.parmAgreementLength();
+        egs_MASS_Input.C035=this.parmStartDate();
+        egs_MASS_Input.C036=this.parmEndDate();
+        egs_MASS_Input.C045=this.parmTechnicGroup1(); // FRGUL 2018-03-01 SV0052298
+        egs_MASS_Input.C046=this.parmTechnicGroup2(); // FRGUL 2018-03-01 SV0052298
+        egs_MASS_Input.C047=this.parmTechnicGroup3(); // FRGUL 2018-03-01 SV0052298
+        egs_MASS_Input.C048=this.parmTechnicGroup4(); // FRGUL 2018-03-01 SV0052298
+        egs_MASS_Input.C049=this.parmPurchasePriceCode();
+        egs_MASS_Input.C079=this.parmSendConfirmationLetter();// FRGUL 2017-02-28 EXU_SV0040303
+        
+        // --> EXU_SV0070302 2021-03-22 MIFAL
+        //egs_MASS_Input.C075=this.parmSource();
+        if(egs_MASS_Input.C019 == 'Energiportalen_1')
+        {
+            egs_MASS_Input.C001 = '1';
+            egs_MASS_Input.C008 = '2';
+            if(egs_MASS_Input.C036 == '0001-01-01')
+            {
+                egs_MASS_Input.C036 = '';
+            }
+        }
+        if(egs_MASS_Input.C019 == 'Energiportalen_2')
+        {
+            egs_MASS_Input.C001 = '2';
+        }
+
+        if(egs_MASS_Input.C019 == 'Energiportalen_4')
+        {
+            egs_MASS_Input.C001 = '4';
+            egs_MASS_Input.C031=this.parmold_ProductNum();
+            egs_MASS_Input.C035=this.parmold_StartDate();
+            egs_MASS_Input.C036=this.parmold_EndDate();
+        }
+        // <-- EXU_SV0070302 2021-03-22 MIFAL
+ 
+        egs_MASS_Input.insert();
+    
+    }
+
+    // FRGUL 2017-02-28 EXU_SV0040303
+    public str parmSendConfirmationLetter(str _confirmationLetter = confirmationLetter)
+    {
+        ;
+        confirmationLetter = _confirmationLetter;
+
+        return confirmationLetter;
+    }
+
+    // FRGUL 2018-03-01 SV0052298
+    public str parmTechnicGroup1(str _technicGroup1 = technicGroup1)
+    {
+        ;
+        technicGroup1 = _technicGroup1;
+
+        return technicGroup1;
+    }
+
+    // FRGUL 2018-03-01 SV0052298
+    public str parmTechnicGroup2(str _technicGroup2 = technicGroup2)
+    {
+        ;
+        technicGroup2 = _technicGroup2;
+
+        return technicGroup2;
+    }
+
+    // FRGUL 2018-03-01 SV0052298
+    public str parmTechnicGroup3(str _technicGroup3 = technicGroup3)
+    {
+        ;
+        technicGroup3 = _technicGroup3;
+
+        return technicGroup3;
+    }
+
+    // FRGUL 2018-03-01 SV0052298
+    public str parmTechnicGroup4(str _technicGroup4 = technicGroup4)
+    {
+        ;
+        technicGroup4 = _technicGroup4;
+
+        return technicGroup4;
+    }
+
+    // --> FRGUL 2018-03-01 SV0052298
+    boolean validate()
+    {
+        boolean ret = true;
+        ;
+
+
+        if(this.parmTechnicGroup1() != '')
+        {
+            if (!this.validateTechnicafields(fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup1)))
+            {
+                this.parmResponseMessage(strfmt('@EGS8167', fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup1)));
+                return false;
+            }
+            if(!EXU_DeliveryGroupTable::find(EXU_DeliveryGroupCode::ContractPartGroup1,this.parmDeliveryCategory(),this.parmTechnicGroup1()))
+            {
+                this.parmResponseMessage(strfmt('@EGS8169',EXU_DeliveryGroupCode::ContractPartGroup1, fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup1)));
+                return false;
+            }
+        }
+
+        if(this.parmTechnicGroup2() != '')
+        {
+            if (!this.validateTechnicafields(fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup2)))
+            {
+                this.parmResponseMessage(strfmt('@EGS8167', fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup2)));
+                return false;
+            }
+            if(!EXU_DeliveryGroupTable::find(EXU_DeliveryGroupCode::ContractPartGroup2,this.parmDeliveryCategory(),this.parmTechnicGroup2()))
+            {
+                this.parmResponseMessage(strfmt('@EGS8169',EXU_DeliveryGroupCode::ContractPartGroup2, fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup2)));
+                return false;
+            }
+        }
+
+        if(this.parmTechnicGroup3() != '')
+        {
+            if (!this.validateTechnicafields(fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup3)))
+            {
+                this.parmResponseMessage(strfmt('@EGS8167', fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup3)));
+                return false;
+            }
+            if(!EXU_DeliveryGroupTable::find(EXU_DeliveryGroupCode::ContractPartGroup3,this.parmDeliveryCategory(),this.parmTechnicGroup3()))
+            {
+                this.parmResponseMessage(strfmt('@EGS8169',EXU_DeliveryGroupCode::ContractPartGroup3, fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup3)));
+                return false;
+            }
+        }
+
+        if(this.parmTechnicGroup4() != '')
+        {
+            if (!this.validateTechnicafields(fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup4)))
+            {
+                this.parmResponseMessage(strfmt('@EGS8167', fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup4)));
+                return false;
+            }
+            if(!EXU_DeliveryGroupTable::find(EXU_DeliveryGroupCode::ContractPartGroup4,this.parmDeliveryCategory(),this.parmTechnicGroup4()))
+            {
+                this.parmResponseMessage(strfmt('@EGS8169',EXU_DeliveryGroupCode::ContractPartGroup4, fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup4)));
+                return false;
+            }
+        }
+
+        if (this.parmContractPartSecuredVolumeFlex())
+        {
+            if (this.parmContractPartSecuredVolumeFlex().elements())
+            {
+                EXU_FlexBAMRTable flexAmrCode = EXU_FlexBAMRTable::find(this.parmAMRCode());
+                if (!flexAmrCode)
+                {
+                    this.parmResponseMessage(strFmt("@EGU5043", "@EGU47632", strFmt("'%1'", this.parmAMRCode()), tableId2PName(tableNum(EXU_FlexBAMRTable))));
+                    ret = false;
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    // --> FRGUL 2018-03-01 SV0052298
+    boolean validateTechnicafields(str fieldName)
+    {
+        EXU_DeliveryCategoryTable      deliveryCategoryTable;
+        boolean ret = false;
+        ;
+        deliveryCategoryTable = EXU_DeliveryCategoryTable::find(this.parmDeliveryCategory());
+
+        switch(fieldName)
+        {
+            case fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup1) :
+                ret = deliveryCategoryTable.Edit_ContractPartsTxtGroup1(false,"") ? true : false;
+                break;
+            case fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup2) :
+                ret = deliveryCategoryTable.Edit_ContractPartsTxtGroup2(false,"") ? true : false;
+                break;
+            case fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup3) :
+                ret = deliveryCategoryTable.Edit_ContractPartsTxtGroup3(false,"") ? true : false;
+                break;
+            case fieldPName(EXU_ContractPartTable, ContractPartsTechnicGroup4) :
+                ret = deliveryCategoryTable.Edit_ContractPartsTxtGroup4(false,"") ? true : false;
+                break;
+            default : 
+                break;
+        }
+
+        return ret;
+
+    }
+
+    void initMassFromPriceManagementNode()
+    {
+        EGS_MASS_Input  egs_MASS_Input;
+        //int             seqNo;
+        ;
+    // set groupId = hämta aktuellt värde via parmgroupId
+    // set groupSeqNo = aktuellt värde + 1
+    // set groupCnt =
+    
+        egs_MASS_Input.clear();
+    
+        //egs_MASS_Input.TypeId=EGS_MASS_ImportType::CO_PRICE;
+        //egs_MASS_Input.Event=EGS_MASS_EVENT::INSERT;
+        //egs_MASS_Input.Message="";
+        //egs_MASS_Input.Status=EGS_MASS_InputStatus::NEW_;
+    
+        //--> EGU DOF 15-12-2009 5.01 Task FG12044 - UTCDateTime
+        //egs_MASS_Input.InstDate=systemdateget();
+        //egs_MASS_Input.InstTime=timenow();
+        //egs_MASS_Input.InstDateTime = DateTimeUtil::utcNow();
+        //<-- EGU DOF 15-12-2009 5.01 Task FG12044 - UTCDateTime
+    
+        // JOROS 2013-11-22 5.04 Task SS0019918_coprice -->
+        this.common_coprice_fields(egs_MASS_Input);
+        // egs_MASS_Input.Group_id=this.parmGroupId(); // def numberseq
+        //seqNo=this.parmGroupSeqNo()+1;
+        //egs_MASS_Input.Group_SeqNo=this.parmGroupSeqNo(seqNo);
+        //egs_MASS_Input.Group_Count=this.parmGroupCnt();
+        //egs_MASS_Input.C001=this.parmProductNum();
+        //egs_MASS_Input.C004=this.parmCompanyId();
+        //egs_MASS_Input.C005=this.parmDeliveryCategory();
+        //egs_MASS_Input.C006=this.parmContractNum();
+        //egs_MASS_Input.C010=this.parmMeteringPoint();
+        // JOROS 2013-11-22 5.04 Task SS0019918_coprice <--
+        egs_MASS_Input.C013=this.parmPriceManagementCode();
+        egs_MASS_Input.C014=this.decimalConvertor(this.parmPurchasePrice(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, PrognosisConsumption));
+        egs_MASS_Input.C015=this.decimalConvertor(this.parmFixedRate(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, PrognosisConsumption));
+        egs_MASS_Input.C016=this.decimalConvertor(this.parmSalesChargeDeduction(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, PrognosisConsumption));
+    
+        egs_MASS_Input.C002='0';  // JOROS2013114 SS0019918 - is PriceManagement
+    
+        egs_MASS_Input.insert();
+    
+    }
+
+    void initPriceManagementFromNode(XmlNode _node)
+    {
+    
+        this.parmPriceManagementCode(this.getTagValue(_node,#NODEVALUE_PriceManagementCode));
+        this.parmPurchasePrice(this.getTagValue(_node,#NODEVALUE_PurchasePrice));
+    //    this.parmSalesPrice(this.getTagValue(_node,#NODEVALUE_SalesPrice));
+        this.parmSalesChargeDeduction(this.getTagValue(_node,#NODEVALUE_SalesChargeDeduction));
+        this.parmFixedRate(this.getTagValue(_node,#NODEVALUE_FixedRate));
+    
+    }
+
+    public str parmAccountNum(str _AccountNum = AccountNum)
+    {
+        ;
+        AccountNum = _AccountNum;
+    
+        return AccountNum;
+    }
+
+    public str parmAgreementLength(str _AgreementLength = AgreementLength)
+    {
+        AgreementLength = _AgreementLength;
+    
+        return AgreementLength;
+    }
+
+    public str parmAlternativeCustomerNumber(str _AlternativeCustomerNumber = AlternativeCustomerNumber)
+    {
+        ;
+        AlternativeCustomerNumber = _AlternativeCustomerNumber;
+    
+        return AlternativeCustomerNumber;
+    }
+
+    public str parmAMRCode(str _AMRCode = AMRCode)
+    {
+        AMRCode = _AMRCode;
+    
+        return AMRCode;
+    }
+
+    public str parmCompanyId(str _CompanyId = CompanyId)
+    {
+        ;
+        CompanyId = _CompanyId;
+    
+        return CompanyId;
+    }
+
+    public str parmContractNum(str _ContractNum = ContractNum)
+    {
+        ;
+        ContractNum = _ContractNum;
+    
+        return ContractNum;
+    }
+
+    public str parmDeliveryCategory(str _DeliveryCategory = DeliveryCategory)
+    {
+        DeliveryCategory = _DeliveryCategory;
+    
+        return DeliveryCategory;
+    }
+
+    public str parmDeliveryGroupNum_RateCode(str _DeliveryGroupNum_RateCode = DeliveryGroupNum_RateCode)
+    {
+        ;
+        DeliveryGroupNum_RateCode = _DeliveryGroupNum_RateCode;
+    
+        return DeliveryGroupNum_RateCode;
+    }
+
+    public str parmEndDate(str _EndDate = EndDate)
+    {
+        ;
+        EndDate = _EndDate;
+    
+        return EndDate;
+    }
+
+    public str parmFixedRate(str _FixedRate = FixedRate)
+    {
+        FixedRate = _FixedRate;
+    
+        return FixedRate;
+    }
+
+    int parmGroupCnt(int _GroupCnt = GroupCnt)
+    {
+        ;
+        GroupCnt = _GroupCnt;
+    
+        return GroupCnt;
+    }
+
+    int parmGroupId(int _GroupId = GroupId)
+    {
+        ;
+        GroupId = _GroupId;
+    
+        return GroupId;
+    }
+
+    int parmGroupSeqNo(int _GroupSeqNo = GroupSeqNo)
+    {
+        ;
+        GroupSeqNo = _GroupSeqNo;
+    
+        return GroupSeqNo;
+    }
+
+    public str parmInstAgreeNum(str _InstAgreeNum = InstAgreeNum)
+    {
+        InstAgreeNum = _InstAgreeNum;
+    
+        return InstAgreeNum;
+    }
+
+    EXU_MeteringPoint parmMeteringPoint(EXU_MeteringPoint _meteringPoint = meteringPoint)
+    {
+        ;
+        meteringPoint = _meteringPoint;
+    
+        return meteringPoint;
+    }
+
+    public str parmold_DeliveryGroupNum_RateCode(str _old_DeliveryGroupNum_RateCode = old_DeliveryGroupNum_RateCode)
+    {
+        old_DeliveryGroupNum_RateCode = _old_DeliveryGroupNum_RateCode;
+    
+        return old_DeliveryGroupNum_RateCode;
+    }
+
+    public str parmold_EndDate(str _old_EndDate = old_EndDate)
+    {
+        ;
+        old_EndDate = _old_EndDate;
+    
+        return old_EndDate;
+    }
+
+    public str parmold_ProductNum(str _old_ProductNum = old_ProductNum)
+    {
+        ;
+        old_ProductNum = _old_ProductNum;
+    
+        return old_ProductNum;
+    }
+
+    public str parmold_StartDate(str _old_StartDate = old_StartDate)
+    {
+        old_StartDate = _old_StartDate;
+    
+        return old_StartDate;
+    }
+
+    public str parmPriceManagementCode(str _PriceManagementCode = PriceManagementCode)
+    {
+        PriceManagementCode = _PriceManagementCode;
+    
+        return PriceManagementCode;
+    }
+
+    public str parmProductNum(str _ProductNum = ProductNum)
+    {
+        ;
+        ProductNum = _ProductNum;
+    
+        return ProductNum;
+    }
+
+    public str parmPurchasePrice(str _PurchasePrice = PurchasePrice)
+    {
+        PurchasePrice = _PurchasePrice;
+    
+        return PurchasePrice;
+    }
+
+    public str parmPurchasePriceCode(str _PurchasePriceCode = PurchasePriceCode)
+    {
+        PurchasePriceCode = _PurchasePriceCode;
+    
+        return PurchasePriceCode;
+    }
+
+    public str parmResponseCode(str _responseCode = responseCode)
+    {
+        ;
+        responseCode = _responseCode;
+    
+        return responseCode;
+    }
+
+    public str parmResponseErrorCode(str _responseErrorCode = responseErrorCode)
+    {
+        ;
+        responseErrorCode = _responseErrorCode;
+    
+        return responseErrorCode;
+    }
+
+    public str parmResponseMessage(str _responseMessage = responseMessage)
+    {
+        ;
+        responseMessage = _responseMessage;
+    
+        return responseMessage;
+    }
+
+    public str parmSalesChargeDeduction(str _SalesChargeDeduction = SalesChargeDeduction)
+    {
+        SalesChargeDeduction = _SalesChargeDeduction;
+    
+        return SalesChargeDeduction;
+    }
+
+    public str parmSalesPrice(str _SalesPrice = SalesPrice)
+    {
+        ;
+        SalesPrice = _SalesPrice;
+    
+        return SalesPrice;
+    }
+
+    public str parmSource(str _Source = Source)
+    {
+        ;
+        Source = _Source;
+    
+        return Source;
+    }
+
+    public str parmStartDate(str _StartDate = StartDate)
+    {
+        ;
+        StartDate = _StartDate;
+    
+        return StartDate;
+    }
+
+    // FRGUL 2018-11-05 EXU_SV0056516
+    public str parmContractCodeDescription(str _ContractCodeDescription = ContractCodeDescription)
+    {
+        ContractCodeDescription = _ContractCodeDescription;
+        return ContractCodeDescription;
+    }
+
+    // FRGUL 2018-11-05 EXU_SV0056516
+    public str parmEnvironmentCode(str _EnvironmentCode = EnvironmentCode)
+    {
+        EnvironmentCode = _EnvironmentCode;
+        return EnvironmentCode;
+    }
+
+    XMLNode xmlnewContractPartResponse(XMLDocument _document)
+    {
+        XMLNode     fatherNode, fieldNode;
+        ;
+    
+        fatherNode = _document.createNode(XMLNodeType::ELEMENT, #NODEVALUE_Response, ""); // "Response"
+    
+        fieldNode = fatherNode.appendChild(_document.createElement(#NODEVALUE_ResponseCode));       // "ResponseCode"
+        fieldNode.appendChild(_document.createTextNode(this.parmResponseCode()));
+        fieldNode = fatherNode.appendChild(_document.createElement(#NODEVALUE_ErrorCode));           // "ErrorCode"
+        fieldNode.appendChild(_document.createTextNode(this.parmResponseErrorCode()));
+        fieldNode = fatherNode.appendChild(_document.createElement(#NODEVALUE_ResponseMessage));    // "ResponseMessage"
+        fieldNode.appendChild(_document.createTextNode(this.parmResponseMessage()));
+    
+        return fatherNode;
+    
+    /*
+    ResponseCode
+    ErrorCode
+    ResponseMessage
+      */
+    
+    }
+
+    public static EGS_API_Entity_newContractPart construct()
+    {
+        return new EGS_API_Entity_newContractPart();
+    }
+
+    static EGS_API_Entity_newContractPart newFromNode(XmlNode node)
+    {
+    
+        EGS_API_Entity_newContractPart transItem = new EGS_API_Entity_newContractPart();
+        transItem.initFromNode(node);
+        return transItem;
+    
+    }
+
+    EGS_API_DataContract_Response dataNewContractPartResponse()
+    {
+        EGS_API_DataContract_Response response;
+        ;
+        response = new EGS_API_DataContract_Response();
+        response.parmResponseCode(this.parmResponseCode());
+        response.parmErrorCode(this.parmResponseErrorCode());
+        response.parmMessage(this.parmResponseMessage());
+    
+        return response;   
+    }
+
+    boolean initFromNodeData(EGS_API_DataContract_NewContractPart_ContractPart _newContractPart)
+    {
+        boolean ret;
+        str     wDateNull = '1900-01-01'
+        ;
+    
+        this.parmAlternativeCustomerNumber(_newContractPart.parmAlternativeCustomerNumber());
+        this.parmAccountNum(_newContractPart.parmAccountNum());
+        this.parmContractNum(_newContractPart.parmContractNum());
+
+        this.parmold_ProductNum(_newContractPart.parmGroupOldProduct().parmProductNum());
+        this.parmold_DeliveryGroupNum_RateCode(_newContractPart.parmGroupOldProduct().parmDeliveryGroupNum_RateCode());
+        this.parmCompanyId(_newContractPart.parmGroupOldProduct().parmCompanyId());
+        this.parmDeliveryCategory(_newContractPart.parmGroupOldProduct().parmDeliveryCategory());
+        this.parmInstAgreeNum(_newContractPart.parmGroupOldProduct().parmInstAgreeNum());
+        this.parmold_StartDate(date2Str(_newContractPart.parmGroupOldProduct().parmStartDate(), 321, DateDay::Digits2, DateSeparator::Auto, DateMonth::Digits2, DateSeparator::Auto, DateYear::Digits4));
+        this.parmold_EndDate(date2Str(_newContractPart.parmGroupOldProduct().parmEndDate(), 321, DateDay::Digits2, DateSeparator::Auto, DateMonth::Digits2, DateSeparator::Auto, DateYear::Digits4));
+    
+        this.parmProductNum(_newContractPart.parmGroupNewProduct().parmProductNum());
+        this.parmDeliveryGroupNum_RateCode(_newContractPart.parmGroupNewProduct().parmDeliveryGroupNum_RateCode());
+        this.parmAMRCode(_newContractPart.parmGroupNewProduct().parmAMRCode());
+        this.parmAgreementLength(int2Str(_newContractPart.parmGroupNewProduct().parmAgreementLength()));
+        this.parmStartDate(date2Str(_newContractPart.parmGroupNewProduct().parmStartDate(), 321, DateDay::Digits2, DateSeparator::Auto, DateMonth::Digits2, DateSeparator::Auto, DateYear::Digits4));
+        this.parmEndDate(date2Str(_newContractPart.parmGroupNewProduct().parmEndDate(), 321, DateDay::Digits2, DateSeparator::Auto, DateMonth::Digits2, DateSeparator::Auto, DateYear::Digits4));
+        this.parmPurchasePriceCode(_newContractPart.parmGroupNewProduct().parmPurchasePriceCode());
+    
+        this.parmSource(_newContractPart.parmSource());
+        this.parmSendConfirmationLetter(_newContractPart.parmSendConfirmationLetter()); // FRGUL 2017-02-28 EXU_SV0040303
+  
+        if (this.parmold_StartDate() == wDateNull)
+            this.parmold_StartDate('');
+        if (this.parmold_EndDate() == wDateNull)
+            this.parmold_EndDate('');
+        if (this.parmStartDate() == wDateNull)
+            this.parmStartDate('');
+        if (this.parmEndDate() == wDateNull)
+            this.parmEndDate('');
+
+        this.parmTechnicGroup1(_newContractPart.parmTechnicGroupContractPart1());
+        this.parmTechnicGroup2(_newContractPart.parmTechnicGroupContractPart2());
+        this.parmTechnicGroup3(_newContractPart.parmTechnicGroupContractPart3());
+        this.parmTechnicGroup4(_newContractPart.parmTechnicGroupContractPart4());
+        this.parmContractCodeDescription(_newContractPart.parmContractCodeDescription());
+        this.parmEnvironmentCode(_newContractPart.parmEnvironmentCode());
+        this.parmContractPartSecuredVolumeFlex(_newContractPart.parmContractPartSecuredVolumeFlex());
+
+        ret = this.checkFromNode();
+    
+        if (ret)
+        {
+            this.parmResponseCode(#ResponseCode_OK);
+        }
+        else
+        {
+            this.parmResponseCode(#ResponseCode_NOT_OK);
+            this.parmResponseErrorCode(#ResponseErrorCode_4);
+        }
+   
+        return(ret);
+    }
+
+    void initPriceManagementFromNodeDataPriceManagement(EGS_API_DataContract_NewContractPart_ContractPart_PriceManagement _priceManagement)
+    {
+    
+        this.parmPriceManagementCode(_priceManagement.parmPriceManagementCode());
+        this.parmPurchasePrice(num2Str(_priceManagement.parmPurchasePrice(), 0, 10, DecimalSeparator::Auto, ThousandSeparator::None));
+        this.parmSalesChargeDeduction(num2Str(_priceManagement.parmSalesChargeDeduction(), 0, 10, DecimalSeparator::Auto, ThousandSeparator::None));
+        this.parmFixedRate(num2Str(_priceManagement.parmFixedRate(), 0, 10, DecimalSeparator::Auto, ThousandSeparator::None));
+    }
+
+    void initPriceManagementFromNodeDataIndividualService(EGS_API_DataContract_NewContractPart_ContractPart_IndividualService _individualService)
+    {
+    
+        this.parmPriceManagementCode(_individualService.parmPriceManagementCode());
+        this.parmPurchasePrice(num2Str(_individualService.parmPurchasePrice(), 0, 10, DecimalSeparator::Auto, ThousandSeparator::None));
+        this.parmSalesChargeDeduction(num2Str(_individualService.parmSalesChargeDeduction(), 0, 10, DecimalSeparator::Auto, ThousandSeparator::None));
+        this.parmFixedRate(num2Str(_individualService.parmFixedRate(), 0, 10, DecimalSeparator::Auto, ThousandSeparator::None));
+    }
+
+    void initMassFromFixedServiceNodeData(EGS_API_DataContract_NewContractPart_ContractPart_FixedService _fixedService)
+    {
+        EGS_MASS_Input  egs_MASS_Input;
+        ;
+    
+        egs_MASS_Input.clear();
+    
+        this.common_coprice_fields(egs_MASS_Input);
+    
+        egs_MASS_Input.C002='1';  // is FixedService
+        egs_MASS_Input.C031 = _fixedService.parmServiceType();
+        egs_MASS_Input.C032 = _fixedService.parmText();
+        egs_MASS_Input.C033 = int2Str(_fixedService.parmBilling());
+        egs_MASS_Input.C034 = int2Str(_fixedService.parmAgreementLength());
+        egs_MASS_Input.C035 = date2Str(_fixedService.parmStartDate(), 321, DateDay::Digits2, DateSeparator::Auto, DateMonth::Digits2, DateSeparator::Auto, DateYear::Digits4);
+        egs_MASS_Input.C036 = date2Str(_fixedService.parmEndDate(), 321, DateDay::Digits2, DateSeparator::Auto, DateMonth::Digits2, DateSeparator::Auto, DateYear::Digits4);
+        egs_MASS_Input.C037 = num2Str(_fixedService.parmQuantity(), 0, 10, DecimalSeparator::Auto, ThousandSeparator::None);
+        egs_MASS_Input.C038 = num2Str(_fixedService.parmPrice(), 0, 10, DecimalSeparator::Auto, ThousandSeparator::None);
+        egs_MASS_Input.C039 = _fixedService.parmAlternateText();
+        egs_MASS_Input.C040 = date2Str(_fixedService.parmOfferStartDate(), 321, DateDay::Digits2, DateSeparator::Auto, DateMonth::Digits2, DateSeparator::Auto, DateYear::Digits4);
+    
+        egs_MASS_Input.insert();
+    }
+
+    void initMassFromIndividualServiceNodeData(EGS_API_DataContract_NewContractPart_ContractPart_IndividualService _individualService)
+    {
+        EGS_MASS_Input  egs_MASS_Input;
+        ;
+    
+        egs_MASS_Input.clear();
+    
+        this.common_coprice_fields(egs_MASS_Input);
+    
+        egs_MASS_Input.C002='2';  // is IndividualService
+        egs_MASS_Input.C013 = this.parmPriceManagementCode();
+        egs_MASS_Input.C014 = this.decimalConvertor(this.parmPurchasePrice(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, PrognosisConsumption));
+        egs_MASS_Input.C015 = this.decimalConvertor(this.parmFixedRate(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, PrognosisConsumption));
+        egs_MASS_Input.C016 = this.decimalConvertor(this.parmSalesChargeDeduction(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, PrognosisConsumption));
+        egs_MASS_Input.C031 = _individualService.parmItemid();
+        egs_MASS_Input.C034 = int2Str(_individualService.parmAgreementLength());
+        egs_MASS_Input.C035 = this.dateTrim(date2Str(_individualService.parmStartDate(), 321, DateDay::Digits2, DateSeparator::Auto, DateMonth::Digits2, DateSeparator::Auto, DateYear::Digits4));
+        egs_MASS_Input.C036 = this.dateTrim(date2Str(_individualService.parmEndDate(), 321, DateDay::Digits2, DateSeparator::Auto, DateMonth::Digits2, DateSeparator::Auto, DateYear::Digits4));
+        egs_MASS_Input.C040 = this.dateTrim(date2Str(_individualService.parmOfferStartDate(), 321, DateDay::Digits2, DateSeparator::Auto, DateMonth::Digits2, DateSeparator::Auto, DateYear::Digits4));
+    
+        egs_MASS_Input.insert();
+    }
+
+    void initSecuredVolumeFlex(EGS_API_DataContract_NewContractPart_ContractPart_SecuredVolumeFlex _securedVolumeFlex)
+    {
+        this.parmSecuredVolumeStartDate(this.dateTrim(date2Str(_securedVolumeFlex.parmStartDate(), 321, DateDay::Digits2, DateSeparator::Auto, DateMonth::Digits2, DateSeparator::Auto, DateYear::Digits4)));
+        this.parmSecuredVolumeEndDate(this.dateTrim(date2Str(_securedVolumeFlex.parmEndDate(), 321, DateDay::Digits2, DateSeparator::Auto, DateMonth::Digits2, DateSeparator::Auto, DateYear::Digits4)));
+        this.parmSecuredVolumeFixedRate(Global::real2double(_securedVolumeFlex.parmFixedRate()).ToString());
+
+        this.parmSecuredVolumeSalesChargeDeduction(Global::real2double(_securedVolumeFlex.parmSalesChargeDeduction()).ToString());
+        this.parmSecuredVolumeSecuredVolumeKWh(Global::real2double(_securedVolumeFlex.parmSecuredVolume()).ToString());
+        this.parmSecuredVolumeSalesDeviatingDeduction(Global::real2double(_securedVolumeFlex.parmSalesDeviatingDeduction()).ToString());
+    }
+
+    void initSecuredVolumeDate(EGS_API_DataContract_NewContractPart_ContractPart_SecuredVolumeDate _securedVolumeDate)
+    {
+        this.parmSecuredVolumeStartDate(this.dateTrim(date2Str(_securedVolumeDate.parmStartDate(), 321, DateDay::Digits2, DateSeparator::Auto, DateMonth::Digits2, DateSeparator::Auto, DateYear::Digits4)));
+        this.parmSecuredVolumeEndDate(this.dateTrim(date2Str(_securedVolumeDate.parmEndDate(), 321, DateDay::Digits2, DateSeparator::Auto, DateMonth::Digits2, DateSeparator::Auto, DateYear::Digits4)));
+        this.parmSecuredVolumeFixedRate(Global::real2double(_securedVolumeDate.parmFixedRate()).ToString());
+
+        this.parmSecuredVolumeForecastedVolumekWh(Global::real2double(_securedVolumeDate.parmForecastedVolumekWh()).ToString());
+        this.parmSecuredVolumeInPercent(Global::real2double(_securedVolumeDate.parmSecuredVolumeInPercent()).ToString());
+
+    }
+
+    void initMassFromSecuredVolumeFlex(EGS_API_DataContract_NewContractPart_ContractPart_SecuredVolumeFlex _securedVolumeFlex)
+    {
+        EGS_MASS_Input  egs_MASS_Input;
+        ;
+    
+        egs_MASS_Input.clear();
+    
+        this.common_coprice_fields(egs_MASS_Input);
+    
+        egs_MASS_Input.C002='3';  
+        egs_MASS_Input.C013 = this.parmAMRCode();
+        egs_MASS_Input.C015 = this.decimalConvertor(this.parmSecuredVolumeFixedRate(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, PrognosisConsumption));
+        egs_MASS_Input.C016 = this.decimalConvertor(this.parmSecuredVolumeSalesChargeDeduction(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, PrognosisConsumption));
+        egs_MASS_Input.C017 = this.decimalConvertor(this.parmSecuredVolumeSecuredVolumeKWh(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, PrognosisConsumption));
+        egs_MASS_Input.C018 = this.decimalConvertor(this.parmSecuredVolumeSalesDeviatingDeduction(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, PrognosisConsumption));
+        egs_MASS_Input.C035 = this.parmSecuredVolumeStartDate();
+        egs_MASS_Input.C036 = this.parmSecuredVolumeEndDate();
+    
+        egs_MASS_Input.insert();
+    }
+
+    private str decimalConvertor(str _num, TableId _tableId, FieldId _fieldId)
+    {
+        EXU_Number num = EXU_Number::createFromString(_num);
+        if(num.toReal() == 0)
+            return '';
+        else
+            return num.toStringAsTableField(_tableId, _fieldId);
+
+    }
+
+    void initMassFromSecuredVolumeDate(EGS_API_DataContract_NewContractPart_ContractPart_SecuredVolumeDate _individualService)
+    {
+        EGS_MASS_Input  egs_MASS_Input;
+        ;
+    
+        egs_MASS_Input.clear();
+    
+        this.common_coprice_fields(egs_MASS_Input);
+    
+        egs_MASS_Input.C002='4';  
+        egs_MASS_Input.C015 = this.decimalConvertor(this.parmSecuredVolumeFixedRate(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, PrognosisConsumption));
+        egs_MASS_Input.C017 = this.parmSecuredVolumeInPercent();
+        egs_MASS_Input.C035 = this.parmSecuredVolumeStartDate();
+        egs_MASS_Input.C036 = this.parmSecuredVolumeEndDate();
+        egs_MASS_Input.C037 = this.decimalConvertor(this.parmSecuredVolumeForecastedVolumekWh(), tableNum(EXU_SecuredVolumeTemplate), fieldNum(EXU_SecuredVolumeTemplate, RateKWh));
+
+        egs_MASS_Input.insert();
+    }
+
+    public str parmSecuredVolumeStartDate(str _securedVolumeStartDate = securedVolumeStartDate)
+    {
+        securedVolumeStartDate = _securedVolumeStartDate;
+        return securedVolumeStartDate;
+    }
+
+    public str parmSecuredVolumeEndDate(str _securedVolumeEndDate = securedVolumeEndDate)
+    {
+        securedVolumeEndDate = _securedVolumeEndDate;
+        return securedVolumeEndDate;
+    }
+
+    public str parmSecuredVolumeFixedRate(str _securedVolumeFixedRate = securedVolumeFixedRate)
+    {
+        securedVolumeFixedRate = _securedVolumeFixedRate;
+        return securedVolumeFixedRate;
+    }
+
+    public str parmSecuredVolumeForecastedVolumekWh(str _securedVolumeForecastedVolumekWh = securedVolumeForecastedVolumekWh)
+    {
+        securedVolumeForecastedVolumekWh = _securedVolumeForecastedVolumekWh;
+        return securedVolumeForecastedVolumekWh;
+    }
+
+    public str parmSecuredVolumeInPercent(str _securedVolumeInPercent = securedVolumeInPercent)
+    {
+        securedVolumeInPercent = _securedVolumeInPercent;
+        return securedVolumeInPercent;
+    }
+
+    public str parmSecuredVolumeSalesChargeDeduction(str _securedVolumeSalesChargeDeduction = securedVolumeSalesChargeDeduction)
+    {
+        securedVolumeSalesChargeDeduction = _securedVolumeSalesChargeDeduction;
+        return securedVolumeSalesChargeDeduction;
+    }
+
+    public str parmSecuredVolumeSecuredVolumeKWh(str _securedVolumeSecuredVolumeKWh = securedVolumeSecuredVolumeKWh)
+    {
+        securedVolumeSecuredVolumeKWh = _securedVolumeSecuredVolumeKWh;
+        return securedVolumeSecuredVolumeKWh;
+    }
+
+    public str parmSecuredVolumeSalesDeviatingDeduction(str _securedVolumeSalesDeviatingDeduction = securedVolumeSalesDeviatingDeduction)
+    {
+        securedVolumeSalesDeviatingDeduction = _securedVolumeSalesDeviatingDeduction;
+        return securedVolumeSalesDeviatingDeduction;
+    }
+
+    public List parmContractPartSecuredVolumeFlex(List _contractPartSecuredVolumeFlex = contractPartSecuredVolumeFlex)
+    {
+        contractPartSecuredVolumeFlex = _contractPartSecuredVolumeFlex;
+        return contractPartSecuredVolumeFlex;
+    }
+
+}
