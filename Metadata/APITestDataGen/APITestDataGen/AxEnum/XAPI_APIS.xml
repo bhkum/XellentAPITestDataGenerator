@@ -18,6 +18,21 @@
 			<Label>Contract</Label>
 			<Value>2</Value>
 		</AxEnumValue>
+		<AxEnumValue>
+			<Name>CreateCustContactInfo</Name>
+			<Label>Contact Info</Label>
+			<Value>3</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>CreateMeterReading</Name>
+			<Label>Meter Reading</Label>
+			<Value>4</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>CreateContractPart</Name>
+			<Label>Contract Part</Label>
+			<Value>5</Value>
+		</AxEnumValue>
 	</EnumValues>
 	<IsExtensible>true</IsExtensible>
 </AxEnum>

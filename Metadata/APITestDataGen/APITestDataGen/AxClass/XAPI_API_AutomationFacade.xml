@@ -34,51 +34,59 @@ public class XAPI_API_AutomationFacade
     public static void cleanup_installation(EXU_InstallationNum _instNum)
     {
         
+        if (!_instNum)
+        {
+            info("No Installation Number provided — skipped deleting Installation data.");
+            return;
+        }
+
+        // 1. Delete Contract linked to this installation
         EXU_ContractTable contract;
-
-        select firstonly contract 
-            where contract.AttachmentNum == _instNum;
-
-        XAPI_API_AutomationFacade::cleanUp_Contract(contract.ContractNum);
-        
-        //EXU_DeliveryCategoryTable delCat;
-        EXU_DelPoint delPoint;
-        select firstonly forupdate delPoint
-            where delPoint.AttachmentNum == _instNum;
-
-        if(delPoint.RecId)
+        select firstonly contract
+        where contract.AttachmentNum == _instNum;
+        if (contract.RecId)
         {
-            delPoint.delete();
+            XAPI_API_AutomationFacade::cleanUp_Contract(contract.ContractNum);
         }
-        else
-        {
-            info("No Customer Account provided — skipped deleting Delivery Points.");
-        }
-        
 
+        // 2. Delete Utility Installation FIRST (FK dependency before Installation)
         EXU_UtilityInstallation uinst;
         select firstonly forupdate uinst
-            where uinst.InstNum == _instNum;
-
-        if(uinst.RecId)
+        where uinst.InstNum == _instNum;
+        if (uinst.RecId)
         {
             uinst.delete();
+            info(strFmt("Deleted Utility Installation for: %1", _instNum));
         }
         else
         {
-            info("No Customer Account provided — skipped deleting Utility Installations.");
+            info(strFmt("No Utility Installation found for: %1 — skipped.", _instNum));
         }
-        
 
+        // 3. Delete Delivery Point
+        EXU_DelPoint delPoint;
+        select firstonly forupdate delPoint
+        where delPoint.AttachmentNum == _instNum;
+        if (delPoint.RecId)
+        {
+            delPoint.delete();
+            info(strFmt("Deleted Delivery Point for: %1", _instNum));
+        }
+        else
+        {
+            info(strFmt("No Delivery Point found for: %1 — skipped.", _instNum));
+        }
+
+        // 4. Delete Installation last (parent record)
         EXU_Installation inst = EXU_Installation::find(_instNum, true);
-
-        if(inst.RecId)
+        if (inst.RecId)
         {
             inst.delete();
+            info(strFmt("Deleted Installation: %1", _instNum));
         }
         else
         {
-            info("No Customer Account provided — skipped deleting Installations.");
+            info(strFmt("Installation '%1' does not exist — skipped.", _instNum));
         }
     }
 
@@ -121,6 +129,7 @@ public class XAPI_API_AutomationFacade
         XAPI_NewContractDelDataGen::main(null);
         XAPI_NewInstallationDelDataGen::main(null);
         XAPI_NewCustomerDelDataGen::main(null);
+        XAPI_NewContractPartDataGen::main(null);
     }
 
 ]]></Source>
@@ -160,6 +169,30 @@ public class XAPI_API_AutomationFacade
         XAPI_NewContractDataGen::main(null);
 
         XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateContract);
+        api.callAPI();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>create_ContractPart</Name>
+				<Source><![CDATA[
+    public static void create_ContractPart()
+    {
+        XAPI_NewContractPartDataGen::main(null);
+        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateContractPart);
+        api.callAPI();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>create_MeterReading</Name>
+				<Source><![CDATA[
+    public static void create_MeterReading()
+    {
+        XAPI_NewMeterReadingDataGen::main(null);
+        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateMeterReading);
         api.callAPI();
     }
 

@@ -158,8 +158,8 @@ abstract class XAPI_APICallerBase
     protected void prepareBody(Map _fields)
     {
         XAPI_APIConfigurations conif;
-        select firstonly conif where conif.XAPI_APIS == api;
-        body = conif.XAPI_JSON;
+        select firstonly conif where conif.API == api;
+        body = conif.JSON;
         MapEnumerator enumerator = _fields.getEnumerator();
         while (enumerator.moveNext())
         {
@@ -183,13 +183,41 @@ abstract class XAPI_APICallerBase
         {
             case XAPI_APIS::CreateCustomer:
                 apiAuto = new XAPI_APICaller_Customer();
+                //apiAuto.parmApi(XAPI_APIS::CreateCustomer);
+                break;
+            case XAPI_APIS::CreateInstallation:
+                apiAuto = new XAPI_APICaller_Installation();
+                //apiAuto.parmApi(XAPI_APIS::CreateInstallation);
+                break;
+            case XAPI_APIS::CreateContract:
+                apiAuto = new XAPI_APICaller_Contract();
+                //apiAuto.parmApi(XAPI_APIS::CreateContract);
+                break;
+            case XAPI_APIS::CreateContractPart:
+                apiAuto = new XAPI_APICaller_ContractPart();
+                break;
+
+            case XAPI_APIS::CreateMeterReading:
+                apiAuto = new XAPI_APICaller_MeterReading();
                 break;
 
             default: throw error("Invalid call");
         }
 
         //new XAPI_API_CallAutomator();
+        apiAuto.parmApi(_api);
         return apiAuto;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>parmApi</Name>
+				<Source><![CDATA[
+    public XAPI_APIS parmApi(XAPI_APIS _api = api)
+    {
+        api = _api;
+        return api;
     }
 
 ]]></Source>
