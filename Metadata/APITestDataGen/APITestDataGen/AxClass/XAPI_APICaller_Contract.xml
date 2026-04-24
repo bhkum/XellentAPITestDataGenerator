@@ -16,7 +16,7 @@ class XAPI_APICaller_Contract extends XAPI_APICallerBase
     /// </summary>
     public str getUrl()
     {
-        return resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newInstallationAPI";
+        return resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newContractAPI";
     }
 
 ]]></Source>

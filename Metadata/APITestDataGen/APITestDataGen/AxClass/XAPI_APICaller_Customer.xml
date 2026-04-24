@@ -40,7 +40,7 @@ class XAPI_APICaller_Customer extends XAPI_APICallerBase
         
         Map configMap = new Map(Types::String, Types::String);
         configMap.insert('<DataAreaId>', curExt());
-        configMap.insert('<AlternativeCustomerNumber>', '195108224444');
+        configMap.insert('<AlternativeCustomerNumber>',XAPI_ALternativeCustomerNumberGenerator::generateCPR());
         configMap.insert('<DimensionName>', da.Name);
         configMap.insert('<DimensionValue>', dv.DisplayValue);
 

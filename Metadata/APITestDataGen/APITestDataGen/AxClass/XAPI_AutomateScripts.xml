@@ -143,6 +143,13 @@ class XAPI_AutomateScripts
         xapi_newcontractdatagen::main(null);
         auto.callcontractapi("", "", "");
 
+        // 4. create contract part for the contract
+        xapi_newcontractpartdatagen::main(null);
+        auto.callcontractpartapi("", "", "","","");
+
+        XAPI_NewMeterReadingDataGen::main(null);
+        auto.callMeterReadingAPI("", "", "", "");
+
     }
 
 ]]></Source>
