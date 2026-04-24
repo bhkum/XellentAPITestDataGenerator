@@ -1,0 +1,472 @@
+class EGS_API_newMeterReading extends EGS_API_Interface
+{
+    #EGS_API
+
+    EGS_API_Entity_newMeterReading  Entity_newMeterReading;
+    str responseMsg;
+    EGS_API_DataContract_Response response;
+    void addXMLnewMeterReading(XmlNode _node)
+    {
+    //-    readingNode = responseNode.appendChild(_node);
+    //    responseNode = rootNode.appendChild(_node);
+        document.appendChild(_node);
+    
+    }
+
+    // MIHAK EGS_SS0026554 31-10-2014
+    void allNewMeterReading(XmlNode _node)
+    {
+        XmlNode             instNode,instParentNode;
+        XmlNodeList         instNodeList;
+        XmlNodeListIterator instIterator;
+        int                 instItemCnt;
+        boolean             retFlag;
+        boolean             firstTime = true;
+    
+        EGS_CreateReadingImportTable createReadingImportTable;
+        ;
+    
+        retFlag = true;
+        instNodeList=_node.selectNodes(#NODEVALUE_IN_newMeterReading); // (".//NewMeterReading")
+        instItemCnt = instNodelist.length();
+    
+        if (instItemCnt == 0)
+        {
+            responseMsg = strfmt("@EGS5669",#NODEVALUE_IN_newMeterReading);
+            this.addXMLnewMeterReading(this.xmlErrorResponse(this.document(),responseMsg));
+            throw Error(responseMsg);
+        }
+    
+        Entity_newMeterReading = EGS_API_Entity_newMeterReading::construct();
+    
+        instIterator = new XmlNodeListIterator(instNodelist);
+        while (retFlag && instIterator.more())
+        {
+            instNode = instIterator.value();
+    
+            Entity_newMeterReading.alltags(instNode);
+            retFlag = Entity_newMeterReading.checkFromNode();
+            if (retFlag)
+            {
+                if (firstTime)
+                {
+                    Entity_newMeterReading.initNewInstanceForImport();
+                    firstTime = false;
+                }
+                Entity_newMeterReading.addReadingForImport();
+                instIterator.next();
+            }
+        }
+    
+        // Import meter readings on last meter
+        if (retFlag && Entity_newMeterReading != null)
+        {
+            retFlag = Entity_newMeterReading.importReadings();
+        }
+    
+        this.addXMLnewMeterReading(Entity_newMeterReading.xmlnewMeterReadingResponse(this.document()));
+    
+    //    if (!retFlag)
+    //    {
+    //        responseMsg = "@EGS5628";
+    //        throw Error(responseMsg);
+    //    }
+    
+        return;
+    }
+
+    // MIHAK EGS_SS0026554 31-10-2014
+    void allNewMeterReading_OLD(XmlNode _node)
+    {
+    //    XmlNode             instNode,instParentNode;
+    //    XmlNodeList         instNodeList;
+    //    XmlNodeListIterator instIterator;
+    //    int                 instItemCnt;
+    //    boolean             retFlag;
+    //    ;
+    //
+    //    retFlag = true;
+    //    instNodeList=_node.selectNodes(#NODEVALUE_IN_newMeterReading); // (".//NewMeterReading")
+    //    instItemCnt = instNodelist.length();
+    //
+    //    if (instItemCnt == 0)
+    //    {
+    //        responseMsg = strfmt("@EGS5669",#NODEVALUE_IN_newMeterReading);
+    //        this.addXMLnewMeterReading(this.xmlErrorResponse(this.document(),responseMsg));
+    //        throw Error(responseMsg);
+    //    }
+    //
+    //    instIterator = new XmlNodeListIterator(instNodelist);
+    //    while (retFlag && instIterator.more())
+    //    {
+    //        instNode = instIterator.value();
+    //        Entity_newMeterReading = EGS_API_Entity_newMeterReading::construct();
+    //        retFlag = Entity_newMeterReading.initFromNode(instNode);
+    //        if (retFlag)
+    //        {
+    //            Entity_newMeterReading.initMeterReadingFromNode();
+    //            instParentNode = instNode.parentNode();
+    //            instParentNode.removeChild(instNode);
+    //            instIterator.next();
+    //        }
+    //    }
+    //
+    //    this.addXMLnewMeterReading(Entity_newMeterReading.xmlnewMeterReadingResponse(this.document()));
+    //
+    //    if (!retFlag)
+    //    {
+    //        responseMsg = "@EGS5628";
+    //        throw Error(responseMsg);
+    //    }
+    //
+    //    return;
+    }
+
+    // MIHAK EGS_SS0026554 31-10-2014
+    void allNewMeterReadingPerMeter(XmlNode _node)
+    {
+        XmlNode             instNode,instParentNode;
+        XmlNodeList         instNodeList;
+        XmlNodeListIterator instIterator;
+        int                 instItemCnt;
+        boolean             retFlag;
+        boolean             unsaved;
+        str                 meterNumSave;
+    
+        EGS_CreateReadingImportTable createReadingImportTable;
+        ;
+    
+        retFlag = true;
+        instNodeList=_node.selectNodes(#NODEVALUE_IN_newMeterReading); // (".//NewMeterReading")
+        instItemCnt = instNodelist.length();
+    
+        if (instItemCnt == 0)
+        {
+            responseMsg = strfmt("@EGS5669",#NODEVALUE_IN_newMeterReading);
+            this.addXMLnewMeterReading(this.xmlErrorResponse(this.document(),responseMsg));
+            throw Error(responseMsg);
+        }
+    
+        Entity_newMeterReading = EGS_API_Entity_newMeterReading::construct();
+    
+        instIterator = new XmlNodeListIterator(instNodelist);
+        while (retFlag && instIterator.more())
+        {
+            instNode = instIterator.value();
+    
+            Entity_newMeterReading.alltags(instNode);
+            retFlag = Entity_newMeterReading.checkFromNode();
+            if (retFlag)
+            {
+                if (meterNumSave && Entity_newMeterReading.parmMeterNum() == meterNumSave)
+                {
+                    Entity_newMeterReading.addReadingForImport();
+                    unsaved = true;
+                }
+    
+                if (!meterNumSave || Entity_newMeterReading.parmMeterNum() != meterNumSave)
+                {
+                    //Not the first time, import meter readings on previous meter.
+                    if (meterNumSave)
+                    {
+                        retFlag = Entity_newMeterReading.importReadings();
+                        unsaved = false;
+                        Entity_newMeterReading = EGS_API_Entity_newMeterReading::construct();
+                    }
+                    if (retFlag)
+                    {
+                        Entity_newMeterReading.initNewInstanceForImport();
+                        Entity_newMeterReading.addReadingForImport();
+                        unsaved = true;
+                    }
+                }
+    
+                instParentNode = instNode.parentNode();
+                instParentNode.removeChild(instNode);
+                instIterator.next();
+    
+                meterNumSave = Entity_newMeterReading.parmMeterNum();
+            }
+        }
+    
+        // Import meter readings on last meter
+        if (retFlag && unsaved && Entity_newMeterReading != null)
+        {
+            retFlag = Entity_newMeterReading.importReadings();
+        }
+    
+        this.addXMLnewMeterReading(Entity_newMeterReading.xmlnewMeterReadingResponse(this.document()));
+    
+    //    if (!retFlag)
+    //    {
+    //        responseMsg = "@EGS5628";
+    //        throw Error(responseMsg);
+    //    }
+    
+        return;
+    }
+
+    void allNewMeterReadings(XmlNode _node)
+    {
+        XmlNode             instNode,instParentNode;
+        XmlNodeList         instNodeList;
+        XmlNodeListIterator instIterator;
+        int                 instItemCnt;
+        boolean             retFlag;
+        ;
+    
+        retFlag = true;
+        instNodeList=_node.selectNodes(#NODEVALUE_IN_newMeterReadings); // (".//NewMeterReadings")
+        instItemCnt = instNodelist.length();
+    
+        if (instItemCnt == 0)
+        {
+            responseMsg = strfmt("@EGS5669",#NODEVALUE_IN_newMeterReadings);
+            this.addXMLnewMeterReading(this.xmlErrorResponse(this.document(),responseMsg));
+            throw Error(responseMsg);
+        }
+    
+        instIterator = new XmlNodeListIterator(instNodelist);
+        while (retFlag && instIterator.more())
+        {
+            instNode = instIterator.value();
+            this.allNewMeterReading(instNode);
+            instParentNode = instNode.parentNode();
+            instParentNode.removeChild(instNode);
+            instIterator.next();
+        }
+    
+    //    this.addXMLnewMeterReading(Entity_newMeterReading.xmlnewMeterReadingResponse(this.document()));
+    
+        return;
+    }
+
+    XMLDocument document()
+    {
+        return document;
+    }
+
+    void initXMLnewMeterReading(str _nameSpace)
+    {
+    //    XMLNode nodeAttribute;
+        ;
+        this.initXMLDocument();
+    
+    //    rootNode = document.appendChild(document.createElement(#NODEVALUE_Response)); //"Response"
+    //    rootNode.attributes().setNamedItem(this.newAttribute("xmlns", "http://edbgruppen.se/webservices/" + _nameSpace));
+    }
+
+    void new()
+    {
+    }
+
+    public str newMeterReading(str _xml)
+    {
+        ;
+    
+        this.initXMLnewMeterReading(#NODEVALUE_newMeterReading); //"newMeterReading"
+    
+        this.XmlnewMeterReading(_xml);
+    
+        return this.xmlDocument(document.toString());
+    
+    }
+
+    XMLNode xmlErrorResponse(XMLDocument _document
+                            ,str _responseMessage)
+    {
+        XMLNode     fatherNode, fieldNode;
+        ;
+    
+        fatherNode = _document.createNode(XMLNodeType::ELEMENT, #NODEVALUE_Response, "");  // "Response"
+    
+        fieldNode = fatherNode.appendChild(_document.createElement(#NODEVALUE_ResponseCode));       // "ResponseCode"
+        fieldNode.appendChild(_document.createTextNode(#ResponseCode_NOT_OK));            // "Not Ok"
+        fieldNode = fatherNode.appendChild(_document.createElement(#NODEVALUE_ErrorCode));          // "ErrorCode"
+        fieldNode.appendChild(_document.createTextNode(#ResponseErrorCode_8));            // "8"
+        fieldNode = fatherNode.appendChild(_document.createElement(#NODEVALUE_ResponseMessage));    // "ResponseMessage"
+        fieldNode.appendChild(_document.createTextNode(_responseMessage));
+    
+        return fatherNode;
+    /*
+    ResponseCode
+    ErrorCode
+    ResponseMessage
+      */
+    
+    }
+
+    void XmlnewMeterReading(str _xml)
+    {
+        XmlDocument             indoc;
+        XmlNode                 inRootNode,inNode,inParentNode;
+        XmlNodeList             inNodeList;
+        XmlNodeListIterator     inIterator;
+        XMLParseError           xmlError;
+        int                     inItemCnt = 0;
+    
+        try
+        {
+            ttsbegin;
+            indoc = new XMLDocument();
+    
+            indoc.loadXml(_xml);
+    //        indoc.load(_xml);
+            xmlError = indoc.parseError();
+            if (xmlError && xmlError.errorCode() != 0)
+            {
+                throw Error(xmlError.reason());
+            }
+    
+            inRootNode = indoc.documentElement();
+    
+            inNodeList = indoc.selectNodes(#NODEVALUE_IN_Request); // ("//Request")
+            inItemCnt = inNodeList.length();
+    
+            if (inItemCnt == 0)
+            {
+                responseMsg = strfmt("@EGS5669",#NODEVALUE_IN_Request);
+                this.addXMLnewMeterReading(this.xmlErrorResponse(this.document(),responseMsg));
+                throw Error(responseMsg);
+            }
+    
+            inIterator = new XmlNodeListIterator(inNodeList);
+            while (inIterator.more())
+            {
+                inNode = inIterator.value();
+                this.allNewMeterReadings(inNode);
+                inParentNode = inNode.parentNode();
+                inParentNode.removeChild(inNode);
+                inIterator.next();
+            }
+    
+    //--> MIHAK EGS_SS0026554 31-10-2014
+    //        ttscommit;
+            if (appl.ttsLevel() > 0)
+            {
+                ttscommit;
+            }
+    //<-- MIHAK EGS_SS0026554 31-10-2014
+    
+            return;
+        }
+        catch (Exception::Error)
+        {
+            if (!responseMsg)
+            {
+                //Detail Cleanup-xxsap-09052016-Start
+                responseMsg = EXU_Infolog::get().copyLastInfologText();
+                //Detail Cleanup-xxsap-09052016-End
+                this.addXMLnewMeterReading(this.xmlErrorResponse(this.document(),responseMsg));
+            }
+            return;
+        }
+    }
+
+    public static EGS_API_newMeterReading construct()
+    {
+        return new EGS_API_newMeterReading();
+    }
+
+    public EGS_API_DataContract_Response newMeterReadingAPI(EGS_API_DataContract_NewMeterReadings _newMeterReadings)
+    {
+        return this.DataNewMeterReading(_newMeterReadings);
+    }
+
+    EGS_API_DataContract_Response DataNewMeterReading(EGS_API_DataContract_NewMeterReadings _newMeterReadings)
+    {
+        ListIterator            inIterator;
+        int                     inItemCnt = 0;
+        List list = _newMeterReadings.parmNewMeterReadings();
+        EGS_API_DataContract_NewMeterReading newMeterReading;
+    
+        try
+        {
+            response = new EGS_API_DataContract_Response();
+            ttsbegin;
+            if (!list || list.elements() == 0)
+            {
+                responseMsg = strfmt("@EGU:RequiredListMissing", "@EGS:MeterReadings");
+                response.parmMessage(responseMsg);
+                throw Error(responseMsg);
+            }
+    
+            inIterator = new ListIterator(list);
+            while (inIterator.more())
+            {
+                newMeterReading = inIterator.value();
+                response = this.allNewMeterReadingData(newMeterReading);
+                
+                //break the loop if reading is not created
+                if (response.parmResponseCode() == #ResponseCode_OK)
+                    inIterator.next();
+                else 
+                    break;
+            }
+    
+            if (appl.ttsLevel() > 0)
+            {
+                ttscommit;
+            }
+    
+            return response;
+        }
+        catch (Exception::Error)
+        {
+            if (!responseMsg)
+            {
+                responseMsg = EXU_Infolog::get().copyLastInfologText();
+                response = this.dataErrorResponse(responseMsg);
+            }
+            return response;
+        }
+    }
+
+    EGS_API_DataContract_Response allNewMeterReadingData(EGS_API_DataContract_NewMeterReading _newMeterReading)
+    {
+        XmlNode             instNode,instParentNode;
+        XmlNodeList         instNodeList;
+        XmlNodeListIterator instIterator;
+        int                 instItemCnt;
+        boolean             retFlag;
+        boolean             firstTime = true;
+    
+        EGS_CreateReadingImportTable createReadingImportTable;
+        ;
+    
+        retFlag = true;
+        Entity_newMeterReading = EGS_API_Entity_newMeterReading::construct();
+        retFlag = Entity_newMeterReading.initFromNodeData(_newMeterReading);
+
+        if (retFlag)
+        {
+            if (firstTime)
+            {
+                Entity_newMeterReading.initNewInstanceForImport();
+                firstTime = false;
+            }
+            Entity_newMeterReading.addReadingForImport();
+        }
+    
+        if (retFlag && Entity_newMeterReading != null)
+        {
+            retFlag = Entity_newMeterReading.importReadings();
+        }
+    
+        response = Entity_newMeterReading.dataNewMeterReadingResponse();
+   
+        return response;
+    }
+
+    EGS_API_DataContract_Response dataErrorResponse(str _responseMessage)
+    {
+        response = new EGS_API_DataContract_Response();
+   
+        response.parmResponseCode(#ResponseCode_NOT_OK);
+        response.parmErrorCode(#ResponseErrorCode_8);
+        response.parmMessage(_responseMessage);
+    
+        return response;
+    }
+
+}
