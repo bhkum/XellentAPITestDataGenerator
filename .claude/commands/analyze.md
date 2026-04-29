@@ -20,8 +20,8 @@ Analyze an API payload and resolve all D365 dependencies by tracing source code.
 
 ```
 Field         | Value          | Table               | Classification
-CustGroup     | TST_CustGrp    | CustGroup           | SCRIPT
-PaymMode      | TST_PaymMd     | CustPaymModeTable   | SCRIPT
+CustGroup     | XAPI_CustGrp    | CustGroup           | SCRIPT
+PaymMode      | XAPI_PaymMd     | CustPaymModeTable   | SCRIPT
 CountryRegion | SWE            | LogisticsAddress... | PRE_EXISTING
 ```
 

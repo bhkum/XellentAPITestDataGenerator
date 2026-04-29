@@ -7,7 +7,7 @@ Given an API payload and class name, Claude traces the source code, resolves all
 and generates ready-to-execute runnable classes.
 
 **Domain:** Utility & Energy (Nordic)  
-**Naming convention:** `TST_` prefix for all test-created data  
+**Naming convention:** `XAPI_` prefix for all test-created data  
 
 ---
 
@@ -40,15 +40,15 @@ and generates ready-to-execute runnable classes.
 
 Uses the output of the last `/analyze`. Produces two runnable classes in `Metadata/APITestDataGen/APITestDataGen/AxClass/`:
 
-- `TST_Setup_<APIClassName>.xml` — creates all `SCRIPT` dependencies
-- `TST_Teardown_<APIClassName>.xml` — deletes exactly what setup created, in reverse order
+- `XAPI_Setup_<APIClassName>.xml` — creates all `SCRIPT` dependencies
+- `XAPI_Teardown_<APIClassName>.xml` — deletes exactly what setup created, in reverse order
 
 **Runnable class rules:**
 - Class must extend nothing, implement `main(Args _args)` as entry point
 - Always check existence before insert (guard with `if (!record.RecId)`)
 - Always use `buf2Buf` from an existing record of the same type as the template
 - Log each action with `info(strFmt(...))`
-- Teardown must only delete records with `TST_` prefix — never touch pre-existing data
+- Teardown must only delete records with `XAPI_` prefix — never touch pre-existing data
 
 ### `/patch <error_log_file>`
 
@@ -80,8 +80,8 @@ Uses the output of the last `/analyze`. Produces two runnable classes in `Metada
 
 ## Conventions
 
-- All test data values use `TST_` prefix
-- Generated class names follow `TST_Setup_<APIClassName>` and `TST_Teardown_<APIClassName>`
+- All test data values use `XAPI_` prefix
+- Generated class names follow `XAPI_Setup_<APIClassName>` and `XAPI_Teardown_<APIClassName>`
 - Never hardcode `DataAreaId` — read from context or payload
 - Financial dimensions and standard reference data (countries, companies) are always `PRE_EXISTING`
 - When in doubt about a classification, ask — do not assume
