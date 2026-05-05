@@ -262,9 +262,9 @@ class XAPI_API_CallAutomator
     private str prepareBody(XAPI_APIS _api, Map _fields)
     {
         XAPI_APIConfigurations conif;
-        select firstonly conif where conif.XAPI_APIS == _api;
+        select firstonly conif where conif.API == _api;
 
-        str body = conif.XAPI_JSON;
+        str body = conif.JSON;
 
         MapEnumerator enumerator = _fields.getEnumerator();
         while (enumerator.moveNext())

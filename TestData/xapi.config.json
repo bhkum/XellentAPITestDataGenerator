@@ -1,3 +1,4 @@
 {
+  "classPrefix": "XAPI_",
   "testDataPrefix": "TST_"
 }
