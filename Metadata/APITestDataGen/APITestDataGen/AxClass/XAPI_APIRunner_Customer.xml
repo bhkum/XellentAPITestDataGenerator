@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APIRunner_Customer</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_APIRunner_Customer extends XAPI_APIRunnerBase
+{
+
+}l̥
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>runPre</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    protected void runPre()
+    {
+        XAPI_Setup_EGS_API_newCustomer::main(null);
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runAPI</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    protected void runAPI()
+    {
+        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateCustomer);
+        api.callAPI();
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

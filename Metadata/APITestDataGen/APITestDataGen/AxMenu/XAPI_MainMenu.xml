@@ -28,5 +28,17 @@
 				</AxMenuElement>
 			</Elements>
 		</AxMenuElement>
+		<AxMenuElement xmlns=""
+			i:type="AxMenuElementSubMenu">
+			<Name>InDevelopmen</Name>
+			<Label>Current</Label>
+			<Elements>
+				<AxMenuElement xmlns=""
+					i:type="AxMenuElementMenuItem">
+					<Name>XAPI_APIConfigurations</Name>
+					<MenuItemName>XAPI_APIConfigurations</MenuItemName>
+				</AxMenuElement>
+			</Elements>
+		</AxMenuElement>
 	</Elements>
 </AxMenu>
