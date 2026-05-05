@@ -33,8 +33,6 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="Classes\" />
-    <Folder Include="Action Menu Items\" />
     <Folder Include="Display Menu Items\" />
     <Folder Include="Forms\" />
     <Folder Include="Menus\" />
