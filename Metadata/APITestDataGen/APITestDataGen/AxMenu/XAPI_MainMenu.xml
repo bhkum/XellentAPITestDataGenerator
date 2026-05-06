@@ -28,5 +28,29 @@
 				</AxMenuElement>
 			</Elements>
 		</AxMenuElement>
+		<AxMenuElement xmlns=""
+			i:type="AxMenuElementSubMenu">
+			<Name>InDevelopmen</Name>
+			<Label>Current</Label>
+			<Elements>
+				<AxMenuElement xmlns=""
+					i:type="AxMenuElementMenuItem">
+					<Name>XAPI_APIConfigurations</Name>
+					<MenuItemName>XAPI_APIConfigurations</MenuItemName>
+				</AxMenuElement>
+				<AxMenuElement xmlns=""
+					i:type="AxMenuElementMenuItem">
+					<Name>XAPI_Teardown_EGS_API_newCustomer</Name>
+					<MenuItemName>XAPI_Teardown_EGS_API_newCustomer</MenuItemName>
+					<MenuItemType>Action</MenuItemType>
+				</AxMenuElement>
+				<AxMenuElement xmlns=""
+					i:type="AxMenuElementMenuItem">
+					<Name>XAPI_Setup_EGS_API_newCustomer</Name>
+					<MenuItemName>XAPI_Setup_EGS_API_newCustomer</MenuItemName>
+					<MenuItemType>Action</MenuItemType>
+				</AxMenuElement>
+			</Elements>
+		</AxMenuElement>
 	</Elements>
 </AxMenu>

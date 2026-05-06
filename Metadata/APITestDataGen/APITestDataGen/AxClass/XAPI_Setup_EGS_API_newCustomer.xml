@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Setup_EGS_API_newCustomer</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_Setup_EGS_API_newCustomer
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    public static void main(Args _args)
+    {
+        CustGroup           custGroup, custGroupTemplate;
+        CustPaymModeTable   custPaymModeTable, custPaymModeTableTemplate;
+
+        // --- 1. CustGroup: TST_CustGrp ---
+        custGroup = CustGroup::find('TST_CustGrp');
+        if (!custGroup.RecId)
+        {
+            select firstonly custGroupTemplate
+                where custGroupTemplate.CustGroup != '';
+            if (custGroupTemplate.RecId)
+            {
+                buf2Buf(custGroupTemplate, custGroup);
+            }
+            custGroup.CustGroup = 'TST_CustGrp';
+            custGroup.Name      = 'TST - Test Customer Group';
+            ttsbegin;
+            custGroup.insert();
+            ttscommit;
+            info(strFmt("Inserted CustGroup: %1", custGroup.CustGroup));
+        }
+        else
+        {
+            info(strFmt("CustGroup already exists: %1", custGroup.CustGroup));
+        }
+
+        // --- 2. CustPaymModeTable: TST_PaymMd ---
+        custPaymModeTable = CustPaymModeTable::find('TST_PaymMd');
+        if (!custPaymModeTable.RecId)
+        {
+            select firstonly custPaymModeTableTemplate
+                where custPaymModeTableTemplate.PaymMode != '';
+            if (custPaymModeTableTemplate.RecId)
+            {
+                buf2Buf(custPaymModeTableTemplate, custPaymModeTable);
+            }
+            custPaymModeTable.PaymMode = 'TST_PaymMd';
+            custPaymModeTable.Name     = 'TST - Test Payment Mode';
+            ttsbegin;
+            custPaymModeTable.insert();
+            ttscommit;
+            info(strFmt("Inserted CustPaymModeTable: %1", custPaymModeTable.PaymMode));
+        }
+        else
+        {
+            info(strFmt("CustPaymModeTable already exists: %1", custPaymModeTable.PaymMode));
+        }
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

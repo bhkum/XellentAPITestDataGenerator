@@ -51,6 +51,15 @@ public class XAPI_APIConfigurations extends common
 			<Name>AutoBrowse</Name>
 			<Fields />
 		</AxTableFieldGroup>
+		<AxTableFieldGroup>
+			<Name>Main</Name>
+			<Label>Main</Label>
+			<Fields>
+				<AxTableFieldGroupField>
+					<DataField>API</DataField>
+				</AxTableFieldGroupField>
+			</Fields>
+		</AxTableFieldGroup>
 	</FieldGroups>
 	<Fields>
 		<AxTableField xmlns=""
