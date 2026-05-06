@@ -1,0 +1,60 @@
+{
+  "mappings": [
+    {
+      "apiField": "CustGroup",
+      "d365Table": "CustGroup",
+      "classification": "SCRIPT",
+      "discoveredFrom": "EGS_API_newCustomer"
+    },
+    {
+      "apiField": "PaymMode",
+      "d365Table": "CustPaymModeTable",
+      "classification": "SCRIPT",
+      "discoveredFrom": "EGS_API_newCustomer"
+    },
+    {
+      "apiField": "Dimensions[].Name",
+      "d365Table": "DimensionAttribute",
+      "classification": "PRE_EXISTING",
+      "discoveredFrom": "EGS_API_newCustomer"
+    },
+    {
+      "apiField": "Dimensions[].Value",
+      "d365Table": "DimensionAttributeValue",
+      "classification": "PRE_EXISTING",
+      "discoveredFrom": "EGS_API_newCustomer"
+    },
+    {
+      "apiField": "address.CountryRegionId",
+      "d365Table": "LogisticsAddressCountryRegion",
+      "classification": "PRE_EXISTING",
+      "discoveredFrom": "EGS_API_newCustomer"
+    },
+    {
+      "apiField": "address.ZipCode",
+      "d365Table": "LogisticsAddressZipCode",
+      "classification": "PRE_EXISTING",
+      "discoveredFrom": "EGS_API_newCustomer"
+    },
+    {
+      "apiField": "DataAreaId",
+      "d365Table": "DataArea",
+      "classification": "PRE_EXISTING",
+      "discoveredFrom": "EGS_API_newCustomer"
+    },
+    {
+      "apiField": "address.City",
+      "d365Table": "LogisticsAddressZipCode",
+      "classification": "PRE_EXISTING",
+      "discoveredFrom": "EGS_API_newCustomer",
+      "notes": "Validated together with address.ZipCode via LogisticsAddressZipCode::findZipCodeCity()"
+    },
+    {
+      "apiField": "TargetSystem",
+      "d365Table": "EXU_ReceivingSystemCust",
+      "classification": "PRE_EXISTING",
+      "discoveredFrom": "EGS_API_newCustomer",
+      "notes": "Record is created by the API call itself (UpdateReceivingSystem), not a pre-existing dependency. Teardown must delete this record."
+    }
+  ]
+}

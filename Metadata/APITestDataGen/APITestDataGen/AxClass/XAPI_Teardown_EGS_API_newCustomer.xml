@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Teardown_EGS_API_newCustomer</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_Teardown_EGS_API_newCustomer
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    public static void main(Args _args)
+    {
+        EXU_ReceivingSystemCust receivingSystemCust;
+        CustTable               custTable;
+        CustPaymModeTable       custPaymModeTable;
+        CustGroup               custGroup;
+
+        // --- 1. EXU_ReceivingSystemCust created by API call (SystemId from payload) ---
+        ttsbegin;
+        while select forUpdate receivingSystemCust
+            where receivingSystemCust.SystemId == 'NewSystem_TC3'
+        {
+            info(strFmt("Deleted EXU_ReceivingSystemCust: AccountNum %1 / SystemId %2", receivingSystemCust.AccountNum, receivingSystemCust.SystemId));
+            receivingSystemCust.delete();
+        }
+        ttscommit;
+
+        // --- 2. CustTable created by API call (identified by AlternativeCustomerNumber from payload) ---
+        // Note: D365 party cascade deletes DirPersonName, LogisticsPostalAddress, LogisticsElectronicAddress
+        ttsbegin;
+        while select forUpdate custTable
+            where custTable.EXU_AlternativeCustomerNumber == '200203155306'
+        {
+            info(strFmt("Deleted CustTable: %1 (AlternativeCustomerNumber: %2)", custTable.AccountNum, custTable.EXU_AlternativeCustomerNumber));
+            custTable.delete();
+        }
+        ttscommit;
+
+        // --- 3. CustPaymModeTable: TST_PaymMd ---
+        ttsbegin;
+        while select forUpdate custPaymModeTable
+            where custPaymModeTable.PaymMode == 'TST_PaymMd'
+        {
+            info(strFmt("Deleted CustPaymModeTable: %1", custPaymModeTable.PaymMode));
+            custPaymModeTable.delete();
+        }
+        ttscommit;
+
+        // --- 4. CustGroup: TST_CustGrp ---
+        ttsbegin;
+        while select forUpdate custGroup
+            where custGroup.CustGroup == 'TST_CustGrp'
+        {
+            info(strFmt("Deleted CustGroup: %1", custGroup.CustGroup));
+            custGroup.delete();
+        }
+        ttscommit;
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

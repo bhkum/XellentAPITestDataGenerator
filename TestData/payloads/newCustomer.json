@@ -1,0 +1,55 @@
+{
+    "_newCustomers": {
+        "Customers": [
+            {
+                "Name": "TestName",
+                "FirstName": "F3",
+                "LastName": "L3",
+                "MiddleName": "",
+                "LastNamePrefix": "",
+                "CustGroup": "TST_CustGrp",
+                "PartyType": "Person",
+                "AdditionalName": "",
+                "AlternativeCustomerCode": "Manual",
+                "AlternativeCustomerNumber": "200203155306",
+                "Phone": "9800000002",
+                "CellularPhone": "9800000003",
+                "Email": "tc3@test.com",
+                "Dimensions": [
+                    {
+                       "Name": "Aktivitet",
+                        "Value": "000"
+                    }
+                ],
+                "PaymMode": "TST_PaymMd",
+                "TechnicGroup1": "",
+                "TechnicGroup2": "",
+                "TechnicGroup3": "",
+                "TechnicGroup4": "",
+                "TechnicDate1": "1900-01-01",
+                "TechnicDate2": "1900-01-01",
+                "TechnicDate3": "1900-01-01",
+                "TechnicDate4": "1900-01-01",
+                "TechnicReal1": 0,
+                "TechnicReal2": 0,
+                "TechnicReal3": 0,
+                "TechnicReal4": 0,
+                "TechnicTxt1": "",
+                "TechnicTxt2": "",
+                "TechnicTxt3": "",
+                "TechnicTxt4": "",
+                "TechnicMemo1": "",
+                "TechnicMemo2": "",
+                "TargetSystem": "NewSystem_TC3",
+                "address": {
+                    "Street": "Test Street 3",
+                    "City": "Malmö",
+                    "ZipCode": 21120,
+                    "CountryRegionId": "SWE"
+                }
+            }
+        ],
+        "DataAreaId": "oab"
+    }
+}
+ 

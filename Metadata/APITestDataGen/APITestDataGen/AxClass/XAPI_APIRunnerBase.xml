@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APIRunnerBase</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+abstract class XAPI_APIRunnerBase
+{
+    
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>runPre</Name>
+				<Source><![CDATA[
+    abstract protected void runPre(){}
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runAPI</Name>
+				<Source><![CDATA[
+    abstract protected void runAPI(){}
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>run</Name>
+				<Source><![CDATA[
+    public void run()
+    {
+        this.runPre();
+        this.runAPI();
+        this.postRun();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>postRun</Name>
+				<Source><![CDATA[
+    protected void postRun() {}
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>construct</Name>
+				<Source><![CDATA[
+    public static XAPI_APIRunnerBase construct(XAPI_APIS _api)
+    {
+        switch(_api)
+        {
+            case XAPI_APIS::CreateCustomer:
+                throw error("dd");
+                break;
+
+            default:
+                throw error("Invalid arguement");
+
+        }
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>
