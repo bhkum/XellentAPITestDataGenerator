@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APICaller_ContactInfo</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_APICaller_ContactInfo extends XAPI_APICallerBase
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>getUrl</Name>
+				<Source><![CDATA[
+    public str getUrl()
+    {
+        return resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newCustContactInfoAPI";
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>callAPI</Name>
+				<Source><![CDATA[
+    public void callAPI()
+    {
+        Map configMap = new Map(Types::String, Types::String);
+
+
+        XAPI_APILogTable logTable;
+
+        select firstonly logTable
+            where logTable.ApiName == XAPI_APIS::CreateCustomer
+               && logTable.Key == 'CustAccount';
+
+        if (!logTable.RecId)
+        {
+            throw error("Customer account not found in log.");
+        }
+
+        configMap.insert('<custAccount>', logTable.Value);
+
+
+
+        this.prepareBody(configMap);
+        this.sendPostRequest();
+
+        if (responseText == '')
+        {
+            return;
+        }
+
+        EGS_API_DataContract_Response res =
+            FormJsonSerializer::deserializeObject(
+                classNum(EGS_API_DataContract_Response),
+                responseText);
+
+        if (res != null)
+        {
+            this.log("ContactInfoResponse", res.parmMessage());
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>cleanPrevious</Name>
+				<Source><![CDATA[
+    public void cleanPrevious()
+    {
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runDependency</Name>
+				<Source><![CDATA[
+    public void runDependency()
+    {
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

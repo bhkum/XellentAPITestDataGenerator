@@ -18,6 +18,7 @@
 		<d2p1:string>ContactPerson</d2p1:string>
 		<d2p1:string>Dimensions</d2p1:string>
 		<d2p1:string>Directory</d2p1:string>
+		<d2p1:string>Ledger</d2p1:string>
 		<d2p1:string>XellentBilling</d2p1:string>
 	</ModuleReferences>
 	<Name>APITestDataGen</Name>

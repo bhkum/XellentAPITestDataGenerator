@@ -21,6 +21,8 @@ final class XAPI_API_Create
         XAPI_API_AutomationFacade::create_Customer();
         XAPI_API_AutomationFacade::create_Installation();
         XAPI_API_AutomationFacade::create_Contract();
+        XAPI_API_AutomationFacade::create_ContractPart();
+        XAPI_API_AutomationFacade::create_MeterReading();
     }
 
 ]]></Source>

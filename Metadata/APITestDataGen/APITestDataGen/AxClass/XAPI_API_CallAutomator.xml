@@ -239,6 +239,101 @@ class XAPI_API_CallAutomator
 ]]></Source>
 			</Method>
 			<Method>
+				<Name>callContractPartAPI</Name>
+				<Source><![CDATA[
+    public void callContractPartAPI(CustAccount _custAccount, str _attachmentNum, str _deliveryCategory, EXU_ContractNum _contractNum, str _productNum)
+    {
+        XAPI_APILogTable logTable;
+        Map configMap = new Map(Types::String, Types::String);
+
+        configMap.insert('<DataAreaId>', curExt());
+
+        select firstonly logTable
+        where logTable.ApiName == XAPI_APIS::CreateCustomer
+           && logTable.Key     == 'CustAccount';
+        configMap.insert('<custAccount>', logTable.Value);
+
+
+        select firstonly logTable
+        where logTable.ApiName == XAPI_APIS::CreateContract
+           && logTable.Key     == 'ContractNum';
+        configMap.insert('<Contract>', logTable.Value);
+
+        select firstonly logTable
+        where logTable.ApiName == XAPI_APIS::CreateInstallation
+           && logTable.Key     == 'InstNum';
+        configMap.insert('<InstNum>', logTable.Value);
+
+        EXU_UtilityInstallation uinst;
+        select firstonly uinst
+        where uinst.InstNum == logTable.Value;
+
+        configMap.insert('<DeliveryCategory>', uinst.DeliveryCategory);
+
+        select firstonly logTable
+        where logTable.ApiName == XAPI_APIS::CreateContract
+           && logTable.Key     == 'ProductNum';
+        configMap.insert('<ProductNum>', logTable.Value);
+
+        var body = this.prepareBody(XAPI_APIS::CreateContractPart, configMap);
+
+        str responseTxt = this.sendPostRequest(
+        resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newContractPartAPI",
+        body);
+
+        EGS_API_DataContract_Response res = FormJsonSerializer::deserializeObject(
+        classNum(EGS_API_DataContract_Response), responseTxt);
+
+        this.log(XAPI_APIS::CreateContractPart, "ContractPartNum", res.parmMessage(), responseTxt);
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>callMeterReadingAPI</Name>
+				<Source><![CDATA[
+    public void callMeterReadingAPI(CustAccount _custAccount, str _attachmentNum, str _deliveryCategory, str _meterNum)
+    {
+        XAPI_APILogTable lotTable;
+        Map configMap = new Map(Types::String, Types::String);
+
+        configMap.insert('<DataAreaId>', curExt());
+        
+        select firstonly lotTable
+            where lotTable.ApiName == XAPI_APIS::CreateCustomer
+            && lotTable.Key == 'CustAccount';
+        
+        configMap.insert('<custAccount>', lotTable.Value);
+        
+        select firstonly  lotTable
+        where lotTable.ApiName == XAPI_APIS::CreateInstallation
+            && lotTable.Key == 'InstNum';
+        configMap.insert('<InstNum>', lotTable.Value);
+
+        EXU_UtilityInstallation uinst;
+        select firstonly uinst
+            where uinst.InstNum == lotTable.Value;
+
+        configMap.insert('<deliveryCategory>', uinst.DeliveryCategory);
+
+        select firstonly lotTable
+        where lotTable.ApiName == XAPI_APIS::CreateMeterReading
+           && lotTable.Key == 'meterNum';
+        configMap.insert('<meterNum>', lotTable.Value);
+
+
+        var body = this.prepareBody(XAPI_APIS::CreateContract, configMap);
+        str responseTxt = this.sendPostRequest(resourceUrl + "/api/services/EGS_WebApiServiceAPI/EGS_WebApiSeServiceAPI/newMeterReadingAPI",
+            body);
+
+        EGS_API_DataContract_Response res =FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseTxt);
+        
+        this.log(XAPI_APIS::CreateMeterReading, "MeterNum", res.parmMessage(), responseTxt);
+    }
+
+]]></Source>
+			</Method>
+			<Method>
 				<Name>log</Name>
 				<Source><![CDATA[
     private void log(XAPI_APIS _api, str _key, str _value, str _response)
