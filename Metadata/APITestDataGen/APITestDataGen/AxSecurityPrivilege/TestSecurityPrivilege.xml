@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AxSecurityPrivilege xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
 	<Name>TestSecurityPrivilege</Name>
-	<DataEntityPermissions>
-		<AxSecurityDataEntityPermission>
-			<Name>TestMenuItem</Name>
-			<Fields />
-			<Methods />
-		</AxSecurityDataEntityPermission>
-	</DataEntityPermissions>
+	<DataEntityPermissions />
 	<DirectAccessPermissions />
-	<EntryPoints />
+	<EntryPoints>
+		<AxSecurityEntryPointReference>
+			<Name>TestMenuItem</Name>
+			<ObjectName>TestMenuItem</ObjectName>
+			<ObjectType>MenuItemDisplay</ObjectType>
+			<Forms />
+		</AxSecurityEntryPointReference>
+	</EntryPoints>
 	<FormControlOverrides />
 </AxSecurityPrivilege>
