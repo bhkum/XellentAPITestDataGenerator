@@ -23,4 +23,7 @@ where inst.INSTREADINGMETHODNUM like  'TST%'
 and cust.CUSTGROUP like  'TST%'
 
 select * from XAPI_APILogTable
+-------------------------------
+select * from custgroup where CUSTGROUP like 'Ts%'
 
+select * from XAPI_APIConfigurations

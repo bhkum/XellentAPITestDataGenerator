@@ -37,6 +37,11 @@
     <Folder Include="Classes\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AxClass\XAPI_APIRunnerBase">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIRunnerBase</Name>
+      <Link>Classes\XAPI_APIRunnerBase</Link>
+    </Content>
     <Content Include="AxClass\XAPI_Setup_EGS_API_newCustomer">
       <SubType>Content</SubType>
       <Name>XAPI_Setup_EGS_API_newCustomer</Name>

@@ -5,16 +5,12 @@
 		<Declaration><![CDATA[
 class XAPI_APIRunner_Customer extends XAPI_APIRunnerBase
 {
-
 }
 ]]></Declaration>
 		<Methods>
 			<Method>
 				<Name>runPre</Name>
 				<Source><![CDATA[
-    /// <summary>
-    ///
-    /// </summary>
     protected void runPre()
     {
         XAPI_Setup_EGS_API_newCustomer::main(null);
@@ -23,15 +19,37 @@ class XAPI_APIRunner_Customer extends XAPI_APIRunnerBase
 ]]></Source>
 			</Method>
 			<Method>
-				<Name>runAPI</Name>
+				<Name>init</Name>
 				<Source><![CDATA[
-    /// <summary>
-    ///
-    /// </summary>
-    protected void runAPI()
+    protected void init()
     {
-        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateCustomer);
-        api.callAPI();
+        api = XAPI_APIS::CreateCustomer;
+        super();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>body</Name>
+				<Source><![CDATA[
+    protected str body()
+    {
+        DimensionAttribute        da;
+        DimensionAttributeValue   dv;
+        
+        select firstonly name from da
+        order by da.Name asc
+        join DisplayValue from dv
+        where dv.DimensionAttribute == da.RecId;
+        
+        Map configMap = new Map(Types::String, Types::String);
+        configMap.insert('<DataAreaId>', curExt());
+        configMap.insert('<AlternativeCustomerNumber>', XAPI_AlternativeCustomerNumberGenerator::generateCPR());
+        configMap.insert('<DimensionName>', da.Name);
+        configMap.insert('<DimensionValue>', dv.DisplayValue);
+
+        return this.prepareBody(configMap);
+        //this.sendPostRequest();
     }
 
 ]]></Source>
