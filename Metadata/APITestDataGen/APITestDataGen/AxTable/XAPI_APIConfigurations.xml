@@ -22,6 +22,29 @@ public class XAPI_APIConfigurations extends common
 
 ]]></Source>
 			</Method>
+			<Method>
+				<Name>displayResponseJSON</Name>
+				<Source><![CDATA[
+    /// <summary>
+    ///
+    /// </summary>
+    display DirMemo displayResponseJSON(XAPI_APIConfigurations _config)
+    {
+        XAPI_APILogTable logTable;
+
+        select firstOnly Response from logTable
+          order by RecId desc
+          where logTable.ApiName == _config.API;
+
+        if (!logTable.Response)
+          return '';
+
+        return logTable.Response;
+        
+    }
+
+]]></Source>
+			</Method>
 		</Methods>
 	</SourceCode>
 	<SubscriberAccessLevel>
