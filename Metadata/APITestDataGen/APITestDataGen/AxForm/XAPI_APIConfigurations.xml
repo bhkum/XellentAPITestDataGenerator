@@ -14,7 +14,28 @@ public class XAPI_APIConfigurations extends FormRun
 			</Method>
 		</Methods>
 		<DataSources xmlns="" />
-		<DataControls xmlns="" />
+		<DataControls xmlns="">
+			<Control>
+				<Name>RunButton</Name>
+				<Type>Button</Type>
+				<Methods>
+					<Method>
+						<Name>clicked</Name>
+						<Source><![CDATA[
+        /// <summary>
+        ///
+        /// </summary>
+        public void clicked()
+        {
+            super();
+            XAPI_APIRunnerFacade::runAPI(XAPI_APIS::CreateCustomer);
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</Control>
+		</DataControls>
 		<Members xmlns="" />
 	</SourceCode>
 	<DataSources>

@@ -35,6 +35,7 @@
   <ItemGroup>
     <Folder Include="Action Menu Items\" />
     <Folder Include="Classes\" />
+    <Folder Include="Forms\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="AxClass\XAPI_APIRunnerBase">
@@ -51,6 +52,11 @@
       <SubType>Content</SubType>
       <Name>XAPI_Teardown_EGS_API_newCustomer</Name>
       <Link>Classes\XAPI_Teardown_EGS_API_newCustomer</Link>
+    </Content>
+    <Content Include="AxForm\XAPI_APIConfigurations">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIConfigurations</Name>
+      <Link>Forms\XAPI_APIConfigurations</Link>
     </Content>
     <Content Include="AxMenuItemAction\XAPI_Setup_EGS_API_newCustomer">
       <SubType>Content</SubType>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AxMenuItemAction xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="Microsoft.Dynamics.AX.Metadata.V1">
 	<Name>XAPI_Setup_EGS_API_newCustomer</Name>
-	<Label>Setup - New Customer</Label>
+	<Label>Setup: EGS API New Customer</Label>
 	<Object>XAPI_Setup_EGS_API_newCustomer</Object>
 	<ObjectType>Class</ObjectType>
 	<SubscriberAccessLevel>

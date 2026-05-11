@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APIRunnerFacade</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+final class XAPI_APIRunnerFacade
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>runAPI</Name>
+				<Source><![CDATA[
+    public static void runAPI(XAPI_APIS _api)
+    {
+        XAPI_APIRunnerBase::construct(_api).run();
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

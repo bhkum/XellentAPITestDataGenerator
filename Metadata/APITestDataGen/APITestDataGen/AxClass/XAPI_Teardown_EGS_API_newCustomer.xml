@@ -11,53 +11,54 @@ class XAPI_Teardown_EGS_API_newCustomer
 			<Method>
 				<Name>main</Name>
 				<Source><![CDATA[
+    /// <summary>
+    /// Class entry point. Deletes the SCRIPT data created by XAPI_Setup_EGS_API_newCustomer
+    /// in reverse dependency order. Only deletes exact, known XAPI test values.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
     public static void main(Args _args)
     {
+        CustGroupId     custGroupId = 'TST_CstGrp';
+        CustPaymMode    paymMode    = 'TST_PaymMd';
+        EXU_SystemId    systemId    = 'NewSystem_TC3';
+
+        // --- 1. EXU_ReceivingSystem (delete first: API may have created EXU_ReceivingSystemCust children pointing here; clean those if present) ---
         EXU_ReceivingSystemCust receivingSystemCust;
-        CustTable               custTable;
-        CustPaymModeTable       custPaymModeTable;
-        CustGroup               custGroup;
+        EXU_ReceivingSystem     receivingSystem;
 
-        // --- 1. EXU_ReceivingSystemCust created by API call (SystemId from payload) ---
-        ttsbegin;
-        while select forUpdate receivingSystemCust
-            where receivingSystemCust.SystemId == 'NewSystem_TC3'
+        delete_from receivingSystemCust
+            where receivingSystemCust.SystemId == systemId;
+        info(strFmt("Deleted EXU_ReceivingSystemCust links for SystemId: %1", systemId));
+
+        select firstonly forUpdate receivingSystem
+            where receivingSystem.SystemId == systemId;
+        if (receivingSystem.RecId)
         {
-            info(strFmt("Deleted EXU_ReceivingSystemCust: AccountNum %1 / SystemId %2", receivingSystemCust.AccountNum, receivingSystemCust.SystemId));
-            receivingSystemCust.delete();
+            receivingSystem.delete();
+            info(strFmt("Deleted EXU_ReceivingSystem: %1", systemId));
         }
-        ttscommit;
 
-        // --- 2. CustTable created by API call (identified by AlternativeCustomerNumber from payload) ---
-        // Note: D365 party cascade deletes DirPersonName, LogisticsPostalAddress, LogisticsElectronicAddress
-        ttsbegin;
-        while select forUpdate custTable
-            where custTable.EXU_AlternativeCustomerNumber == '200203155306'
+        // --- 2. CustPaymModeTable (guard: prefix must match testDataPrefix 'TST_') ---
+        CustPaymModeTable paymModeTable;
+
+        select firstonly forUpdate paymModeTable
+            where paymModeTable.PaymMode == paymMode;
+        if (paymModeTable.RecId && strStartsWith(paymModeTable.PaymMode, 'TST_'))
         {
-            info(strFmt("Deleted CustTable: %1 (AlternativeCustomerNumber: %2)", custTable.AccountNum, custTable.EXU_AlternativeCustomerNumber));
-            custTable.delete();
+            paymModeTable.delete();
+            info(strFmt("Deleted PaymMode: %1", paymMode));
         }
-        ttscommit;
 
-        // --- 3. CustPaymModeTable: TST_PaymMd ---
-        ttsbegin;
-        while select forUpdate custPaymModeTable
-            where custPaymModeTable.PaymMode == 'TST_PaymMd'
-        {
-            info(strFmt("Deleted CustPaymModeTable: %1", custPaymModeTable.PaymMode));
-            custPaymModeTable.delete();
-        }
-        ttscommit;
+        // --- 3. CustGroup (guard: prefix must match testDataPrefix 'TST_') ---
+        CustGroup custGroup;
 
-        // --- 4. CustGroup: TST_CustGrp ---
-        ttsbegin;
-        while select forUpdate custGroup
-            where custGroup.CustGroup == 'TST_CustGrp'
+        select firstonly forUpdate custGroup
+            where custGroup.CustGroup == custGroupId;
+        if (custGroup.RecId && strStartsWith(custGroup.CustGroup, 'TST_'))
         {
-            info(strFmt("Deleted CustGroup: %1", custGroup.CustGroup));
             custGroup.delete();
+            info(strFmt("Deleted CustGroup: %1", custGroupId));
         }
-        ttscommit;
     }
 
 ]]></Source>
