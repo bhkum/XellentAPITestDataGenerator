@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxForm xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="Microsoft.Dynamics.AX.Metadata.V6">
+	<Name>XAPI_TestSuiteLogForm</Name>
+	<SourceCode>
+		<Methods xmlns="">
+			<Method>
+				<Name>classDeclaration</Name>
+				<Source><![CDATA[
+[Form]
+public class XAPI_TestSuiteLogForm extends FormRun
+{
+}
+]]></Source>
+			</Method>
+			<Method>
+				<Name>applySessionFilter</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Re-applies the SessionId range on the data source from the filter
+    /// control's current text. Empty text clears the range.
+    /// </summary>
+    public void applySessionFilter()
+    {
+        QueryBuildDataSource    qbds;
+        QueryBuildRange         range;
+        str                     filterText;
+
+        qbds = XAPI_APILogTable_ds.query().dataSourceTable(tableNum(XAPI_APILogTable));
+        qbds.clearRange(fieldNum(XAPI_APILogTable, SessionId));
+
+        filterText = SessionIdFilter.text();
+
+        if (filterText)
+        {
+            range = qbds.addRange(fieldNum(XAPI_APILogTable, SessionId));
+            range.value(queryValue(str2Guid(filterText)));
+        }
+
+        XAPI_APILogTable_ds.executeQuery();
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+		<DataSources xmlns="">
+			<DataSource>
+				<Name>XAPI_APILogTable</Name>
+				<Methods>
+					<Method>
+						<Name>init</Name>
+						<Source><![CDATA[
+        public void init()
+        {
+            super();
+
+            this.query().dataSourceTable(tableNum(XAPI_APILogTable))
+                .addOrderBy(fieldNum(XAPI_APILogTable, Sequence), SortOrder::Ascending);
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</DataSource>
+		</DataSources>
+		<DataControls xmlns="">
+			<Control>
+				<Name>SessionIdFilter</Name>
+				<Type>String</Type>
+				<Methods>
+					<Method>
+						<Name>modified</Name>
+						<Source><![CDATA[
+        public boolean modified()
+        {
+            boolean ret;
+            ret = super();
+
+            element.applySessionFilter();
+
+            return ret;
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</Control>
+			<Control>
+				<Name>LatestRunButton</Name>
+				<Type>Button</Type>
+				<Methods>
+					<Method>
+						<Name>clicked</Name>
+						<Source><![CDATA[
+        public void clicked()
+        {
+            XAPI_APILogTable    latestRow;
+
+            super();
+
+            select firstonly SessionId from latestRow
+                order by RecId desc;
+
+            if (latestRow.SessionId)
+            {
+                SessionIdFilter.text(guid2Str(latestRow.SessionId));
+                element.applySessionFilter();
+            }
+            else
+            {
+                info("No log rows found.");
+            }
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</Control>
+			<Control>
+				<Name>ArchiveButton</Name>
+				<Type>Button</Type>
+				<Methods>
+					<Method>
+						<Name>clicked</Name>
+						<Source><![CDATA[
+        public void clicked()
+        {
+            super();
+
+            XAPI_APILogTable::archive();
+            XAPI_APILogTable_ds.research();
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</Control>
+		</DataControls>
+		<Members xmlns="" />
+	</SourceCode>
+	<DataSources>
+		<AxFormDataSource xmlns="">
+			<Name>XAPI_APILogTable</Name>
+			<Table>XAPI_APILogTable</Table>
+			<AllowCreate>No</AllowCreate>
+			<AllowDelete>No</AllowDelete>
+			<AllowEdit>No</AllowEdit>
+			<Fields>
+				<AxFormDataSourceField>
+					<DataField>LogNum</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>SessionId</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>Sequence</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>ApiName</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>Key</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>Value</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>Message</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>Response</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>Archived</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>RecId</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>TableId</DataField>
+				</AxFormDataSourceField>
+			</Fields>
+			<ReferencedDataSources />
+			<DataSourceLinks />
+			<DerivedDataSources />
+		</AxFormDataSource>
+	</DataSources>
+	<Design>
+		<DataSource xmlns="">XAPI_APILogTable</DataSource>
+		<Pattern xmlns="">SimpleList</Pattern>
+		<PatternVersion xmlns="">1.3</PatternVersion>
+		<Title xmlns="">API Run Log</Title>
+		<Controls xmlns="">
+			<AxFormControl xmlns=""
+				i:type="AxFormActionPaneControl">
+				<Name>ActionPaneMain</Name>
+				<HeightMode>Auto</HeightMode>
+				<Type>ActionPane</Type>
+				<VerticalSpacing>-1</VerticalSpacing>
+				<FormControlExtension
+					i:nil="true" />
+				<Controls>
+					<AxFormControl xmlns=""
+						i:type="AxFormActionPaneTabControl">
+						<Name>ActionPaneTabMain</Name>
+						<HeightMode>Auto</HeightMode>
+						<Type>ActionPaneTab</Type>
+						<VerticalSpacing>-1</VerticalSpacing>
+						<WidthMode>Auto</WidthMode>
+						<FormControlExtension
+							i:nil="true" />
+						<Controls>
+							<AxFormControl xmlns=""
+								i:type="AxFormButtonGroupControl">
+								<Name>ButtonGroupMaintain</Name>
+								<Type>ButtonGroup</Type>
+								<FormControlExtension
+									i:nil="true" />
+								<Controls>
+									<AxFormControl xmlns=""
+										i:type="AxFormButtonControl">
+										<Name>ArchiveButton</Name>
+										<AutoDeclaration>Yes</AutoDeclaration>
+										<Type>Button</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<Text>Archive</Text>
+									</AxFormControl>
+								</Controls>
+							</AxFormControl>
+						</Controls>
+						<AlignChild>No</AlignChild>
+						<AlignChildren>No</AlignChildren>
+						<ArrangeMethod>Vertical</ArrangeMethod>
+					</AxFormControl>
+				</Controls>
+				<AlignChild>No</AlignChild>
+				<AlignChildren>No</AlignChildren>
+				<ArrangeMethod>Vertical</ArrangeMethod>
+				<DataSource>XAPI_APILogTable</DataSource>
+			</AxFormControl>
+			<AxFormControl xmlns=""
+				i:type="AxFormGroupControl">
+				<Name>FilterGroup</Name>
+				<HeightMode>Auto</HeightMode>
+				<Type>Group</Type>
+				<VerticalSpacing>-1</VerticalSpacing>
+				<WidthMode>SizeToAvailable</WidthMode>
+				<FormControlExtension
+					i:nil="true" />
+				<Controls>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>SessionIdFilter</Name>
+						<AutoDeclaration>Yes</AutoDeclaration>
+						<HeightMode>Auto</HeightMode>
+						<Label>Session ID</Label>
+						<Type>String</Type>
+						<VerticalSpacing>-1</VerticalSpacing>
+						<WidthMode>Manual</WidthMode>
+						<Width>320</Width>
+						<FormControlExtension
+							i:nil="true" />
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormButtonControl">
+						<Name>LatestRunButton</Name>
+						<AutoDeclaration>Yes</AutoDeclaration>
+						<HeightMode>Auto</HeightMode>
+						<Type>Button</Type>
+						<VerticalSpacing>-1</VerticalSpacing>
+						<WidthMode>Auto</WidthMode>
+						<FormControlExtension
+							i:nil="true" />
+						<Text>Latest Run</Text>
+					</AxFormControl>
+				</Controls>
+				<ArrangeMethod>HorizontalAlignTop</ArrangeMethod>
+				<Caption>Filter</Caption>
+				<ColumnsMode>Fill</ColumnsMode>
+				<FrameType>Raised</FrameType>
+			</AxFormControl>
+			<AxFormControl xmlns=""
+				i:type="AxFormGridControl">
+				<Name>LogGrid</Name>
+				<AllowEdit>No</AllowEdit>
+				<HeightMode>SizeToAvailable</HeightMode>
+				<Type>Grid</Type>
+				<VerticalSpacing>-1</VerticalSpacing>
+				<WidthMode>SizeToAvailable</WidthMode>
+				<FormControlExtension
+					i:nil="true" />
+				<Controls>
+					<AxFormControl xmlns=""
+						i:type="AxFormIntControl">
+						<Name>LogGrid_Sequence</Name>
+						<Type>Int</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Sequence</DataField>
+						<DataSource>XAPI_APILogTable</DataSource>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormComboBoxControl">
+						<Name>LogGrid_ApiName</Name>
+						<Type>ComboBox</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>ApiName</DataField>
+						<DataSource>XAPI_APILogTable</DataSource>
+						<Items />
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogGrid_Key</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Key</DataField>
+						<DataSource>XAPI_APILogTable</DataSource>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogGrid_Value</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Value</DataField>
+						<DataSource>XAPI_APILogTable</DataSource>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogGrid_Message</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Message</DataField>
+						<DataSource>XAPI_APILogTable</DataSource>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogGrid_Response</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Response</DataField>
+						<DataSource>XAPI_APILogTable</DataSource>
+						<MultiLine>Yes</MultiLine>
+					</AxFormControl>
+				</Controls>
+				<DataSource>XAPI_APILogTable</DataSource>
+				<MultiSelect>No</MultiSelect>
+				<ShowRowLabels>No</ShowRowLabels>
+				<Style>Tabular</Style>
+			</AxFormControl>
+		</Controls>
+	</Design>
+	<Parts />
+</AxForm>

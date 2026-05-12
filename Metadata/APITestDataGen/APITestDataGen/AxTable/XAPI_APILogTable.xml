@@ -170,6 +170,18 @@ public class XAPI_APILogTable extends common
 			<IgnoreEDTRelation>Yes</IgnoreEDTRelation>
 			<EnumType>NoYes</EnumType>
 		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldGuid">
+			<Name>SessionId</Name>
+			<ExtendedDataType>GUID</ExtendedDataType>
+			<Label>Session ID</Label>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldInt">
+			<Name>Sequence</Name>
+			<ExtendedDataType>Integer</ExtendedDataType>
+			<Label>Sequence</Label>
+		</AxTableField>
 	</Fields>
 	<FullTextIndexes />
 	<Indexes />

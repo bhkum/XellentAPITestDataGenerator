@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_TestSuiteCopyFromConfig</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+final class XAPI_TestSuiteCopyFromConfig
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>copyAll</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Copies every XAPI_APIConfigurations row into XAPI_TestCase rows under
+    /// the given suite. Existing cases (matched by API) are updated in place;
+    /// new ones are appended with Sequence = max(Sequence) + 10.
+    /// </summary>
+    /// <param name = "_suiteId">Target test suite identifier.</param>
+    public static void copyAll(str _suiteId)
+    {
+        XAPI_APIConfigurations    config;
+        XAPI_TestCase             testCase;
+        int                       count;
+
+        ttsbegin;
+
+        while select config
+        {
+            select forupdate testCase
+                where testCase.SuiteId == _suiteId
+                   && testCase.API     == config.API;
+
+            if (testCase.RecId)
+            {
+                testCase.URL                   = config.URL;
+                testCase.JSON                  = config.JSON;
+                testCase.PreProcessClass       = config.PreProcessClass;
+                testCase.PostProcessBatchClass = config.PostProcessBatchClass;
+                testCase.update();
+            }
+            else
+            {
+                int nextSeq;
+
+                select maxof(Sequence) from testCase
+                    where testCase.SuiteId == _suiteId;
+
+                nextSeq = max(testCase.Sequence + 10, 10);
+
+                testCase.clear();
+                testCase.SuiteId               = _suiteId;
+                testCase.Sequence              = nextSeq;
+                testCase.API                   = config.API;
+                testCase.URL                   = config.URL;
+                testCase.JSON                  = config.JSON;
+                testCase.PreProcessClass       = config.PreProcessClass;
+                testCase.PostProcessBatchClass = config.PostProcessBatchClass;
+                testCase.insert();
+            }
+
+            count++;
+        }
+
+        ttscommit;
+
+        info(strFmt("Copied %1 API configs into suite %2.", count, _suiteId));
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>copySingle</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Copies a single XAPI_APIConfigurations row (identified by API) into
+    /// XAPI_TestCase under the given suite. Existing case (matched by API)
+    /// is updated in place; otherwise a new row is appended with
+    /// Sequence = max(Sequence) + 10.
+    /// </summary>
+    /// <param name = "_suiteId">Target test suite identifier.</param>
+    /// <param name = "_api">API configuration to copy.</param>
+    public static void copySingle(str _suiteId, XAPI_APIS _api)
+    {
+        XAPI_APIConfigurations    config;
+        XAPI_TestCase             testCase;
+        int                       count;
+
+        ttsbegin;
+
+        select config
+            where config.API == _api;
+
+        if (config.RecId)
+        {
+            select forupdate testCase
+                where testCase.SuiteId == _suiteId
+                   && testCase.API     == config.API;
+
+            if (testCase.RecId)
+            {
+                testCase.URL                   = config.URL;
+                testCase.JSON                  = config.JSON;
+                testCase.PreProcessClass       = config.PreProcessClass;
+                testCase.PostProcessBatchClass = config.PostProcessBatchClass;
+                testCase.update();
+            }
+            else
+            {
+                int nextSeq;
+
+                select maxof(Sequence) from testCase
+                    where testCase.SuiteId == _suiteId;
+
+                nextSeq = max(testCase.Sequence + 10, 10);
+
+                testCase.clear();
+                testCase.SuiteId               = _suiteId;
+                testCase.Sequence              = nextSeq;
+                testCase.API                   = config.API;
+                testCase.URL                   = config.URL;
+                testCase.JSON                  = config.JSON;
+                testCase.PreProcessClass       = config.PreProcessClass;
+                testCase.PostProcessBatchClass = config.PostProcessBatchClass;
+                testCase.insert();
+            }
+
+            count++;
+        }
+
+        ttscommit;
+
+        info(strFmt("Copied %1 API configs into suite %2.", count, _suiteId));
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

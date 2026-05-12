@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_SuiteOrchestrator</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+final class XAPI_SuiteOrchestrator
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>run</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Runs every test case in the given suite in Sequence order.
+    /// Independent suites continue past failures; Chained suites stop on
+    /// the first failure. Successful cases may publish a value into a
+    /// session-scoped map (via ExtractField / ExtractAs) so that later
+    /// cases can reference it through {{key}} placeholders in their JSON.
+    /// </summary>
+    /// <param name = "_suiteId">Suite to run.</param>
+    public static void run(str _suiteId)
+    {
+        XAPI_TestSuite        suite;
+        XAPI_TestCase         testCase;
+        XAPI_APILogTable      logRow;
+        XAPI_SuiteType        suiteType;
+        Map                   sessionMap;
+        MapEnumerator         mapEnum;
+        guid                  sessionId;
+        str                   resolvedJson;
+        str                   tokenKey;
+        str                   tokenValue;
+        int                   infologMark;
+        str                   failureMessage;
+        boolean               chainBroken;
+
+        select firstonly suite
+            where suite.SuiteId == _suiteId;
+
+        if (!suite.RecId)
+        {
+            error(strFmt("Suite %1 not found.", _suiteId));
+            return;
+        }
+
+        suiteType  = suite.SuiteType;
+        sessionId  = newGuid();
+        sessionMap = new Map(Types::String, Types::String);
+
+        while select testCase
+            order by Sequence asc
+            where testCase.SuiteId == _suiteId
+        {
+            if (chainBroken)
+            {
+                break;
+            }
+
+            infologMark  = infolog.line();
+            resolvedJson = testCase.JSON;
+
+            mapEnum = sessionMap.getEnumerator();
+            while (mapEnum.moveNext())
+            {
+                tokenKey     = mapEnum.currentKey();
+                tokenValue   = mapEnum.currentValue();
+                resolvedJson = strReplace(resolvedJson, '{{' + tokenKey + '}}', tokenValue);
+            }
+
+            try
+            {
+                XAPI_APIRunnerFacade::runAPI(testCase.API, resolvedJson, sessionId, testCase.Sequence);
+
+                info(strFmt("Suite %1 - Seq %2 API %3 completed.",
+                    _suiteId,
+                    testCase.Sequence,
+                    enum2Str(testCase.API)));
+
+                if (testCase.ExtractField != '' && testCase.ExtractAs != '')
+                {
+                    select firstonly logRow
+                        order by RecId desc
+                        where logRow.SessionId == sessionId
+                           && logRow.Sequence  == testCase.Sequence;
+
+                    if (logRow.RecId && logRow.Response)
+                    {
+                        XAPI_SuiteOrchestrator::extractInto(
+                            sessionMap,
+                            logRow.Response,
+                            testCase.ExtractField,
+                            testCase.ExtractAs,
+                            _suiteId,
+                            testCase.Sequence);
+                    }
+                }
+            }
+            catch (Exception::Error)
+            {
+                failureMessage = infolog.text(infologMark + 1);
+
+                warning(strFmt("Suite %1 - Seq %2 API %3 failed: %4.",
+                    _suiteId,
+                    testCase.Sequence,
+                    enum2Str(testCase.API),
+                    failureMessage));
+
+                if (suiteType == XAPI_SuiteType::Chained)
+                {
+                    chainBroken = true;
+                }
+            }
+        }
+
+        info(strFmt("Suite %1 run %2 complete.", _suiteId, guid2Str(sessionId)));
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>extractInto</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Parses the given response JSON, extracts the value at the supplied
+    /// path (using JSONPath via Newtonsoft.Json.Linq.JToken.SelectToken so
+    /// nested keys like "data.AccountNum" work), and stores it in the
+    /// session map under the supplied alias. Failures are reported as
+    /// warnings only - they do not abort the run.
+    /// </summary>
+    private static void extractInto(
+        Map     _sessionMap,
+        str     _responseJson,
+        str     _extractField,
+        str     _extractAs,
+        str     _suiteId,
+        int     _sequence)
+    {
+        Newtonsoft.Json.Linq.JObject jObj;
+        Newtonsoft.Json.Linq.JToken  jTok;
+        str                          extractedValue;
+
+        try
+        {
+            jObj = Newtonsoft.Json.Linq.JObject::Parse(_responseJson);
+            jTok = jObj.SelectToken(_extractField);
+
+            if (jTok != null)
+            {
+                extractedValue = jTok.ToString();
+                _sessionMap.insert(_extractAs, extractedValue);
+            }
+            else
+            {
+                warning(strFmt(
+                    "Suite %1 - Seq %2: ExtractField '%3' not found in response.",
+                    _suiteId, _sequence, _extractField));
+            }
+        }
+        catch (Exception::CLRError)
+        {
+            warning(strFmt(
+                "Suite %1 - Seq %2: response JSON parse failed for ExtractField '%3'.",
+                _suiteId, _sequence, _extractField));
+        }
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>
