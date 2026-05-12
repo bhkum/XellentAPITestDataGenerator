@@ -540,9 +540,9 @@ public class XAPI_TestSuiteForm extends FormRun
 									i:nil="true" />
 								<Controls>
 									<AxFormControl xmlns=""
-										i:type="AxFormIntControl">
+										i:type="AxFormIntegerControl">
 										<Name>TestCaseGrid_Sequence</Name>
-										<Type>Int</Type>
+										<Type>Integer</Type>
 										<FormControlExtension
 											i:nil="true" />
 										<DataField>Sequence</DataField>

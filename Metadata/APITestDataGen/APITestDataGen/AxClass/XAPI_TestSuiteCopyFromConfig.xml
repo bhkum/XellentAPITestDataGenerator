@@ -21,7 +21,7 @@ final class XAPI_TestSuiteCopyFromConfig
     {
         XAPI_APIConfigurations    config;
         XAPI_TestCase             testCase;
-        int                       count;
+        int                       ncount;
 
         ttsbegin;
 
@@ -59,12 +59,12 @@ final class XAPI_TestSuiteCopyFromConfig
                 testCase.insert();
             }
 
-            count++;
+            ncount++;
         }
 
         ttscommit;
 
-        info(strFmt("Copied %1 API configs into suite %2.", count, _suiteId));
+        info(strFmt("Copied %1 API configs into suite %2.", ncount, _suiteId));
     }
 
 ]]></Source>
@@ -84,7 +84,7 @@ final class XAPI_TestSuiteCopyFromConfig
     {
         XAPI_APIConfigurations    config;
         XAPI_TestCase             testCase;
-        int                       count;
+        int                       ncount;
 
         ttsbegin;
 
@@ -125,12 +125,12 @@ final class XAPI_TestSuiteCopyFromConfig
                 testCase.insert();
             }
 
-            count++;
+            ncount++;
         }
 
         ttscommit;
 
-        info(strFmt("Copied %1 API configs into suite %2.", count, _suiteId));
+        info(strFmt("Copied %1 API configs into suite %2.", ncount, _suiteId));
     }
 
 ]]></Source>

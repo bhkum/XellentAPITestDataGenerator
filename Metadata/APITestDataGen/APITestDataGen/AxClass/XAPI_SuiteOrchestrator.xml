@@ -70,7 +70,7 @@ final class XAPI_SuiteOrchestrator
 
             try
             {
-                XAPI_APIRunnerFacade::runAPI(testCase.API, resolvedJson, sessionId, testCase.Sequence);
+                XAPI_APIRunnerFacade::runAPI(testCase.API);
 
                 info(strFmt("Suite %1 - Seq %2 API %3 completed.",
                     _suiteId,
