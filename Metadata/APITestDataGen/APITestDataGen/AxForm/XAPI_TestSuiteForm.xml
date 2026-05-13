@@ -48,21 +48,43 @@ public class XAPI_TestSuiteForm extends FormRun
 						<Source><![CDATA[
     public void initValue()
     {
-        int     nextId;
         int     padding;
         str     numStr;
 
         super();
 
         lastSuiteNum++;
-        nextId  = lastSuiteNum;
-        numStr  = strFmt("%1", nextId);
+        numStr  = strFmt("%1", lastSuiteNum);
         padding = 3 - strLen(numStr);
         if (padding < 0)
         {
             padding = 0;
         }
         XAPI_TestSuite.SuiteId = "S" + subStr("000", 1, padding) + numStr;
+    }
+
+]]></Source>
+					</Method>
+				</Methods>
+				<Fields />
+			</DataSource>
+			<DataSource>
+				<Name>XAPI_TestCase</Name>
+				<Methods>
+					<Method>
+						<Name>initValue</Name>
+						<Source><![CDATA[
+    public void initValue()
+    {
+        XAPI_TestCase   existing;
+
+        super();
+
+        XAPI_TestCase.SuiteId = XAPI_TestSuite.SuiteId;
+
+        select maxof(Sequence) from existing
+            where existing.SuiteId == XAPI_TestSuite.SuiteId;
+        XAPI_TestCase.Sequence = existing.Sequence + 10;
     }
 
 ]]></Source>

@@ -68,6 +68,11 @@
       <Name>XAPI_APILogTable</Name>
       <Link>Tables\XAPI_APILogTable</Link>
     </Content>
+    <Content Include="AxTable\XAPI_TestCase">
+      <SubType>Content</SubType>
+      <Name>XAPI_TestCase</Name>
+      <Link>Tables\XAPI_TestCase</Link>
+    </Content>
     <Content Include="AxTable\XAPI_TestParameters">
       <SubType>Content</SubType>
       <Name>XAPI_TestParameters</Name>

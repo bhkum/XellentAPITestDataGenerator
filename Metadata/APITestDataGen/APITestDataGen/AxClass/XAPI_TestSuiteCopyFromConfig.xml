@@ -51,6 +51,7 @@ final class XAPI_TestSuiteCopyFromConfig
                 testCase.clear();
                 testCase.SuiteId               = _suiteId;
                 testCase.Sequence              = nextSeq;
+                testCase.TestCaseId            = XAPI_TestSuiteCopyFromConfig::nextTestCaseId(_suiteId);
                 testCase.API                   = config.API;
                 testCase.URL                   = config.URL;
                 testCase.JSON                  = config.JSON;
@@ -117,6 +118,7 @@ final class XAPI_TestSuiteCopyFromConfig
                 testCase.clear();
                 testCase.SuiteId               = _suiteId;
                 testCase.Sequence              = nextSeq;
+                testCase.TestCaseId            = XAPI_TestSuiteCopyFromConfig::nextTestCaseId(_suiteId);
                 testCase.API                   = config.API;
                 testCase.URL                   = config.URL;
                 testCase.JSON                  = config.JSON;
@@ -131,6 +133,46 @@ final class XAPI_TestSuiteCopyFromConfig
         ttscommit;
 
         info(strFmt("Copied %1 API configs into suite %2.", ncount, _suiteId));
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>nextTestCaseId</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Returns the next available TestCaseId for the given suite in the format "C###".
+    /// </summary>
+    private static str nextTestCaseId(str _suiteId)
+    {
+        XAPI_TestCase   existing;
+        int             maxNum = 0;
+        int             currentId;
+        int             padding;
+        str             numStr;
+
+        while select TestCaseId from existing
+            where existing.SuiteId == _suiteId
+        {
+            if (existing.TestCaseId)
+            {
+                currentId = str2int(subStr(existing.TestCaseId, 2, strLen(existing.TestCaseId) - 1));
+                if (currentId > maxNum)
+                {
+                    maxNum = currentId;
+                }
+            }
+        }
+
+        maxNum++;
+        numStr  = strFmt("%1", maxNum);
+        padding = 3 - strLen(numStr);
+        if (padding < 0)
+        {
+            padding = 0;
+        }
+
+        return "C" + subStr("000", 1, padding) + numStr;
     }
 
 ]]></Source>
