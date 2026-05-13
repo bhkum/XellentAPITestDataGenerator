@@ -9,11 +9,67 @@
 [Form]
 public class XAPI_TestSuiteForm extends FormRun
 {
+    int lastSuiteNum;
 }
 ]]></Source>
 			</Method>
+			<Method>
+				<Name>init</Name>
+				<Source><![CDATA[
+    public void init()
+    {
+        XAPI_TestSuite  existing;
+        int             currentId;
+
+        super();
+
+        while select SuiteId from existing
+        {
+            if (existing.SuiteId)
+            {
+                currentId = str2int(subStr(existing.SuiteId, 2, strLen(existing.SuiteId) - 1));
+                if (currentId > lastSuiteNum)
+                {
+                    lastSuiteNum = currentId;
+                }
+            }
+        }
+    }
+
+]]></Source>
+			</Method>
 		</Methods>
-		<DataSources xmlns="" />
+		<DataSources xmlns="">
+			<DataSource>
+				<Name>XAPI_TestSuite</Name>
+				<Methods>
+					<Method>
+						<Name>initValue</Name>
+						<Source><![CDATA[
+    public void initValue()
+    {
+        int     nextId;
+        int     padding;
+        str     numStr;
+
+        super();
+
+        lastSuiteNum++;
+        nextId  = lastSuiteNum;
+        numStr  = strFmt("%1", nextId);
+        padding = 3 - strLen(numStr);
+        if (padding < 0)
+        {
+            padding = 0;
+        }
+        XAPI_TestSuite.SuiteId = "S" + subStr("000", 1, padding) + numStr;
+    }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</DataSource>
+		</DataSources>
 		<DataControls xmlns="">
 			<Control>
 				<Name>CopyAllButton</Name>
