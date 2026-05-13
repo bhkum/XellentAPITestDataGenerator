@@ -9,6 +9,42 @@ public class XAPI_TestSuite extends common
 ]]></Declaration>
 		<Methods>
 			<Method>
+				<Name>initValue</Name>
+				<Source><![CDATA[
+    public void initValue()
+    {
+        XAPI_TestSuite  existing;
+        int             maxId;
+        int             currentId;
+        int             nextId;
+        int             padding;
+        str             numStr;
+
+        super();
+
+        while select SuiteId from existing
+        {
+            // Strip the "S" prefix before numeric comparison
+            currentId = str2int(subStr(existing.SuiteId, 2, strLen(existing.SuiteId) - 1));
+            if (currentId > maxId)
+            {
+                maxId = currentId;
+            }
+        }
+
+        nextId  = maxId + 1;
+        numStr  = int2str(nextId);
+        padding = 3 - strLen(numStr);
+        if (padding < 0)
+        {
+            padding = 0;
+        }
+        this.SuiteId = "S" + subStr("000", 1, padding) + numStr;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
 				<Name>shouldThrowExceptionOnZeroDelete</Name>
 				<Source><![CDATA[
     /// <summary>

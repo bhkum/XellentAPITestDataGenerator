@@ -124,7 +124,6 @@ public class XAPI_TestCase extends common
 			i:type="AxTableFieldEnum">
 			<Name>API</Name>
 			<EnumType>XAPI_APIS</EnumType>
-			<Label>API</Label>
 		</AxTableField>
 		<AxTableField xmlns=""
 			i:type="AxTableFieldString">
@@ -142,28 +141,24 @@ public class XAPI_TestCase extends common
 			i:type="AxTableFieldString">
 			<Name>PreProcessClass</Name>
 			<Label>Pre-process Class</Label>
-			<Mandatory>No</Mandatory>
 			<StringSize>100</StringSize>
 		</AxTableField>
 		<AxTableField xmlns=""
 			i:type="AxTableFieldString">
 			<Name>PostProcessBatchClass</Name>
 			<Label>Post-process Batch Class</Label>
-			<Mandatory>No</Mandatory>
 			<StringSize>100</StringSize>
 		</AxTableField>
 		<AxTableField xmlns=""
 			i:type="AxTableFieldString">
 			<Name>ExtractField</Name>
 			<Label>Extract Field</Label>
-			<Mandatory>No</Mandatory>
 			<StringSize>100</StringSize>
 		</AxTableField>
 		<AxTableField xmlns=""
 			i:type="AxTableFieldString">
 			<Name>ExtractAs</Name>
 			<Label>Extract As</Label>
-			<Mandatory>No</Mandatory>
 			<StringSize>100</StringSize>
 		</AxTableField>
 	</Fields>
@@ -171,7 +166,6 @@ public class XAPI_TestCase extends common
 	<Indexes>
 		<AxTableIndex>
 			<Name>TestCaseIdx</Name>
-			<AllowDuplicates>No</AllowDuplicates>
 			<AlternateKey>Yes</AlternateKey>
 			<Fields>
 				<AxTableIndexField>

@@ -47,10 +47,19 @@ public class XAPI_APIConfigurations extends FormRun
 					<DataField>API</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
-					<DataField>Execute</DataField>
+					<DataField>DataAreaId</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>JSON</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>Partition</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>PostProcessBatchClass</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>PreProcessClass</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>RecId</DataField>
@@ -309,6 +318,24 @@ public class XAPI_APIConfigurations extends FormRun
 										<DataField>JSON</DataField>
 										<DataSource>XAPI_APIConfigurations</DataSource>
 										<MultiLine>Yes</MultiLine>
+									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormStringControl">
+										<Name>XAPI_APIConfigurations_PreProcessClass</Name>
+										<Type>String</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<DataField>PreProcessClass</DataField>
+										<DataSource>XAPI_APIConfigurations</DataSource>
+									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormStringControl">
+										<Name>XAPI_APIConfigurations_PostProcessBatchClass</Name>
+										<Type>String</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<DataField>PostProcessBatchClass</DataField>
+										<DataSource>XAPI_APIConfigurations</DataSource>
 									</AxFormControl>
 								</Controls>
 								<Caption>Configuration</Caption>

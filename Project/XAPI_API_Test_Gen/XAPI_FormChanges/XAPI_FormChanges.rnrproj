@@ -68,6 +68,16 @@
       <Name>XAPI_APILogTable</Name>
       <Link>Tables\XAPI_APILogTable</Link>
     </Content>
+    <Content Include="AxTable\XAPI_TestParameters">
+      <SubType>Content</SubType>
+      <Name>XAPI_TestParameters</Name>
+      <Link>Tables\XAPI_TestParameters</Link>
+    </Content>
+    <Content Include="AxTable\XAPI_TestSuite">
+      <SubType>Content</SubType>
+      <Name>XAPI_TestSuite</Name>
+      <Link>Tables\XAPI_TestSuite</Link>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
   <Import Project="$(BuildTasksDirectory)\Microsoft.Dynamics.Framework.Tools.BuildTasks.17.0.targets" />

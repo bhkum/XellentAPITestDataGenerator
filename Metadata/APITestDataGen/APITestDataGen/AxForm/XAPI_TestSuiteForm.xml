@@ -109,19 +109,25 @@ public class XAPI_TestSuiteForm extends FormRun
 			<Table>XAPI_TestSuite</Table>
 			<Fields>
 				<AxFormDataSourceField>
-					<DataField>SuiteId</DataField>
-				</AxFormDataSourceField>
-				<AxFormDataSourceField>
-					<DataField>Name</DataField>
+					<DataField>DataAreaId</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>Description</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
-					<DataField>SuiteType</DataField>
+					<DataField>Name</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>Partition</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>RecId</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>SuiteId</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>SuiteType</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>TableId</DataField>
@@ -134,44 +140,52 @@ public class XAPI_TestSuiteForm extends FormRun
 		<AxFormDataSource xmlns="">
 			<Name>XAPI_TestCase</Name>
 			<Table>XAPI_TestCase</Table>
-			<AllowCreate>Yes</AllowCreate>
-			<AllowEdit>Yes</AllowEdit>
-			<InsertIfEmpty>No</InsertIfEmpty>
-			<JoinSource>XAPI_TestSuite</JoinSource>
-			<LinkType>Delayed</LinkType>
 			<Fields>
-				<AxFormDataSourceField>
-					<DataField>TestCaseId</DataField>
-				</AxFormDataSourceField>
-				<AxFormDataSourceField>
-					<DataField>SuiteId</DataField>
-				</AxFormDataSourceField>
-				<AxFormDataSourceField>
-					<DataField>Sequence</DataField>
-				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>API</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
-					<DataField>URL</DataField>
+					<DataField>DataAreaId</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>ExtractAs</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>ExtractField</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>JSON</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
-					<DataField>PreProcessClass</DataField>
+					<DataField>Partition</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>PostProcessBatchClass</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
+					<DataField>PreProcessClass</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
 					<DataField>RecId</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>Sequence</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>SuiteId</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>TableId</DataField>
 				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>TestCaseId</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>URL</DataField>
+				</AxFormDataSourceField>
 			</Fields>
 			<ReferencedDataSources />
+			<InsertIfEmpty>No</InsertIfEmpty>
 			<DataSourceLinks />
 			<DerivedDataSources />
 		</AxFormDataSource>
@@ -182,7 +196,6 @@ public class XAPI_TestSuiteForm extends FormRun
 		<Pattern xmlns="">SimpleListDetails-Grid</Pattern>
 		<PatternVersion xmlns="">1.4</PatternVersion>
 		<Style xmlns="">SimpleListDetails</Style>
-		<Title xmlns="">Test Suites</Title>
 		<WidthMode xmlns="">Column</WidthMode>
 		<Controls xmlns="">
 			<AxFormControl xmlns=""
@@ -217,7 +230,6 @@ public class XAPI_TestSuiteForm extends FormRun
 										<Type>CommandButton</Type>
 										<FormControlExtension
 											i:nil="true" />
-										<DataSource>XAPI_TestSuite</DataSource>
 										<Command>New</Command>
 									</AxFormControl>
 									<AxFormControl xmlns=""
@@ -226,7 +238,6 @@ public class XAPI_TestSuiteForm extends FormRun
 										<Type>CommandButton</Type>
 										<FormControlExtension
 											i:nil="true" />
-										<DataSource>XAPI_TestSuite</DataSource>
 										<Command>DeleteRecord</Command>
 									</AxFormControl>
 								</Controls>
@@ -489,53 +500,17 @@ public class XAPI_TestSuiteForm extends FormRun
 								i:type="AxFormActionPaneControl">
 								<Name>TestCaseActionPane</Name>
 								<HeightMode>Auto</HeightMode>
-								<Style>Strip</Style>
 								<Type>ActionPane</Type>
-								<VerticalSpacing>-1</VerticalSpacing>
 								<FormControlExtension
 									i:nil="true" />
-								<Controls>
-									<AxFormControl xmlns=""
-										i:type="AxFormButtonGroupControl">
-										<Name>TestCaseButtonGroupNew</Name>
-										<Type>ButtonGroup</Type>
-										<FormControlExtension
-											i:nil="true" />
-										<Controls>
-											<AxFormControl xmlns=""
-												i:type="AxFormCommandButtonControl">
-												<Name>TestCaseNewButton</Name>
-												<Type>CommandButton</Type>
-												<FormControlExtension
-													i:nil="true" />
-												<DataSource>XAPI_TestCase</DataSource>
-												<Command>New</Command>
-											</AxFormControl>
-											<AxFormControl xmlns=""
-												i:type="AxFormCommandButtonControl">
-												<Name>TestCaseDeleteButton</Name>
-												<Type>CommandButton</Type>
-												<FormControlExtension
-													i:nil="true" />
-												<DataSource>XAPI_TestCase</DataSource>
-												<Command>DeleteRecord</Command>
-											</AxFormControl>
-										</Controls>
-									</AxFormControl>
-								</Controls>
-								<AlignChild>No</AlignChild>
-								<AlignChildren>No</AlignChildren>
-								<ArrangeMethod>Vertical</ArrangeMethod>
-								<DataSource>XAPI_TestCase</DataSource>
+								<Controls />
+								<Style>Strip</Style>
 							</AxFormControl>
 							<AxFormControl xmlns=""
 								i:type="AxFormGridControl">
 								<Name>TestCaseGrid</Name>
-								<AllowEdit>Yes</AllowEdit>
-								<HeightMode>SizeToAvailable</HeightMode>
 								<Type>Grid</Type>
 								<VerticalSpacing>-1</VerticalSpacing>
-								<WidthMode>SizeToAvailable</WidthMode>
 								<FormControlExtension
 									i:nil="true" />
 								<Controls>
@@ -584,6 +559,7 @@ public class XAPI_TestSuiteForm extends FormRun
 											i:nil="true" />
 										<DataField>URL</DataField>
 										<DataSource>XAPI_TestCase</DataSource>
+										<Label>Endpoint</Label>
 									</AxFormControl>
 									<AxFormControl xmlns=""
 										i:type="AxFormStringControl">
@@ -597,7 +573,6 @@ public class XAPI_TestSuiteForm extends FormRun
 									</AxFormControl>
 								</Controls>
 								<DataSource>XAPI_TestCase</DataSource>
-								<MultiSelect>Yes</MultiSelect>
 								<ShowRowLabels>No</ShowRowLabels>
 								<Style>Tabular</Style>
 							</AxFormControl>

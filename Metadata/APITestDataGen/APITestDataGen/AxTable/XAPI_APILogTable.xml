@@ -173,7 +173,7 @@ public class XAPI_APILogTable extends common
 		<AxTableField xmlns=""
 			i:type="AxTableFieldGuid">
 			<Name>SessionId</Name>
-			<ExtendedDataType>EXU_Guid</ExtendedDataType>
+			<ExtendedDataType>sysGuid</ExtendedDataType>
 			<IgnoreEDTRelation>Yes</IgnoreEDTRelation>
 			<Label>Session ID</Label>
 		</AxTableField>
