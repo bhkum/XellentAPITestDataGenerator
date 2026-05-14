@@ -129,7 +129,7 @@ class XAPI_AutomateScripts
     {
         this.deleteAll();
 
-        xapi_api_callautomator auto = xapi_api_callautomator::construct();
+        XAPI_API_CallAutomator_del auto = XAPI_API_CallAutomator_del::construct();
 
         // 1. create customer
         xapi_newcustomerdatagen::main(null);

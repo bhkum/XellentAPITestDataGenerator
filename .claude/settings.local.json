@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem *)",
+      "PowerShell($content = Get-Content -Path \"J:\\\\AosService\\\\PackagesLocalDirectory\\\\Directory\\\\Directory\\\\AxTable\\\\LogisticsAddressZipCode.xml\" -Raw; $fieldsStart = $content.IndexOf\\(\"<Fields>\"\\); $fieldsEnd = $content.IndexOf\\(\"</Fields>\"\\) + 9; $relationsStart = $content.IndexOf\\(\"<Relations>\"\\); $relationsEnd = $content.IndexOf\\(\"</Relations>\"\\) + 12; Write-Output $content.Substring\\($fieldsStart, $fieldsEnd - $fieldsStart\\))",
+      "PowerShell($content = Get-Content -Path \"J:\\\\AosService\\\\PackagesLocalDirectory\\\\Directory\\\\Directory\\\\AxTable\\\\LogisticsAddressZipCode.xml\" -Raw; $relationsStart = $content.IndexOf\\(\"<Relations>\"\\); $relationsEnd = $content.IndexOf\\(\"</Relations>\"\\) + 12; Write-Output $content.Substring\\($relationsStart, $relationsEnd - $relationsStart\\) | Select-Object -First 500)",
+      "Bash(xargs grep -l \"StringSize\")",
+      "Bash(xargs grep -l \"SysGroup\")",
+      "Bash(xargs grep -l \"CustGroup\")",
+      "Bash(xargs grep -l \"<Name>SysGroup</Name>\")",
+      "Bash(xargs grep -B 2 -A 5 \"<Extends>SysGroup</Extends>\")",
+      "Bash(powershell *)",
+      "PowerShell(Get-ChildItem -Path 'J:\\\\AosService\\\\PackagesLocalDirectory' -Recurse -Filter 'PaymMode.xml' -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match 'AxEdt' } | Select-Object -First 5 FullName)",
+      "PowerShell(Get-ChildItem -Path 'J:\\\\AosService\\\\PackagesLocalDirectory' -Recurse -ErrorAction SilentlyContinue -File | Where-Object { $_.Name -eq 'PaymMode.xml' -and $_.FullName -match 'AxEdt' } | Select-Object -First 5 FullName)",
+      "PowerShell($dirs = Get-ChildItem -Path 'J:\\\\AosService\\\\PackagesLocalDirectory' -Directory -ErrorAction SilentlyContinue; Write-Output \"Found $\\($dirs.Count\\) dirs\"; $dirs | ForEach-Object { Write-Output $_.Name })",
+      "PowerShell(Test-Path *)",
+      "PowerShell(Get-ChildItem -Path 'J:\\\\AosService\\\\PackagesLocalDirectory\\\\ApplicationPlatform','J:\\\\AosService\\\\PackagesLocalDirectory\\\\ApplicationFoundation','J:\\\\AosService\\\\PackagesLocalDirectory\\\\ApplicationSuite' -Recurse -ErrorAction SilentlyContinue -File -Filter 'SysGroup.xml' | Where-Object { $_.FullName -match 'AxEdt' } | Select-Object -First 5 FullName)",
+      "PowerShell(Get-ChildItem -Path 'J:\\\\AosService\\\\PackagesLocalDirectory\\\\APITestDataGen\\\\APITestDataGen\\\\AxClass' -ErrorAction SilentlyContinue | ForEach-Object { Write-Output $_.Name })",
+      "PowerShell(Get-ChildItem -Path 'C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxClass' -ErrorAction SilentlyContinue | ForEach-Object { Write-Output $_.Name })",
+      "PowerShell(git *)",
+      "PowerShell($item = Get-Item 'C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen' -Force -ErrorAction SilentlyContinue; if \\($item\\) { Write-Output \\(\"LinkType={0}\" -f $item.LinkType\\); Write-Output \\(\"Target={0}\" -f \\($item.Target -join ','\\)\\); Write-Output \\(\"Attributes={0}\" -f $item.Attributes\\) } else { Write-Output 'NOT FOUND' })",
+      "Bash(awk 'NR==146,NR==158' \"C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxTable\\\\XAPI_TestCase.xml\")",
+      "Bash(awk 'NR==148' \"C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxTable\\\\XAPI_TestCase.xml\")",
+      "Bash(awk 'NR==228,NR==234' \"C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxForm\\\\XAPI_TestSuiteForm.xml\")"
+    ]
+  }
+}

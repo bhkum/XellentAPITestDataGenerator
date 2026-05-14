@@ -193,13 +193,13 @@ abstract class XAPI_APICallerBase
                 apiAuto = new XAPI_APICaller_Contract();
                 //apiAuto.parmApi(XAPI_APIS::CreateContract);
                 break;
-            case XAPI_APIS::CreateContractPart:
-                apiAuto = new XAPI_APICaller_ContractPart();
-                break;
+            //case XAPI_APIS::CreateContractPart:
+            //    apiAuto = new XAPI_APICaller_ContractPart();
+            //    break;
 
-            case XAPI_APIS::CreateMeterReading:
-                apiAuto = new XAPI_APICaller_MeterReading();
-                break;
+            //case XAPI_APIS::CreateMeterReading:
+            //    apiAuto = new XAPI_APICaller_MeterReading();
+            //    break;
 
             default: throw error("Invalid call");
         }

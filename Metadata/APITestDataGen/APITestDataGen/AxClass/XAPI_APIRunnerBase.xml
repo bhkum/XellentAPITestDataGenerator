@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APIRunnerBase</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+abstract class XAPI_APIRunnerBase
+{
+    protected XAPI_APIConfigurations apiConfig;
+
+    // API
+    private str tenantId = XAPI_AutomationHelper::tenantId;
+    private str clientId = XAPI_AutomationHelper::clientId;
+    private str clientSecret = XAPI_AutomationHelper::clientSecret;
+    protected str  resourceUrl = XAPI_AutomationHelper::resourceUrl;
+
+    protected str responseText;
+    protected str requestBody;
+    protected str errorMessage;
+    protected str logKey;
+    protected str logValue;
+    protected XAPI_APIS api;
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>body</Name>
+				<Source><![CDATA[
+   // protected str body;
+
+
+    // api
+    abstract protected str body() {}
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>execute</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Orchestrator entry point. Runs the api call and writes one XAPI_APILogTable
+    /// row stamped with the suite-run SessionId and Sequence from the context.
+    /// </summary>
+    public void execute(XAPI_TestStepContext _ctx)
+    {
+        XAPI_APILogTable logRow;
+
+        this.init();
+        this.runAPI();
+
+        try
+        {
+            this.postRun();
+        }
+        catch
+        {
+            // Deserialization failures must not block the log row.
+        }
+
+        logRow.SessionId    = _ctx.parmSessionId();
+        logRow.Sequence     = _ctx.parmSequence();
+        logRow.ApiName      = api;
+        logRow.Key          = logKey;
+        logRow.Value        = logValue;
+        logRow.RequestBody  = requestBody;
+        logRow.Response     = responseText;
+        logRow.ErrorMessage = errorMessage;
+        logRow.insert();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>init</Name>
+				<Source><![CDATA[
+    protected void init()
+    {
+        select firstonly apiConfig
+            where apiConfig.API == api;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runAPI</Name>
+				<Source><![CDATA[
+    protected void runAPI()
+    {
+        this.sendPostRequest();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>postRun</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Optional hook for subclasses to parse responseText and populate logKey /
+    /// logValue (e.g. the created entity's identifier) before the log row is
+    /// written. Default is a no-op.
+    /// </summary>
+    protected void postRun()
+    {
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>prepareBody</Name>
+				<Source><![CDATA[
+    // call api section
+    protected str prepareBody(Map _fields)
+    {
+
+        str body = apiConfig.JSON;
+        MapEnumerator enumerator = _fields.getEnumerator();
+        while (enumerator.moveNext())
+        {
+            str placeholder = enumerator.currentKey();
+            str value = enumerator.currentValue();
+            body = strReplace(body, placeholder, value);
+        }
+        return body;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>url</Name>
+				<Source><![CDATA[
+    protected str url()
+    {
+        return resourceUrl + apiConfig.URL;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>sendPostRequest</Name>
+				<Source><![CDATA[
+    protected void sendPostRequest()
+    {
+        str                       bearerToken;
+        System.Net.HttpWebRequest request;
+        System.IO.StreamWriter    writer;
+        System.IO.StreamReader    reader;
+        System.Exception          ex;
+
+        requestBody  = this.body();
+        bearerToken  = this.GetAccessToken();
+        if (strLen(bearerToken) == 0)
+        {
+            errorMessage = 'Failed to acquire bearer token.';
+            responseText = '';
+            return;
+        }
+
+        try
+        {
+            request = System.Net.WebRequest::Create(this.url()) as System.Net.HttpWebRequest;
+            request.set_Method("POST");
+            request.set_ContentType("application/json");
+            request.get_Headers().Set("Authorization", "Bearer " + bearerToken);
+
+            writer = new System.IO.StreamWriter(request.GetRequestStream());
+            writer.Write(requestBody);
+            writer.Flush();
+            writer.Close();
+
+            reader = new System.IO.StreamReader(request.GetResponse().GetResponseStream());
+            responseText = reader.ReadToEnd();
+            reader.Close();
+        }
+        catch (Exception::CLRError)
+        {
+            ex           = CLRInterop::getLastException();
+            errorMessage = ex.get_Message();
+            responseText = XAPI_APIRunnerBase::readWebErrorBody(ex);
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>readWebErrorBody</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Pulls the response body out of a System.Net.WebException so a failed call
+    /// still surfaces the server's error payload instead of a silent empty string.
+    /// </summary>
+    private static str readWebErrorBody(System.Exception _ex)
+    {
+        System.Net.WebException webEx;
+        System.IO.StreamReader  reader;
+
+        if (!(_ex is System.Net.WebException))
+        {
+            return '';
+        }
+
+        webEx = _ex as System.Net.WebException;
+        if (webEx.get_Response() == null)
+        {
+            return '';
+        }
+
+        reader = new System.IO.StreamReader(webEx.get_Response().GetResponseStream());
+        return reader.ReadToEnd();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>GetAccessToken</Name>
+				<Source><![CDATA[
+    protected str GetAccessToken()
+    {
+        System.Net.HttpWebRequest request;
+        System.Net.HttpWebResponse response;
+        System.IO.StreamWriter streamWriter;
+        System.IO.StreamReader streamReader;
+        str url = "https://login.microsoftonline.com/" + tenantId + "/oauth2/token";
+        System.Text.RegularExpressions.Regex regex;
+        System.Text.RegularExpressions.Match match;
+
+        System.Uri uri = new System.Uri("http://dummy"); // helper for encoding
+        str encodedSecret = System.Net.WebUtility::UrlEncode(clientSecret);
+        str postData = "grant_type=client_credentials"
+           + "&client_id=" + clientId
+           + "&client_secret=" + encodedSecret
+           + "&resource=" + resourceUrl;
+
+        try
+        {
+            request = System.Net.WebRequest::Create(url) as System.Net.HttpWebRequest;
+            request.set_Method("POST");
+            request.set_ContentType("application/x-www-form-urlencoded");
+
+            streamWriter = new System.IO.StreamWriter(request.GetRequestStream());
+            streamWriter.Write(postData);
+            streamWriter.Flush();
+            streamWriter.Close();
+
+            response = request.GetResponse() as System.Net.HttpWebResponse;
+            streamReader = new System.IO.StreamReader(response.GetResponseStream());
+            responseText = streamReader.ReadToEnd();
+            streamReader.Close();
+
+        }
+        catch (Exception::CLRError)
+        {
+            System.Exception ex = CLRInterop::getLastException();
+            System.Net.WebException webEx;
+            System.IO.StreamReader errorReader;
+            str errorText = "";
+
+            if (ex is System.Net.WebException)
+            {
+                webEx = ex as System.Net.WebException;
+
+                if (webEx.get_Response())
+                {
+                    errorReader = new System.IO.StreamReader(webEx.get_Response().GetResponseStream());
+                    errorText = errorReader.ReadToEnd();
+                    errorReader.Close();
+                }
+            }
+            return "";
+        }
+
+        regex = new System.Text.RegularExpressions.Regex("\"access_token\"\\s*:\\s*\"([^\"]+)\"");
+        match = regex.Match(responseText);
+
+        if (match.Success)
+        {
+            return match.Groups.get_Item(1).get_Value();
+        }
+
+        return "";
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

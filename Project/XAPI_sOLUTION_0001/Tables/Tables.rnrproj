@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <BuildTasksDirectory Condition=" '$(BuildTasksDirectory)' == ''">$(MSBuildProgramFiles32)\MSBuild\Microsoft\Dynamics\AX</BuildTasksDirectory>
+    <Model>APITestDataGen</Model>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <OutputPath>bin</OutputPath>
+    <SchemaVersion>2.0</SchemaVersion>
+    <GenerateCrossReferences>True</GenerateCrossReferences>
+    <RunAppCheckerRules>False</RunAppCheckerRules>
+    <LogAppcheckerDiagsAsErrors>False</LogAppcheckerDiagsAsErrors>
+    <DeployOnline>False</DeployOnline>
+    <ProjectGuid>{25f85e9d-3514-4cf6-8392-ffa2e7d245d4}</ProjectGuid>
+    <Name>Tables</Name>
+    <RootNamespace>Tables</RootNamespace>
+    <StartupType>Class</StartupType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <Configuration>Debug</Configuration>
+    <DBSyncInBuild>False</DBSyncInBuild>
+    <GenerateFormAdaptors>False</GenerateFormAdaptors>
+    <Company>
+    </Company>
+    <Partition>initial</Partition>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DataEntityExpandParentChildRelations>False</DataEntityExpandParentChildRelations>
+    <DataEntityUseLabelTextAsFieldName>False</DataEntityUseLabelTextAsFieldName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Tables\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="AxTable\XAPI_APIConfigurations">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIConfigurations</Name>
+      <Link>Tables\XAPI_APIConfigurations</Link>
+    </Content>
+    <Content Include="AxTable\XAPI_APILogTable">
+      <SubType>Content</SubType>
+      <Name>XAPI_APILogTable</Name>
+      <Link>Tables\XAPI_APILogTable</Link>
+    </Content>
+    <Content Include="AxTable\XAPI_TestCase">
+      <SubType>Content</SubType>
+      <Name>XAPI_TestCase</Name>
+      <Link>Tables\XAPI_TestCase</Link>
+    </Content>
+    <Content Include="AxTable\XAPI_TestParameters">
+      <SubType>Content</SubType>
+      <Name>XAPI_TestParameters</Name>
+      <Link>Tables\XAPI_TestParameters</Link>
+    </Content>
+    <Content Include="AxTable\XAPI_TestSuite">
+      <SubType>Content</SubType>
+      <Name>XAPI_TestSuite</Name>
+      <Link>Tables\XAPI_TestSuite</Link>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
+  <Import Project="$(BuildTasksDirectory)\Microsoft.Dynamics.Framework.Tools.BuildTasks.17.0.targets" />
+</Project>

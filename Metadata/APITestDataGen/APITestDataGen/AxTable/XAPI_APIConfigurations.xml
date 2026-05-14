@@ -32,7 +32,14 @@ public class XAPI_APIConfigurations extends common
 	<FieldGroups>
 		<AxTableFieldGroup>
 			<Name>AutoReport</Name>
-			<Fields />
+			<Fields>
+				<AxTableFieldGroupField>
+					<DataField>API</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
+					<DataField>URL</DataField>
+				</AxTableFieldGroupField>
+			</Fields>
 		</AxTableFieldGroup>
 		<AxTableFieldGroup>
 			<Name>AutoLookup</Name>
@@ -41,7 +48,11 @@ public class XAPI_APIConfigurations extends common
 		<AxTableFieldGroup>
 			<Name>AutoIdentification</Name>
 			<AutoPopulate>Yes</AutoPopulate>
-			<Fields />
+			<Fields>
+				<AxTableFieldGroupField>
+					<DataField>API</DataField>
+				</AxTableFieldGroupField>
+			</Fields>
 		</AxTableFieldGroup>
 		<AxTableFieldGroup>
 			<Name>AutoSummary</Name>
@@ -51,13 +62,43 @@ public class XAPI_APIConfigurations extends common
 			<Name>AutoBrowse</Name>
 			<Fields />
 		</AxTableFieldGroup>
+		<AxTableFieldGroup>
+			<Name>Main</Name>
+			<Label>Main</Label>
+			<Fields>
+				<AxTableFieldGroupField>
+					<DataField>API</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
+					<DataField>URL</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
+					<DataField>PreProcessClass</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
+					<DataField>RunnerClass</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
+					<DataField>PostProcessBatchClass</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
+					<DataField>JSON</DataField>
+				</AxTableFieldGroupField>
+			</Fields>
+		</AxTableFieldGroup>
 	</FieldGroups>
 	<Fields>
 		<AxTableField xmlns=""
 			i:type="AxTableFieldEnum">
 			<Name>API</Name>
-			<Label>API </Label>
+			<Label>API</Label>
 			<EnumType>XAPI_APIS</EnumType>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>URL</Name>
+			<Label>URL</Label>
+			<StringSize>-1</StringSize>
 		</AxTableField>
 		<AxTableField xmlns=""
 			i:type="AxTableFieldString">
@@ -67,19 +108,39 @@ public class XAPI_APIConfigurations extends common
 		</AxTableField>
 		<AxTableField xmlns=""
 			i:type="AxTableFieldString">
-			<Name>URL</Name>
-			<StringSize>-1</StringSize>
+			<Name>PreProcessClass</Name>
+			<Label>Pre-process class</Label>
+			<Mandatory>No</Mandatory>
+			<StringSize>100</StringSize>
 		</AxTableField>
 		<AxTableField xmlns=""
-			i:type="AxTableFieldEnum">
-			<Name>Execute</Name>
-			<ExtendedDataType>NoYesId</ExtendedDataType>
-			<IgnoreEDTRelation>Yes</IgnoreEDTRelation>
-			<EnumType>NoYes</EnumType>
+			i:type="AxTableFieldString">
+			<Name>RunnerClass</Name>
+			<Label>Runner class</Label>
+			<Mandatory>Yes</Mandatory>
+			<StringSize>100</StringSize>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>PostProcessBatchClass</Name>
+			<Label>Post-process batch class</Label>
+			<Mandatory>No</Mandatory>
+			<StringSize>100</StringSize>
 		</AxTableField>
 	</Fields>
 	<FullTextIndexes />
-	<Indexes />
+	<Indexes>
+		<AxTableIndex>
+			<Name>APIIdx</Name>
+			<AllowDuplicates>No</AllowDuplicates>
+			<AlternateKey>Yes</AlternateKey>
+			<Fields>
+				<AxTableIndexField>
+					<DataField>API</DataField>
+				</AxTableIndexField>
+			</Fields>
+		</AxTableIndex>
+	</Indexes>
 	<Mappings />
 	<Relations />
 	<StateMachines />

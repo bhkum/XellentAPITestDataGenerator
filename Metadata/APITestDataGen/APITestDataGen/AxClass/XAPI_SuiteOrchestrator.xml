@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_SuiteOrchestrator</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+final class XAPI_SuiteOrchestrator
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>run</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Runs every test case in the given suite in Sequence order. For each case
+    /// the orchestrator dispatches to three class names stored on the case row:
+    ///   - PreProcessClass        (required) - runnable class, static main(Args)
+    ///   - RunnerClass            (required) - extends XAPI_APIRunnerBase, executes the API call and logs it
+    ///   - PostProcessBatchClass  (optional) - runnable class, static main(Args)
+    /// Independent suites continue past failures; Chained suites stop on the first failure.
+    /// </summary>
+    /// <param name = "_suiteId">Suite to run.</param>
+    public static void run(str _suiteId)
+    {
+        XAPI_TestSuite       suite;
+        XAPI_TestCase        testCase;
+        XAPI_TestStepContext context;
+        XAPI_SuiteType       suiteType;
+        boolean              chainBroken;
+
+        select firstonly suite
+            where suite.SuiteId == _suiteId;
+
+        if (!suite.RecId)
+        {
+            error(strFmt("Suite %1 not found.", _suiteId));
+            return;
+        }
+
+        suiteType = suite.SuiteType;
+        context   = XAPI_TestStepContext::construct(_suiteId, newGuid());
+
+        while select testCase
+            order by Sequence asc
+            where testCase.SuiteId == _suiteId
+        {
+            if (chainBroken)
+            {
+                break;
+            }
+
+            context.setCurrentCase(testCase);
+
+            try
+            {
+                if (testCase.PreProcessClass != '')
+                {
+                    XAPI_SuiteOrchestrator::runMain(testCase.PreProcessClass);
+                }
+                else
+                {
+                    throw Error("No preprocess class found");
+                }
+
+                XAPI_SuiteOrchestrator::runStep(testCase.RunnerClass, context);
+
+                if (testCase.PostProcessBatchClass != '')
+                {
+                    XAPI_SuiteOrchestrator::runMain(testCase.PostProcessBatchClass);
+                }
+
+                info(strFmt("Suite %1 - Seq %2 [%3] completed.",
+                    _suiteId, testCase.Sequence, testCase.RunnerClass));
+            }
+            catch (Exception::Error)
+            {
+                warning(strFmt("Suite %1 - Seq %2 [%3] failed.",
+                    _suiteId, testCase.Sequence, testCase.RunnerClass));
+
+                if (suiteType == XAPI_SuiteType::Chained)
+                {
+                    chainBroken = true;
+                }
+            }
+        }
+
+        info(strFmt("Suite %1 run %2 complete.", _suiteId, guid2Str(context.parmSessionId())));
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runMain</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Invokes the named class's static main(Args) entry point. Used for pre and
+    /// post-process steps, which follow the standard runnable-class pattern and
+    /// do not extend any base.
+    /// </summary>
+    private static void runMain(str _className)
+    {
+        ClassId      classId;
+        SysDictClass dictClass;
+        Args         args;
+
+        classId = className2Id(_className);
+        if (!classId)
+        {
+            throw error(strFmt("Class %1 not found.", _className));
+        }
+
+        dictClass = new SysDictClass(classId);
+        args      = new Args();
+        dictClass.callStatic('main', args);
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runStep</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Instantiates the named class (must extend XAPI_APIRunnerBase) and invokes
+    /// execute(context). Throws if the class can't be resolved or doesn't conform.
+    /// </summary>
+    private static void runStep(str _className, XAPI_TestStepContext _ctx)
+    {
+        ClassId            classId;
+        SysDictClass       dictClass;
+        XAPI_APIRunnerBase runner;
+
+        if (_className == '')
+        {
+            throw error("Test case is missing a runner class name.");
+        }
+
+        classId = className2Id(_className);
+        if (!classId)
+        {
+            throw error(strFmt("Class %1 not found.", _className));
+        }
+
+        dictClass = new SysDictClass(classId);
+        runner    = dictClass.makeObject() as XAPI_APIRunnerBase;
+        if (!runner)
+        {
+            throw error(strFmt("Class %1 does not extend XAPI_APIRunnerBase.", _className));
+        }
+
+        runner.execute(_ctx);
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

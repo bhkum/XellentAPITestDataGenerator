@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-	<Name>XAPI_API_CallAutomator</Name>
+	<Name>XAPI_API_CallAutomator_del</Name>
 	<SourceCode>
 		<Declaration><![CDATA[
-class XAPI_API_CallAutomator
+class XAPI_API_CallAutomator_del
 {
    
     str bearerToken;
@@ -377,9 +377,9 @@ class XAPI_API_CallAutomator
 			<Method>
 				<Name>construct</Name>
 				<Source><![CDATA[
-    public static XAPI_API_CallAutomator construct()
+    public static XAPI_API_CallAutomator_del construct()
     {
-        XAPI_API_CallAutomator apiAuto = new XAPI_API_CallAutomator();
+        XAPI_API_CallAutomator_del apiAuto = new XAPI_API_CallAutomator_del();
         return apiAuto;
     }
 
