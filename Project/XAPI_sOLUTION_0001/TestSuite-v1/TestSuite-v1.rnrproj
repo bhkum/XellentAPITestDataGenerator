@@ -41,6 +41,16 @@
       <Name>XAPI_APIRunnerBase</Name>
       <Link>Classes\XAPI_APIRunnerBase</Link>
     </Content>
+    <Content Include="AxClass\XAPI_APIRunner_Customer">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIRunner_Customer</Name>
+      <Link>Classes\XAPI_APIRunner_Customer</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_APIRunner_Installation">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIRunner_Installation</Name>
+      <Link>Classes\XAPI_APIRunner_Installation</Link>
+    </Content>
     <Content Include="AxClass\XAPI_AutomationHelper">
       <SubType>Content</SubType>
       <Name>XAPI_AutomationHelper</Name>

@@ -3,7 +3,7 @@
 	<Name>XAPI_APIRunnerBase</Name>
 	<SourceCode>
 		<Declaration><![CDATA[
-abstract class XAPI_APIRunnerBase extends XAPI_TestStepBase
+abstract class XAPI_APIRunnerBase
 {
     protected XAPI_APIConfigurations apiConfig;
 
@@ -16,6 +16,8 @@ abstract class XAPI_APIRunnerBase extends XAPI_TestStepBase
     protected str responseText;
     protected str requestBody;
     protected str errorMessage;
+    protected str logKey;
+    protected str logValue;
     protected XAPI_APIS api;
 }
 ]]></Declaration>
@@ -35,8 +37,8 @@ abstract class XAPI_APIRunnerBase extends XAPI_TestStepBase
 				<Name>execute</Name>
 				<Source><![CDATA[
     /// <summary>
-    /// XAPI_TestStepBase contract. Runs the pre/api/post chain and writes one
-    /// XAPI_APILogTable row stamped with the suite-run SessionId and Sequence.
+    /// Orchestrator entry point. Runs the api call and writes one XAPI_APILogTable
+    /// row stamped with the suite-run SessionId and Sequence from the context.
     /// </summary>
     public void execute(XAPI_TestStepContext _ctx)
     {
@@ -45,9 +47,20 @@ abstract class XAPI_APIRunnerBase extends XAPI_TestStepBase
         this.init();
         this.runAPI();
 
+        try
+        {
+            this.postRun();
+        }
+        catch
+        {
+            // Deserialization failures must not block the log row.
+        }
+
         logRow.SessionId    = _ctx.parmSessionId();
         logRow.Sequence     = _ctx.parmSequence();
         logRow.ApiName      = api;
+        logRow.Key          = logKey;
+        logRow.Value        = logValue;
         logRow.RequestBody  = requestBody;
         logRow.Response     = responseText;
         logRow.ErrorMessage = errorMessage;
@@ -73,6 +86,20 @@ abstract class XAPI_APIRunnerBase extends XAPI_TestStepBase
     protected void runAPI()
     {
         this.sendPostRequest();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>postRun</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Optional hook for subclasses to parse responseText and populate logKey /
+    /// logValue (e.g. the created entity's identifier) before the log row is
+    /// written. Default is a no-op.
+    /// </summary>
+    protected void postRun()
+    {
     }
 
 ]]></Source>

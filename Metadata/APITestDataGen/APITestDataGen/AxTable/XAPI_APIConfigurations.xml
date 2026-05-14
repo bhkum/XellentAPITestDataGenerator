@@ -76,6 +76,9 @@ public class XAPI_APIConfigurations extends common
 					<DataField>PreProcessClass</DataField>
 				</AxTableFieldGroupField>
 				<AxTableFieldGroupField>
+					<DataField>RunnerClass</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
 					<DataField>PostProcessBatchClass</DataField>
 				</AxTableFieldGroupField>
 				<AxTableFieldGroupField>
@@ -108,6 +111,13 @@ public class XAPI_APIConfigurations extends common
 			<Name>PreProcessClass</Name>
 			<Label>Pre-process class</Label>
 			<Mandatory>No</Mandatory>
+			<StringSize>100</StringSize>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>RunnerClass</Name>
+			<Label>Runner class</Label>
+			<Mandatory>Yes</Mandatory>
 			<StringSize>100</StringSize>
 		</AxTableField>
 		<AxTableField xmlns=""

@@ -20,6 +20,25 @@ class XAPI_APIRunner_Customer extends XAPI_APIRunnerBase
 ]]></Source>
 			</Method>
 			<Method>
+				<Name>postRun</Name>
+				<Source><![CDATA[
+    protected void postRun()
+    {
+        EGS_API_DataContract_Response res;
+
+        if (!responseText)
+        {
+            return;
+        }
+
+        res      = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+        logKey   = "CustAccount";
+        logValue = res.parmMessage();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
 				<Name>body</Name>
 				<Source><![CDATA[
     protected str body()

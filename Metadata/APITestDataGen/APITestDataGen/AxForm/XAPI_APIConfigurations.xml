@@ -66,6 +66,9 @@ public class XAPI_APIConfigurations extends FormRun
 					<DataField>RecId</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
+					<DataField>RunnerClass</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
 					<DataField>TableId</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
@@ -327,6 +330,15 @@ public class XAPI_APIConfigurations extends FormRun
 										<FormControlExtension
 											i:nil="true" />
 										<DataField>PreProcessClass</DataField>
+										<DataSource>XAPI_APIConfigurations</DataSource>
+									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormStringControl">
+										<Name>XAPI_APIConfigurations_RunnerClass</Name>
+										<Type>String</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<DataField>RunnerClass</DataField>
 										<DataSource>XAPI_APIConfigurations</DataSource>
 									</AxFormControl>
 									<AxFormControl xmlns=""

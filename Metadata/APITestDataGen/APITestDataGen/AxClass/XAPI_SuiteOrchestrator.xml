@@ -14,8 +14,8 @@ final class XAPI_SuiteOrchestrator
     /// <summary>
     /// Runs every test case in the given suite in Sequence order. For each case
     /// the orchestrator dispatches to three class names stored on the case row:
-    ///   - PreProcessClass        (optional) - runnable class, static main(Args)
-    ///   - RunnerClass            (required) - extends XAPI_TestStepBase, executes the API call and logs it
+    ///   - PreProcessClass        (required) - runnable class, static main(Args)
+    ///   - RunnerClass            (required) - extends XAPI_APIRunnerBase, executes the API call and logs it
     ///   - PostProcessBatchClass  (optional) - runnable class, static main(Args)
     /// Independent suites continue past failures; Chained suites stop on the first failure.
     /// </summary>
@@ -120,14 +120,14 @@ final class XAPI_SuiteOrchestrator
 				<Name>runStep</Name>
 				<Source><![CDATA[
     /// <summary>
-    /// Instantiates the named class (must extend XAPI_TestStepBase) and invokes
+    /// Instantiates the named class (must extend XAPI_APIRunnerBase) and invokes
     /// execute(context). Throws if the class can't be resolved or doesn't conform.
     /// </summary>
     private static void runStep(str _className, XAPI_TestStepContext _ctx)
     {
-        ClassId           classId;
-        SysDictClass      dictClass;
-        XAPI_TestStepBase step;
+        ClassId            classId;
+        SysDictClass       dictClass;
+        XAPI_APIRunnerBase runner;
 
         if (_className == '')
         {
@@ -141,13 +141,13 @@ final class XAPI_SuiteOrchestrator
         }
 
         dictClass = new SysDictClass(classId);
-        step      = dictClass.makeObject() as XAPI_TestStepBase;
-        if (!step)
+        runner    = dictClass.makeObject() as XAPI_APIRunnerBase;
+        if (!runner)
         {
-            throw error(strFmt("Class %1 does not extend XAPI_TestStepBase.", _className));
+            throw error(strFmt("Class %1 does not extend XAPI_APIRunnerBase.", _className));
         }
 
-        step.execute(_ctx);
+        runner.execute(_ctx);
     }
 
 ]]></Source>
