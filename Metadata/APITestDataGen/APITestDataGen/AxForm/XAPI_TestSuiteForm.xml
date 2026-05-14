@@ -9,7 +9,9 @@
 [Form]
 public class XAPI_TestSuiteForm extends FormRun
 {
-    int lastSuiteNum;
+    int     lastSuiteNum;
+    boolean formInitialized;
+
 }
 ]]></Source>
 			</Method>
@@ -21,8 +23,10 @@ public class XAPI_TestSuiteForm extends FormRun
         XAPI_TestSuite  existing;
         int             currentId;
 
+        formInitialized = false; // BEFORE super() — keeps form empty on open
         super();
 
+        // Calculate lastSuiteNum so next New gets correct ID (S003 after S001, S002)
         while select SuiteId from existing
         {
             if (existing.SuiteId)
@@ -44,24 +48,91 @@ public class XAPI_TestSuiteForm extends FormRun
 				<Name>XAPI_TestSuite</Name>
 				<Methods>
 					<Method>
+						<Name>executeQuery</Name>
+						<Source><![CDATA[
+        public void executeQuery()
+        {
+            QueryBuildDataSource qbds = this.queryBuildDataSource();
+            qbds.clearRanges();
+
+            if (!formInitialized)
+            {
+                // Block all records on form open
+                qbds.addRange(fieldNum(XAPI_TestSuite, SuiteId))
+                    .value("!");
+            }
+            super();
+        }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>selectionChanged</Name>
+						<Source><![CDATA[
+        public void selectionChanged()
+        {
+            super();
+            // When switching S001 <-> S002, refresh test cases for selected suite
+            XAPI_TestCase_ds.executeQuery();
+        }
+
+]]></Source>
+					</Method>
+					<Method>
 						<Name>initValue</Name>
 						<Source><![CDATA[
-    public void initValue()
-    {
-        int     padding;
-        str     numStr;
-
-        super();
-
-        lastSuiteNum++;
-        numStr  = strFmt("%1", lastSuiteNum);
-        padding = 3 - strLen(numStr);
-        if (padding < 0)
+        public void initValue()
         {
-            padding = 0;
+            int             padding;
+            str             numStr;
+            str             newSuiteId;
+            XAPI_TestCase   orphan;
+
+            super();
+            lastSuiteNum++;
+            numStr  = strFmt("%1", lastSuiteNum);
+            padding = 3 - strLen(numStr);
+            if (padding < 0)
+            {
+                padding = 0;
+            }
+            newSuiteId = "S" + subStr("000", 1, padding) + numStr;
+            XAPI_TestSuite.SuiteId = newSuiteId;
+
+            // Clean up orphan test cases (left over from a previously deleted suite
+            // that happened to use the same SuiteId). A new suite must start empty.
+            ttsbegin;
+            delete_from orphan
+                where orphan.SuiteId == newSuiteId;
+            ttscommit;
+
+            formInitialized = true; // Unlock test cases after New is clicked
         }
-        XAPI_TestSuite.SuiteId = "S" + subStr("000", 1, padding) + numStr;
-    }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>validateDelete</Name>
+						<Source><![CDATA[
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        public boolean validateDelete()
+        {
+            boolean         ret = super();
+            XAPI_TestCase   testCase;
+
+            select firstonly testCase
+            where testCase.SuiteId == XAPI_TestSuite.SuiteId;
+
+            if (testCase.SuiteId)
+            {
+                ret = checkFailed(strFmt("Cannot delete suite '%1'. Please delete all test cases first.", XAPI_TestSuite.SuiteId));
+            }
+
+            return ret;
+        }
 
 ]]></Source>
 					</Method>
@@ -72,24 +143,71 @@ public class XAPI_TestSuiteForm extends FormRun
 				<Name>XAPI_TestCase</Name>
 				<Methods>
 					<Method>
+						<Name>executeQuery</Name>
+						<Source><![CDATA[
+        public void executeQuery()
+        {
+            QueryBuildDataSource qbds = this.queryBuildDataSource();
+            qbds.clearRanges();
+
+            if (XAPI_TestSuite.SuiteId)
+            {
+                // Show only test cases for the currently selected suite
+                qbds.addRange(fieldNum(XAPI_TestCase, SuiteId))
+                    .value(XAPI_TestSuite.SuiteId);
+            }
+            else
+            {
+                // No suite selected — show nothing.
+                // SuiteId is mandatory so no real record has empty SuiteId;
+                // matching empty string therefore returns zero rows.
+                qbds.addRange(fieldNum(XAPI_TestCase, SuiteId))
+                    .value(SysQuery::valueEmptyString());
+            }
+            super();
+        }
+
+]]></Source>
+					</Method>
+					<Method>
 						<Name>initValue</Name>
 						<Source><![CDATA[
-    public void initValue()
-    {
-        XAPI_TestCase   existing;
+        public void initValue()
+        {
+            XAPI_TestCase   existing;
+            super();
 
-        super();
+            if (!XAPI_TestSuite.SuiteId)
+            {
+                warning("Please create a test suite first.");
+                return;
+            }
 
-        XAPI_TestCase.SuiteId = XAPI_TestSuite.SuiteId;
+            XAPI_TestCase.SuiteId = XAPI_TestSuite.SuiteId;
+            select maxof(Sequence) from existing
+                where existing.SuiteId == XAPI_TestSuite.SuiteId;
+            XAPI_TestCase.Sequence    = existing.Sequence + 10;
+            XAPI_TestCase.TestCaseId  = XAPI_TestSuiteCopyFromConfig::nextTestCaseId(XAPI_TestSuite.SuiteId);
+        }
 
-        select maxof(Sequence) from existing
-            where existing.SuiteId == XAPI_TestSuite.SuiteId;
-        XAPI_TestCase.Sequence = existing.Sequence + 10;
-    }
+]]></Source>
+					</Method>
+					<Method>
+						<Name>init</Name>
+						<Source><![CDATA[
+        /// <summary>
+        ///
+        /// </summary>
+        public void init()
+        {
+            super();
+            this.insertIfEmpty(false);
+        }
 
 ]]></Source>
 					</Method>
 				</Methods>
+				<Fields />
 			</DataSource>
 		</DataSources>
 		<DataControls xmlns="">
@@ -103,13 +221,11 @@ public class XAPI_TestSuiteForm extends FormRun
         public void clicked()
         {
             super();
-
             if (!XAPI_TestSuite.SuiteId)
             {
                 warning("Select a test suite first.");
                 return;
             }
-
             XAPI_TestSuiteCopyFromConfig::copyAll(XAPI_TestSuite.SuiteId);
             XAPI_TestCase_ds.research();
         }
@@ -130,18 +246,14 @@ public class XAPI_TestSuiteForm extends FormRun
             Dialog          dialog;
             DialogField     apiField;
             XAPI_APIS       selectedApi;
-
             super();
-
             if (!XAPI_TestSuite.SuiteId)
             {
                 warning("Select a test suite first.");
                 return;
             }
-
             dialog   = new Dialog("Copy single API config");
             apiField = dialog.addField(enumStr(XAPI_APIS), "API");
-
             if (dialog.run() && dialog.closedOk())
             {
                 selectedApi = apiField.value();
@@ -164,13 +276,11 @@ public class XAPI_TestSuiteForm extends FormRun
         public void clicked()
         {
             super();
-
             if (!XAPI_TestSuite.SuiteId)
             {
                 warning("Select a test suite first.");
                 return;
             }
-
             XAPI_SuiteOrchestrator::run(XAPI_TestSuite.SuiteId);
         }
 
@@ -212,6 +322,7 @@ public class XAPI_TestSuiteForm extends FormRun
 				</AxFormDataSourceField>
 			</Fields>
 			<ReferencedDataSources />
+			<InsertIfEmpty>No</InsertIfEmpty>
 			<DataSourceLinks />
 			<DerivedDataSources />
 		</AxFormDataSource>
@@ -224,6 +335,12 @@ public class XAPI_TestSuiteForm extends FormRun
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>DataAreaId</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>ExtractAs</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>ExtractField</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>JSON</DataField>
@@ -239,9 +356,6 @@ public class XAPI_TestSuiteForm extends FormRun
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>RecId</DataField>
-				</AxFormDataSourceField>
-				<AxFormDataSourceField>
-					<DataField>RunnerClass</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>Sequence</DataField>
@@ -260,6 +374,7 @@ public class XAPI_TestSuiteForm extends FormRun
 				</AxFormDataSourceField>
 			</Fields>
 			<ReferencedDataSources />
+			<InsertAtEnd>No</InsertAtEnd>
 			<InsertIfEmpty>No</InsertIfEmpty>
 			<DataSourceLinks />
 			<DerivedDataSources />
@@ -366,11 +481,13 @@ public class XAPI_TestSuiteForm extends FormRun
 						<AlignChild>No</AlignChild>
 						<AlignChildren>No</AlignChildren>
 						<ArrangeMethod>Vertical</ArrangeMethod>
+						<Caption>Runner</Caption>
 					</AxFormControl>
 				</Controls>
 				<AlignChild>No</AlignChild>
 				<AlignChildren>No</AlignChildren>
 				<ArrangeMethod>Vertical</ArrangeMethod>
+				<Caption>Runner</Caption>
 				<DataSource>XAPI_TestSuite</DataSource>
 			</AxFormControl>
 			<AxFormControl xmlns=""
@@ -578,7 +695,33 @@ public class XAPI_TestSuiteForm extends FormRun
 								<Type>ActionPane</Type>
 								<FormControlExtension
 									i:nil="true" />
-								<Controls />
+								<Controls>
+									<AxFormControl xmlns=""
+										i:type="AxFormButtonGroupControl">
+										<Name>ButtonGroupNewCopy1</Name>
+										<Type>ButtonGroup</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<Controls>
+											<AxFormControl xmlns=""
+												i:type="AxFormCommandButtonControl">
+												<Name>NewButtonCopy1</Name>
+												<Type>CommandButton</Type>
+												<FormControlExtension
+													i:nil="true" />
+												<Command>New</Command>
+											</AxFormControl>
+											<AxFormControl xmlns=""
+												i:type="AxFormCommandButtonControl">
+												<Name>DeleteButtonCopy1</Name>
+												<Type>CommandButton</Type>
+												<FormControlExtension
+													i:nil="true" />
+												<Command>DeleteRecord</Command>
+											</AxFormControl>
+										</Controls>
+									</AxFormControl>
+								</Controls>
 								<Style>Strip</Style>
 							</AxFormControl>
 							<AxFormControl xmlns=""
