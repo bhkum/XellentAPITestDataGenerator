@@ -9,6 +9,8 @@ Project("{FC65038C-1B2F-41E1-A629-BED71D161FFF}") = "CustomerAPI_v1 (VAR) [API T
 EndProject
 Project("{FC65038C-1B2F-41E1-A629-BED71D161FFF}") = "BaseApp_TestFramework (VAR) [API Test Data Gen]", "BaseApp_TestFramework\BaseApp_TestFramework.rnrproj", "{46A406E8-0911-413C-B808-091EE31FE8E6}"
 EndProject
+Project("{FC65038C-1B2F-41E1-A629-BED71D161FFF}") = "Tables (VAR) [API Test Data Gen]", "Tables\Tables.rnrproj", "{25F85E9D-3514-4CF6-8392-FFA2E7D245D4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,8 @@ Global
 		{C3C071F3-DD2D-4B84-A00F-FF707277C113}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46A406E8-0911-413C-B808-091EE31FE8E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{46A406E8-0911-413C-B808-091EE31FE8E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25F85E9D-3514-4CF6-8392-FFA2E7D245D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25F85E9D-3514-4CF6-8392-FFA2E7D245D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
