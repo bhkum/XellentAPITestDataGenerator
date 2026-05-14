@@ -90,6 +90,7 @@ public class XAPI_TestSuiteForm extends FormRun
 ]]></Source>
 					</Method>
 				</Methods>
+				<Fields />
 			</DataSource>
 		</DataSources>
 		<DataControls xmlns="">
@@ -581,7 +582,33 @@ public class XAPI_TestSuiteForm extends FormRun
 								<Type>ActionPane</Type>
 								<FormControlExtension
 									i:nil="true" />
-								<Controls />
+								<Controls>
+									<AxFormControl xmlns=""
+										i:type="AxFormButtonGroupControl">
+										<Name>ButtonGroupNewCopy1</Name>
+										<Type>ButtonGroup</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<Controls>
+											<AxFormControl xmlns=""
+												i:type="AxFormCommandButtonControl">
+												<Name>NewButtonCopy1</Name>
+												<Type>CommandButton</Type>
+												<FormControlExtension
+													i:nil="true" />
+												<Command>New</Command>
+											</AxFormControl>
+											<AxFormControl xmlns=""
+												i:type="AxFormCommandButtonControl">
+												<Name>DeleteButtonCopy1</Name>
+												<Type>CommandButton</Type>
+												<FormControlExtension
+													i:nil="true" />
+												<Command>DeleteRecord</Command>
+											</AxFormControl>
+										</Controls>
+									</AxFormControl>
+								</Controls>
 								<Style>Strip</Style>
 							</AxFormControl>
 							<AxFormControl xmlns=""
