@@ -139,20 +139,14 @@ public class XAPI_TestCase extends common
 		</AxTableField>
 		<AxTableField xmlns=""
 			i:type="AxTableFieldString">
+			<Name>RunnerClass</Name>
+			<Label>Runner Class</Label>
+			<StringSize>100</StringSize>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
 			<Name>PostProcessBatchClass</Name>
 			<Label>Post-process Batch Class</Label>
-			<StringSize>100</StringSize>
-		</AxTableField>
-		<AxTableField xmlns=""
-			i:type="AxTableFieldString">
-			<Name>ExtractField</Name>
-			<Label>Extract Field</Label>
-			<StringSize>100</StringSize>
-		</AxTableField>
-		<AxTableField xmlns=""
-			i:type="AxTableFieldString">
-			<Name>ExtractAs</Name>
-			<Label>Extract As</Label>
 			<StringSize>100</StringSize>
 		</AxTableField>
 		<AxTableField xmlns=""

@@ -12,28 +12,21 @@ final class XAPI_SuiteOrchestrator
 				<Name>run</Name>
 				<Source><![CDATA[
     /// <summary>
-    /// Runs every test case in the given suite in Sequence order.
-    /// Independent suites continue past failures; Chained suites stop on
-    /// the first failure. Successful cases may publish a value into a
-    /// session-scoped map (via ExtractField / ExtractAs) so that later
-    /// cases can reference it through {{key}} placeholders in their JSON.
+    /// Runs every test case in the given suite in Sequence order. For each case
+    /// the orchestrator dispatches to three class names stored on the case row:
+    ///   - PreProcessClass        (optional) - runnable class, static main(Args)
+    ///   - RunnerClass            (required) - extends XAPI_TestStepBase, executes the API call and logs it
+    ///   - PostProcessBatchClass  (optional) - runnable class, static main(Args)
+    /// Independent suites continue past failures; Chained suites stop on the first failure.
     /// </summary>
     /// <param name = "_suiteId">Suite to run.</param>
     public static void run(str _suiteId)
     {
-        XAPI_TestSuite        suite;
-        XAPI_TestCase         testCase;
-        XAPI_APILogTable      logRow;
-        XAPI_SuiteType        suiteType;
-        Map                   sessionMap;
-        MapEnumerator         mapEnum;
-        guid                  sessionId;
-        str                   resolvedJson;
-        str                   tokenKey;
-        str                   tokenValue;
-        int                   infologMark;
-        str                   failureMessage;
-        boolean               chainBroken;
+        XAPI_TestSuite       suite;
+        XAPI_TestCase        testCase;
+        XAPI_TestStepContext context;
+        XAPI_SuiteType       suiteType;
+        boolean              chainBroken;
 
         select firstonly suite
             where suite.SuiteId == _suiteId;
@@ -44,9 +37,8 @@ final class XAPI_SuiteOrchestrator
             return;
         }
 
-        suiteType  = suite.SuiteType;
-        sessionId  = newGuid();
-        sessionMap = new Map(Types::String, Types::String);
+        suiteType = suite.SuiteType;
+        context   = XAPI_TestStepContext::construct(_suiteId, newGuid());
 
         while select testCase
             order by Sequence asc
@@ -57,54 +49,33 @@ final class XAPI_SuiteOrchestrator
                 break;
             }
 
-            infologMark  = infolog.line();
-            resolvedJson = testCase.JSON;
-
-            mapEnum = sessionMap.getEnumerator();
-            while (mapEnum.moveNext())
-            {
-                tokenKey     = mapEnum.currentKey();
-                tokenValue   = mapEnum.currentValue();
-                resolvedJson = strReplace(resolvedJson, '{{' + tokenKey + '}}', tokenValue);
-            }
+            context.setCurrentCase(testCase);
 
             try
             {
-                XAPI_APIRunnerFacade::runAPI(testCase.API);
-
-                info(strFmt("Suite %1 - Seq %2 API %3 completed.",
-                    _suiteId,
-                    testCase.Sequence,
-                    enum2Str(testCase.API)));
-
-                if (testCase.ExtractField != '' && testCase.ExtractAs != '')
+                if (testCase.PreProcessClass != '')
                 {
-                    select firstonly logRow
-                        order by RecId desc
-                        where logRow.SessionId == sessionId
-                           && logRow.Sequence  == testCase.Sequence;
-
-                    if (logRow.RecId && logRow.Response)
-                    {
-                        XAPI_SuiteOrchestrator::extractInto(
-                            sessionMap,
-                            logRow.Response,
-                            testCase.ExtractField,
-                            testCase.ExtractAs,
-                            _suiteId,
-                            testCase.Sequence);
-                    }
+                    XAPI_SuiteOrchestrator::runMain(testCase.PreProcessClass);
                 }
+                else
+                {
+                    throw Error("No preprocess class found");
+                }
+
+                XAPI_SuiteOrchestrator::runStep(testCase.RunnerClass, context);
+
+                if (testCase.PostProcessBatchClass != '')
+                {
+                    XAPI_SuiteOrchestrator::runMain(testCase.PostProcessBatchClass);
+                }
+
+                info(strFmt("Suite %1 - Seq %2 [%3] completed.",
+                    _suiteId, testCase.Sequence, testCase.RunnerClass));
             }
             catch (Exception::Error)
             {
-                failureMessage = infolog.text(infologMark + 1);
-
-                warning(strFmt("Suite %1 - Seq %2 API %3 failed: %4.",
-                    _suiteId,
-                    testCase.Sequence,
-                    enum2Str(testCase.API),
-                    failureMessage));
+                warning(strFmt("Suite %1 - Seq %2 [%3] failed.",
+                    _suiteId, testCase.Sequence, testCase.RunnerClass));
 
                 if (suiteType == XAPI_SuiteType::Chained)
                 {
@@ -113,56 +84,70 @@ final class XAPI_SuiteOrchestrator
             }
         }
 
-        info(strFmt("Suite %1 run %2 complete.", _suiteId, guid2Str(sessionId)));
+        info(strFmt("Suite %1 run %2 complete.", _suiteId, guid2Str(context.parmSessionId())));
     }
 
 ]]></Source>
 			</Method>
 			<Method>
-				<Name>extractInto</Name>
+				<Name>runMain</Name>
 				<Source><![CDATA[
     /// <summary>
-    /// Parses the given response JSON, extracts the value at the supplied
-    /// path (using JSONPath via Newtonsoft.Json.Linq.JToken.SelectToken so
-    /// nested keys like "data.AccountNum" work), and stores it in the
-    /// session map under the supplied alias. Failures are reported as
-    /// warnings only - they do not abort the run.
+    /// Invokes the named class's static main(Args) entry point. Used for pre and
+    /// post-process steps, which follow the standard runnable-class pattern and
+    /// do not extend any base.
     /// </summary>
-    private static void extractInto(
-        Map     _sessionMap,
-        str     _responseJson,
-        str     _extractField,
-        str     _extractAs,
-        str     _suiteId,
-        int     _sequence)
+    private static void runMain(str _className)
     {
-        Newtonsoft.Json.Linq.JObject jObj;
-        Newtonsoft.Json.Linq.JToken  jTok;
-        str                          extractedValue;
+        ClassId      classId;
+        SysDictClass dictClass;
+        Args         args;
 
-        try
+        classId = className2Id(_className);
+        if (!classId)
         {
-            jObj = Newtonsoft.Json.Linq.JObject::Parse(_responseJson);
-            jTok = jObj.SelectToken(_extractField);
+            throw error(strFmt("Class %1 not found.", _className));
+        }
 
-            if (jTok != null)
-            {
-                extractedValue = jTok.ToString();
-                _sessionMap.insert(_extractAs, extractedValue);
-            }
-            else
-            {
-                warning(strFmt(
-                    "Suite %1 - Seq %2: ExtractField '%3' not found in response.",
-                    _suiteId, _sequence, _extractField));
-            }
-        }
-        catch (Exception::CLRError)
+        dictClass = new SysDictClass(classId);
+        args      = new Args();
+        dictClass.callStatic('main', args);
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runStep</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Instantiates the named class (must extend XAPI_TestStepBase) and invokes
+    /// execute(context). Throws if the class can't be resolved or doesn't conform.
+    /// </summary>
+    private static void runStep(str _className, XAPI_TestStepContext _ctx)
+    {
+        ClassId           classId;
+        SysDictClass      dictClass;
+        XAPI_TestStepBase step;
+
+        if (_className == '')
         {
-            warning(strFmt(
-                "Suite %1 - Seq %2: response JSON parse failed for ExtractField '%3'.",
-                _suiteId, _sequence, _extractField));
+            throw error("Test case is missing a runner class name.");
         }
+
+        classId = className2Id(_className);
+        if (!classId)
+        {
+            throw error(strFmt("Class %1 not found.", _className));
+        }
+
+        dictClass = new SysDictClass(classId);
+        step      = dictClass.makeObject() as XAPI_TestStepBase;
+        if (!step)
+        {
+            throw error(strFmt("Class %1 does not extend XAPI_TestStepBase.", _className));
+        }
+
+        step.execute(_ctx);
     }
 
 ]]></Source>

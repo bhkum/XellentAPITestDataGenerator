@@ -29,3 +29,5 @@ select * from custgroup where CUSTGROUP like 'Ts%'
 select * from XAPI_APIConfigurations
 
 --delete from XAPI_APIConfigurations
+
+--delete from  XAPI_APILogTable where archived = 0

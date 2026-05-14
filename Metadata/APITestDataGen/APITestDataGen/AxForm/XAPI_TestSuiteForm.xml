@@ -226,12 +226,6 @@ public class XAPI_TestSuiteForm extends FormRun
 					<DataField>DataAreaId</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
-					<DataField>ExtractAs</DataField>
-				</AxFormDataSourceField>
-				<AxFormDataSourceField>
-					<DataField>ExtractField</DataField>
-				</AxFormDataSourceField>
-				<AxFormDataSourceField>
 					<DataField>JSON</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
@@ -245,6 +239,9 @@ public class XAPI_TestSuiteForm extends FormRun
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>RecId</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>RunnerClass</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>Sequence</DataField>

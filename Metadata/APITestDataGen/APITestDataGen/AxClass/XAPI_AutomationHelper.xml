@@ -6,10 +6,10 @@
 final class XAPI_AutomationHelper
 {
  
-    public static str tenantId = "tenantid";
-    public static str clientId = "clientid";
-    public static str clientSecret = "clientsecret";
-    public static str resourceUrl = "url";
+    public static str tenantId = "b1bc47a9-e2bc-4220-bdb5-7244799f5e49";
+    public static str clientId = "95ed2a99-26ba-449d-b0b4-4026b3a79bdc";
+    public static str clientSecret = "3dhMoZByfib47Sr0C5GvPru/ZWvy2Je6lBHU8+gS0Lw=";
+    public static str resourceUrl = "https://dev-1046-bhavi482ffb578d8e9254devaos.cloudax.dynamics.com/";
 
 }
 ]]></Declaration>

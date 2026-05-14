@@ -28,7 +28,8 @@ public class XAPI_APIConfigurations extends FormRun
         public void clicked()
         {
             super();
-            XAPI_APIRunnerFacade::runAPI(XAPI_APIS::CreateCustomer);
+            XAPI_APIRunner_Customer runner = new XAPI_APIRunner_Customer();
+            runner.execute(XAPI_TestStepContext::construct('', newGuid()));
         }
 
 ]]></Source>

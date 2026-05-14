@@ -164,6 +164,20 @@ public class XAPI_APILogTable extends common
 			<IgnoreEDTRelation>Yes</IgnoreEDTRelation>
 		</AxTableField>
 		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>RequestBody</Name>
+			<ExtendedDataType>DirMemo</ExtendedDataType>
+			<IgnoreEDTRelation>Yes</IgnoreEDTRelation>
+			<Label>Request Body</Label>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>ErrorMessage</Name>
+			<ExtendedDataType>DirMemo</ExtendedDataType>
+			<IgnoreEDTRelation>Yes</IgnoreEDTRelation>
+			<Label>Error Message</Label>
+		</AxTableField>
+		<AxTableField xmlns=""
 			i:type="AxTableFieldEnum">
 			<Name>Archived</Name>
 			<ExtendedDataType>NoYesId</ExtendedDataType>

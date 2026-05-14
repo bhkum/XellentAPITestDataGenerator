@@ -295,11 +295,31 @@ public class XAPI_TestSuiteLogForm extends FormRun
 					</AxFormControl>
 					<AxFormControl xmlns=""
 						i:type="AxFormStringControl">
+						<Name>LogGrid_RequestBody</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>RequestBody</DataField>
+						<DataSource>XAPI_APILogTable</DataSource>
+						<MultiLine>Yes</MultiLine>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
 						<Name>LogGrid_Response</Name>
 						<Type>String</Type>
 						<FormControlExtension
 							i:nil="true" />
 						<DataField>Response</DataField>
+						<DataSource>XAPI_APILogTable</DataSource>
+						<MultiLine>Yes</MultiLine>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogGrid_ErrorMessage</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>ErrorMessage</DataField>
 						<DataSource>XAPI_APILogTable</DataSource>
 						<MultiLine>Yes</MultiLine>
 					</AxFormControl>
