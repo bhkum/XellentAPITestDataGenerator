@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_JsonHtmlFormatter</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+using Newtonsoft.Json;
+using NReg = System.Text.RegularExpressions;
+
+/// <summary>
+/// Pretty-prints a JSON string and wraps tokens in HTML span tags so it can
+/// be displayed inside an HTMLEditor form control (VS Code dark palette).
+/// </summary>
+public class XAPI_JsonHtmlFormatter
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>toColoredHtml</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Converts a raw JSON string into a syntax-highlighted HTML document.
+    /// If the input cannot be parsed it is rendered as-is (still escaped).
+    /// </summary>
+    public static str toColoredHtml(str _rawJson)
+    {
+        str         pretty;
+        str         kOpen, kClose, sOpen, sClose, nOpen, nClose, bOpen, bClose;
+        NReg.Regex  rx;
+        str         containerCss;
+
+        containerCss = 'font-family:Consolas,Courier New,monospace;font-size:13px;background:#1e1e1e;color:#d4d4d4;padding:10px;margin:0;white-space:pre;border-radius:4px;overflow:auto';
+
+        if (!_rawJson)
+        {
+            return '<pre style="' + containerCss + ';color:#888">(empty)</pre>';
+        }
+
+        try
+        {
+            // Pretty-print via Newtonsoft; on parse failure fall back to raw text.
+            var parsed = JsonConvert::DeserializeObject(_rawJson);
+            pretty     = JsonConvert::SerializeObject(parsed, Newtonsoft.Json.Formatting::Indented);
+        }
+        catch
+        {
+            pretty = _rawJson;
+        }
+
+        // HTML-escape first so user content can't break out of spans.
+        pretty = strReplace(pretty, '&',  '&amp;');
+        pretty = strReplace(pretty, '<',  '&lt;');
+        pretty = strReplace(pretty, '>',  '&gt;');
+
+        // Use ASCII control chars as opaque placeholders so later regex passes
+        // don't re-match content already wrapped by earlier ones.
+        kOpen  = num2Char(1);   kClose = num2Char(2);
+        sOpen  = num2Char(3);   sClose = num2Char(4);
+        nOpen  = num2Char(5);   nClose = num2Char(6);
+        bOpen  = num2Char(7);   bClose = num2Char(8);
+
+        // Keys: any quoted string immediately followed by ':' (whitespace allowed).
+        rx     = new NReg.Regex('"([^"\\\\]*(?:\\\\.[^"\\\\]*)*)"(?=\\s*:)');
+        pretty = rx.Replace(pretty, kOpen + '"$1"' + kClose);
+
+        // Remaining quoted strings are values.
+        rx     = new NReg.Regex('"([^"\\\\]*(?:\\\\.[^"\\\\]*)*)"');
+        pretty = rx.Replace(pretty, sOpen + '"$1"' + sClose);
+
+        // Numbers — bounded by non-identifier chars so we don't catch substrings.
+        rx     = new NReg.Regex('(?<![A-Za-z_\\d])(-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)(?![A-Za-z_\\d])');
+        pretty = rx.Replace(pretty, nOpen + '$1' + nClose);
+
+        // Booleans and null.
+        rx     = new NReg.Regex('\\b(true|false|null)\\b');
+        pretty = rx.Replace(pretty, bOpen + '$1' + bClose);
+
+        // Materialize placeholders into colored spans.
+        pretty = strReplace(pretty, kOpen,  '<span style="color:#9cdcfe">');   // keys      - light blue
+        pretty = strReplace(pretty, sOpen,  '<span style="color:#ce9178">');   // strings   - orange
+        pretty = strReplace(pretty, nOpen,  '<span style="color:#b5cea8">');   // numbers   - mint green
+        pretty = strReplace(pretty, bOpen,  '<span style="color:#569cd6">');   // bool/null - blue
+        pretty = strReplace(pretty, kClose, '</span>');
+        pretty = strReplace(pretty, sClose, '</span>');
+        pretty = strReplace(pretty, nClose, '</span>');
+        pretty = strReplace(pretty, bClose, '</span>');
+
+        return '<pre style="' + containerCss + '">' + pretty + '</pre>';
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>
