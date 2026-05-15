@@ -206,6 +206,16 @@ public class XAPI_TestSuiteForm extends FormRun
 
 ]]></Source>
 					</Method>
+					<Method>
+						<Name>jsonHtml</Name>
+						<Source><![CDATA[
+        public display str jsonHtml()
+        {
+            return XAPI_JsonHtmlFormatter::toColoredHtml(XAPI_TestCase.JSON);
+        }
+
+]]></Source>
+					</Method>
 				</Methods>
 				<Fields />
 			</DataSource>
@@ -778,6 +788,15 @@ public class XAPI_TestSuiteForm extends FormRun
 										<DataField>URL</DataField>
 										<DataSource>XAPI_TestCase</DataSource>
 										<Label>Endpoint</Label>
+									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormStringControl">
+										<Name>XAPI_TestCase_JSON</Name>
+										<Type>String</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<DataField>JSON</DataField>
+										<DataSource>XAPI_TestCase</DataSource>
 									</AxFormControl>
 								</Controls>
 								<DataSource>XAPI_TestCase</DataSource>
