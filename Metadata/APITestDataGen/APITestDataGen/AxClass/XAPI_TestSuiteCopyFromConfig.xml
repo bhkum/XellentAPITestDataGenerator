@@ -147,7 +147,7 @@ final class XAPI_TestSuiteCopyFromConfig
     /// <summary>
     /// Returns the next available TestCaseId for the given suite in the format "C###".
     /// </summary>
-    private static str nextTestCaseId(str _suiteId)
+    public static str nextTestCaseId(str _suiteId)
     {
         XAPI_TestCase   existing;
         int             maxNum = 0;

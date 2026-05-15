@@ -6,6 +6,7 @@
 abstract class XAPI_APIRunnerBase
 {
     protected XAPI_APIConfigurations apiConfig;
+    protected XAPI_TestCase          testCase;
 
     // API
     private str tenantId = XAPI_AutomationHelper::tenantId;
@@ -18,7 +19,8 @@ abstract class XAPI_APIRunnerBase
     protected str errorMessage;
     protected str logKey;
     protected str logValue;
-    protected XAPI_APIS api;
+    protected XAPI_APIS      api;
+    protected XAPI_APIStatus status;
 }
 ]]></Declaration>
 		<Methods>
@@ -44,6 +46,8 @@ abstract class XAPI_APIRunnerBase
     {
         XAPI_APILogTable logRow;
 
+        testCase = _ctx.parmTestCase();
+
         this.init();
         this.runAPI();
 
@@ -59,6 +63,7 @@ abstract class XAPI_APIRunnerBase
         logRow.SessionId    = _ctx.parmSessionId();
         logRow.Sequence     = _ctx.parmSequence();
         logRow.ApiName      = api;
+        logRow.Status       = status;
         logRow.Key          = logKey;
         logRow.Value        = logValue;
         logRow.RequestBody  = requestBody;
@@ -110,8 +115,7 @@ abstract class XAPI_APIRunnerBase
     // call api section
     protected str prepareBody(Map _fields)
     {
-
-        str body = apiConfig.JSON;
+        str body = testCase.JSON;
         MapEnumerator enumerator = _fields.getEnumerator();
         while (enumerator.moveNext())
         {
@@ -145,10 +149,12 @@ abstract class XAPI_APIRunnerBase
         System.IO.StreamReader    reader;
         System.Exception          ex;
 
+        status       = XAPI_APIStatus::Success;
         requestBody  = this.body();
         bearerToken  = this.GetAccessToken();
         if (strLen(bearerToken) == 0)
         {
+            status       = XAPI_APIStatus::Error;
             errorMessage = 'Failed to acquire bearer token.';
             responseText = '';
             return;
@@ -172,6 +178,7 @@ abstract class XAPI_APIRunnerBase
         }
         catch (Exception::CLRError)
         {
+            status       = XAPI_APIStatus::Error;
             ex           = CLRInterop::getLastException();
             errorMessage = ex.get_Message();
             responseText = XAPI_APIRunnerBase::readWebErrorBody(ex);

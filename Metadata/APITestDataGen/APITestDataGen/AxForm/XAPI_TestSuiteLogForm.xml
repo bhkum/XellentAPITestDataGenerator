@@ -267,6 +267,16 @@ public class XAPI_TestSuiteLogForm extends FormRun
 						<Items />
 					</AxFormControl>
 					<AxFormControl xmlns=""
+						i:type="AxFormComboBoxControl">
+						<Name>LogGrid_Status</Name>
+						<Type>ComboBox</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Status</DataField>
+						<DataSource>XAPI_APILogTable</DataSource>
+						<Items />
+					</AxFormControl>
+					<AxFormControl xmlns=""
 						i:type="AxFormStringControl">
 						<Name>LogGrid_Key</Name>
 						<Type>String</Type>

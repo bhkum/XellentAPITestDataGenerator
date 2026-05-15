@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APIRunner_ContractPart</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_APIRunner_ContractPart extends XAPI_APIRunnerBase
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>init</Name>
+				<Source><![CDATA[
+    protected void init()
+    {
+        api = XAPI_APIS::CreateContractPart;
+        super();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>postRun</Name>
+				<Source><![CDATA[
+    protected void postRun()
+    {
+        EGS_API_DataContract_Response res;
+
+        if (!responseText)
+        {
+            return;
+        }
+
+        res      = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+        logKey   = "ContractPartNum";
+        logValue = res.parmMessage();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>body</Name>
+				<Source><![CDATA[
+    protected str body()
+    {
+        XAPI_APILogTable        logRow;
+        EXU_UtilityInstallation uinst;
+        Map                     configMap;
+
+        configMap = new Map(Types::String, Types::String);
+        configMap.insert('<DataAreaId>', curExt());
+
+        select firstonly logRow
+            order by RecId desc
+            where logRow.ApiName == XAPI_APIS::CreateCustomer
+               && logRow.Key     == 'CustAccount';
+        configMap.insert('<custAccount>', logRow.Value);
+
+        select firstonly logRow
+            order by RecId desc
+            where logRow.ApiName == XAPI_APIS::CreateContract
+               && logRow.Key     == 'ContractNum';
+        configMap.insert('<Contract>', logRow.Value);
+
+        select firstonly logRow
+            order by RecId desc
+            where logRow.ApiName == XAPI_APIS::CreateInstallation
+               && logRow.Key     == 'InstNum';
+        configMap.insert('<InstNum>', logRow.Value);
+
+        select firstonly uinst
+            where uinst.InstNum == logRow.Value;
+        configMap.insert('<deliveryCategory>', uinst.DeliveryCategory);
+
+        return this.prepareBody(configMap);
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>
