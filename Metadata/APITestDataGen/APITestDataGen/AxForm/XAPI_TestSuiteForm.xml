@@ -779,16 +779,6 @@ public class XAPI_TestSuiteForm extends FormRun
 										<DataSource>XAPI_TestCase</DataSource>
 										<Label>Endpoint</Label>
 									</AxFormControl>
-									<AxFormControl xmlns=""
-										i:type="AxFormStringControl">
-										<Name>TestCaseGrid_JSON</Name>
-										<Type>String</Type>
-										<FormControlExtension
-											i:nil="true" />
-										<DataField>JSON</DataField>
-										<DataSource>XAPI_TestCase</DataSource>
-										<MultiLine>Yes</MultiLine>
-									</AxFormControl>
 								</Controls>
 								<DataSource>XAPI_TestCase</DataSource>
 								<ShowRowLabels>No</ShowRowLabels>
@@ -796,6 +786,48 @@ public class XAPI_TestSuiteForm extends FormRun
 							</AxFormControl>
 						</Controls>
 						<Caption>Test Cases</Caption>
+						<DataSource>XAPI_TestCase</DataSource>
+						<Scrollbars>Auto</Scrollbars>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormTabPageControl">
+						<Name>JSON</Name>
+						<HeightMode>SizeToAvailable</HeightMode>
+						<Type>TabPage</Type>
+						<WidthMode>SizeToAvailable</WidthMode>
+						<FormControlExtension
+							i:nil="true" />
+						<Controls>
+							<AxFormControl>
+								<Name>JsonHtmlDisplay</Name>
+								<HeightMode>SizeToAvailable</HeightMode>
+								<WidthMode>SizeToAvailable</WidthMode>
+								<FormControlExtension>
+									<Name>HTMLEditor</Name>
+									<ExtensionComponents />
+									<ExtensionProperties>
+										<AxFormControlExtensionProperty>
+											<Name>parmDataSourceName</Name>
+											<Type>String</Type>
+											<TypeName>str</TypeName>
+											<Value>XAPI_TestCase</Value>
+										</AxFormControlExtensionProperty>
+										<AxFormControlExtensionProperty>
+											<Name>parmDataFieldName</Name>
+											<Type>String</Type>
+											<TypeName>str</TypeName>
+										</AxFormControlExtensionProperty>
+										<AxFormControlExtensionProperty>
+											<Name>parmDataMethodName</Name>
+											<Type>String</Type>
+											<TypeName>str</TypeName>
+											<Value>jsonHtml</Value>
+										</AxFormControlExtensionProperty>
+									</ExtensionProperties>
+								</FormControlExtension>
+							</AxFormControl>
+						</Controls>
+						<Caption>JSON</Caption>
 						<DataSource>XAPI_TestCase</DataSource>
 						<Scrollbars>Auto</Scrollbars>
 					</AxFormControl>
