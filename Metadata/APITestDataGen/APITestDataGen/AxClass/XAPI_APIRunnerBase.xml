@@ -70,6 +70,11 @@ abstract class XAPI_APIRunnerBase
         logRow.Response     = responseText;
         logRow.ErrorMessage = errorMessage;
         logRow.insert();
+
+        if (status == XAPI_APIStatus::Success)
+        {
+            this.postProcess();
+        }
     }
 
 ]]></Source>
@@ -105,6 +110,25 @@ abstract class XAPI_APIRunnerBase
     /// </summary>
     protected void postRun()
     {
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>postProcess</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Runs the post-processor registered for this api (if any). Invoked after
+    /// the log row is inserted, only when status is Success.
+    /// </summary>
+    protected void postProcess()
+    {
+        XAPI_APIPostProcessorBase postProc = XAPI_APIPostProcessorBase::construct(api);
+
+        if (postProc)
+        {
+            postProc.run();
+        }
     }
 
 ]]></Source>

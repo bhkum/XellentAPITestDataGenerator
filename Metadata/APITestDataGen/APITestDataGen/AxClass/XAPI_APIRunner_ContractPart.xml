@@ -46,6 +46,7 @@ class XAPI_APIRunner_ContractPart extends XAPI_APIRunnerBase
         XAPI_APILogTable        logRow;
         EXU_UtilityInstallation uinst;
         Map                     configMap;
+        EXU_ContractNum         conNum;
 
         configMap = new Map(Types::String, Types::String);
         configMap.insert('<DataAreaId>', curExt());
@@ -61,16 +62,31 @@ class XAPI_APIRunner_ContractPart extends XAPI_APIRunnerBase
             where logRow.ApiName == XAPI_APIS::CreateContract
                && logRow.Key     == 'ContractNum';
         configMap.insert('<Contract>', logRow.Value);
+        conNum = logRow.Value;
 
         select firstonly logRow
             order by RecId desc
             where logRow.ApiName == XAPI_APIS::CreateInstallation
                && logRow.Key     == 'InstNum';
-        configMap.insert('<InstNum>', logRow.Value);
+        configMap.insert('<InstallationNum>', logRow.Value);
 
         select firstonly uinst
             where uinst.InstNum == logRow.Value;
         configMap.insert('<deliveryCategory>', uinst.DeliveryCategory);
+
+        EXU_ContractPartTable partTable;
+        select firstonly partTable
+            where partTable.ContractNum == conNum;
+        configMap.insert('<productNum>', partTable.ProductNum);
+        
+        str dateStr = date2Str(partTable.Startdate, 
+                                321, 
+                                DateDay::Digits2, 
+                                DateSeparator::Hyphen, 
+                                DateMonth::Digits2, 
+                                DateSeparator::Hyphen, 
+                                DateYear::Digits4); // Todo: move it to util
+        configMap.insert('<startdate>', dateStr);
 
         return this.prepareBody(configMap);
     }

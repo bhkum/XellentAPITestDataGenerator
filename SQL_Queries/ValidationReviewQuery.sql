@@ -19,11 +19,11 @@ join EXU_INSTALLATION inst
 on inst.INSTNUM= ct.ATTACHMENTNUM
 join custtable cust
 on cust.ACCOUNTNUM = ct.CUSTACCOUNT
-where inst.INSTREADINGMETHODNUM like  'TST%'
-and cust.CUSTGROUP like  'TST%'
+where inst.INSTREADINGMETHODNUM like  'TS%'
+and cust.CUSTGROUP like  'TS%'
 
 select REQUESTBODY,* from XAPI_APILogTable
-where recid > 5637161092
+where recid > 5637164833
 -------------------------------
 select * from custgroup where CUSTGROUP like 'Ts%'
 
@@ -34,4 +34,8 @@ select * from XAPI_APIConfigurations
 
 --delete from  XAPI_APILogTable where archived = 0
 
+-----=== check in master tables
+select * from CUSTTABLE where ACCOUNTNUM = '917602'
+
+select *f 
 

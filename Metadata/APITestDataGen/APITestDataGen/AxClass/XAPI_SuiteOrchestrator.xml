@@ -64,10 +64,10 @@ final class XAPI_SuiteOrchestrator
 
                 XAPI_SuiteOrchestrator::runStep(testCase.RunnerClass, context);
 
-                if (testCase.PostProcessBatchClass != '')
-                {
-                    XAPI_SuiteOrchestrator::runMain(testCase.PostProcessBatchClass);
-                }
+                //if (testCase.PostProcessBatchClass != '')
+                //{
+                //    XAPI_SuiteOrchestrator::runMain(testCase.PostProcessBatchClass);
+                //}
 
                 info(strFmt("Suite %1 - Seq %2 [%3] completed.",
                     _suiteId, testCase.Sequence, testCase.RunnerClass));

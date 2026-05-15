@@ -3,4 +3,11 @@
     <BuildType Name="Default" />
     <Platform Name="Default" />
   </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path="../log.sql" />
+    <File Path="../misc.sql" />
+    <File Path="../output.sql" />
+    <File Path="../SuiteTables.sql" />
+    <File Path="../ValidationReviewQuery.sql" />
+  </Folder>
 </Solution>
