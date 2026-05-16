@@ -70,10 +70,22 @@ internal final class XAPI_NewMeterReadingDataGen
 
         meterNum = meterTemplate.MeterNum;
         info(strFmt("Generated MeterNum: %1", meterNum));
-        XAPI_APILogTable meterLog;
-        meterLog.ApiName = XAPI_APIS::CreateMeterReading;
-        meterLog.Key     = 'meterNum';
-        meterLog.Value   = meterNum;
+
+        XAPI_APILogTable  meterMasterLog;
+        XAPI_APILogValues meterLog;
+        guid              meterSessionId = newGuid();
+
+        meterMasterLog.SessionId = meterSessionId;
+        meterMasterLog.ApiName   = XAPI_APIS::CreateMeterReading;
+        meterMasterLog.Status    = XAPI_APIStatus::Success;
+        meterMasterLog.insert();
+
+        meterLog.SessionId  = meterSessionId;
+        meterLog.Sequence   = 0;
+        meterLog.LogType    = XAPI_LogType::PreProcess;
+        meterLog.FieldName  = 'meterNum';
+        meterLog.FieldValue = meterNum;
+        meterLog.Status     = XAPI_APIStatus::Success;
         meterLog.insert();
 
         testGroupNum = EXU_MeterTable::find(meterNum, deliveryCategory, companyId).TestGroupNum;

@@ -13,10 +13,10 @@ final class XAPI_SuiteOrchestrator
 				<Source><![CDATA[
     /// <summary>
     /// Runs every test case in the given suite in Sequence order. For each case
-    /// the orchestrator dispatches to three class names stored on the case row:
-    ///   - PreProcessClass        (required) - runnable class, static main(Args)
-    ///   - RunnerClass            (required) - extends XAPI_APIRunnerBase, executes the API call and logs it
-    ///   - PostProcessBatchClass  (optional) - runnable class, static main(Args)
+    /// the orchestrator dispatches to three phases:
+    ///   - PreProcessClass  (required) - runnable class, static main(Args)
+    ///   - RunnerClass      (required) - extends XAPI_APIRunnerBase, executes the API call and logs it
+    ///   - Post-process     (optional) - resolved via XAPI_APIPostProcessorBase::construct(API)
     /// Independent suites continue past failures; Chained suites stop on the first failure.
     /// </summary>
     /// <param name = "_suiteId">Suite to run.</param>
@@ -51,30 +51,50 @@ final class XAPI_SuiteOrchestrator
 
             context.setCurrentCase(testCase);
 
+            // --- Pre-process phase ---
+            XAPI_APILogValues preLog;
+            preLog.SessionId = context.parmSessionId();
+            preLog.Sequence  = testCase.Sequence;
+            preLog.LogType   = XAPI_LogType::PreProcess;
+
             try
             {
-                if (testCase.PreProcessClass != '')
-                {
-                    XAPI_SuiteOrchestrator::runMain(testCase.PreProcessClass);
-                }
-                else
+                if (testCase.PreProcessClass == '')
                 {
                     throw Error("No preprocess class found");
                 }
 
-                XAPI_SuiteOrchestrator::runStep(testCase.RunnerClass, context);
+                XAPI_SuiteOrchestrator::runMain(testCase.PreProcessClass);
 
-                //if (testCase.PostProcessBatchClass != '')
-                //{
-                //    XAPI_SuiteOrchestrator::runMain(testCase.PostProcessBatchClass);
-                //}
-
-                info(strFmt("Suite %1 - Seq %2 [%3] completed.",
-                    _suiteId, testCase.Sequence, testCase.RunnerClass));
+                preLog.Status  = XAPI_APIStatus::Success;
+                preLog.Message = strFmt("PreProcess %1 completed.", testCase.PreProcessClass);
             }
             catch (Exception::Error)
             {
-                warning(strFmt("Suite %1 - Seq %2 [%3] failed.",
+                preLog.Status       = XAPI_APIStatus::Error;
+                preLog.Message      = strFmt("PreProcess %1 failed.", testCase.PreProcessClass);
+                preLog.ErrorMessage = infolog().text();
+
+                if (suiteType == XAPI_SuiteType::Chained)
+                {
+                    chainBroken = true;
+                }
+            }
+            preLog.insert();
+
+            if (chainBroken)
+            {
+                continue;
+            }
+
+            // --- API Runner phase (logs its own rows via execute()) ---
+            try
+            {
+                XAPI_SuiteOrchestrator::runStep(testCase.RunnerClass, context);
+            }
+            catch (Exception::Error)
+            {
+                warning(strFmt("Suite %1 - Seq %2 [%3] runner failed.",
                     _suiteId, testCase.Sequence, testCase.RunnerClass));
 
                 if (suiteType == XAPI_SuiteType::Chained)
@@ -82,6 +102,44 @@ final class XAPI_SuiteOrchestrator
                     chainBroken = true;
                 }
             }
+
+            if (chainBroken)
+            {
+                continue;
+            }
+
+            // --- Post-process phase ---
+            XAPI_APIPostProcessorBase postProc = XAPI_APIPostProcessorBase::construct(testCase.API);
+            if (postProc)
+            {
+                XAPI_APILogValues postLog;
+                postLog.SessionId = context.parmSessionId();
+                postLog.Sequence  = testCase.Sequence;
+                postLog.LogType   = XAPI_LogType::PostProcess;
+
+                try
+                {
+                    postProc.run();
+
+                    postLog.Status  = XAPI_APIStatus::Success;
+                    postLog.Message = strFmt("PostProcess for %1 completed.", enum2Str(testCase.API));
+                }
+                catch (Exception::Error)
+                {
+                    postLog.Status       = XAPI_APIStatus::Error;
+                    postLog.Message      = strFmt("PostProcess for %1 failed.", enum2Str(testCase.API));
+                    postLog.ErrorMessage = infolog().text();
+
+                    if (suiteType == XAPI_SuiteType::Chained)
+                    {
+                        chainBroken = true;
+                    }
+                }
+                postLog.insert();
+            }
+
+            info(strFmt("Suite %1 - Seq %2 [%3] completed.",
+                _suiteId, testCase.Sequence, testCase.RunnerClass));
         }
 
         info(strFmt("Suite %1 run %2 complete.", _suiteId, guid2Str(context.parmSessionId())));

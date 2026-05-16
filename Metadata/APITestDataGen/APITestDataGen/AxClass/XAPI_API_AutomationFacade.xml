@@ -142,8 +142,8 @@ public class XAPI_API_AutomationFacade
     {
         XAPI_NewCustomerDataGen::main(null);
 
-        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateCustomer);
-        api.callAPI();
+        //XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateCustomer);
+        //api.callAPI();
     }
 
 ]]></Source>
@@ -155,8 +155,8 @@ public class XAPI_API_AutomationFacade
     {
         XAPI_NewInstallationDataGen::main(null);
 
-        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateInstallation);
-        api.callAPI();
+        //XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateInstallation);
+        //api.callAPI();
     }
 
 ]]></Source>
@@ -168,8 +168,8 @@ public class XAPI_API_AutomationFacade
     {
         XAPI_NewContractDataGen::main(null);
 
-        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateContract);
-        api.callAPI();
+        //XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateContract);
+        //api.callAPI();
     }
 
 ]]></Source>
@@ -179,9 +179,9 @@ public class XAPI_API_AutomationFacade
 				<Source><![CDATA[
     public static void create_ContractPart()
     {
-        XAPI_NewContractPartDataGen::main(null);
-        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateContractPart);
-        api.callAPI();
+        //XAPI_NewContractPartDataGen::main(null);
+        //XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateContractPart);
+        //api.callAPI();
     }
 
 ]]></Source>
@@ -191,9 +191,9 @@ public class XAPI_API_AutomationFacade
 				<Source><![CDATA[
     public static void create_MeterReading()
     {
-        XAPI_NewMeterReadingDataGen::main(null);
-        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateMeterReading);
-        api.callAPI();
+        //XAPI_NewMeterReadingDataGen::main(null);
+        //XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateMeterReading);
+        //api.callAPI();
     }
 
 ]]></Source>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxEnum xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_LogType</Name>
+	<Label>Log Type</Label>
+	<UseEnumValue>No</UseEnumValue>
+	<EnumValues>
+		<AxEnumValue>
+			<Name>PreProcess</Name>
+			<Label>Pre-Process</Label>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>APIRunner</Name>
+			<Label>API Runner</Label>
+			<Value>1</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>PostProcess</Name>
+			<Label>Post-Process</Label>
+			<Value>2</Value>
+		</AxEnumValue>
+	</EnumValues>
+	<IsExtensible>true</IsExtensible>
+</AxEnum>

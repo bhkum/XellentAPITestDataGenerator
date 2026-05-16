@@ -11,7 +11,8 @@ order by RECID desc
 select eu.INSTNUM,uinst.DELIVERYCATEGORY from EXU_INSTALLATION eu
 join EXU_UTILITYINSTALLATION uinst
 on uinst.INSTNUM = eu.INSTNUM
-where eu.INSTREADINGMETHODNUM like  'TST%'
+where 
+eu.INSTREADINGMETHODNUM like  'TST%'
 order by eu.RECID desc
 
 select ct.CONTRACTNUM,ct.ATTACHMENTNUM, cust.ACCOUNTNUM, * from EXU_CONTRACTTABLE ct
@@ -19,11 +20,12 @@ join EXU_INSTALLATION inst
 on inst.INSTNUM= ct.ATTACHMENTNUM
 join custtable cust
 on cust.ACCOUNTNUM = ct.CUSTACCOUNT
-where inst.INSTREADINGMETHODNUM like  'TS%'
-and cust.CUSTGROUP like  'TS%'
+where --inst.INSTREADINGMETHODNUM like  'TS%'
+--and
+cust.CUSTGROUP like  'TS%'
 
 select REQUESTBODY,* from XAPI_APILogTable
-where recid > 5637164833
+where recid > 5637164841
 -------------------------------
 select * from custgroup where CUSTGROUP like 'Ts%'
 
@@ -37,5 +39,9 @@ select * from XAPI_APIConfigurations
 -----=== check in master tables
 select * from CUSTTABLE where ACCOUNTNUM = '917602'
 
-select *f 
+select * from  EXU_INSTALLATION where INSTNUM = '19765'
 
+select * from EXU_CONTRACTTABLE where CONTRACTNUM =  '9367872'
+
+--truncate table XAPI_APILogTable
+--drop table XAPI_APILogTable

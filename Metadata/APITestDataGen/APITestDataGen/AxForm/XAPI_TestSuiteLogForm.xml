@@ -150,6 +150,23 @@ public class XAPI_TestSuiteLogForm extends FormRun
 			<DataSourceLinks />
 			<DerivedDataSources />
 		</AxFormDataSource>
+		<AxFormDataSource xmlns="">
+			<Name>XAPI_APILogValues</Name>
+			<Table>XAPI_APILogValues</Table>
+			<Fields />
+			<ReferencedDataSources />
+			<AllowCreate>No</AllowCreate>
+			<AllowDelete>No</AllowDelete>
+			<AllowEdit>No</AllowEdit>
+			<DataSourceLinks>
+				<AxFormDataSourceLink>
+					<DataSource>XAPI_APILogTable</DataSource>
+					<JoinRelation>XAPI_APILogTable</JoinRelation>
+				</AxFormDataSourceLink>
+			</DataSourceLinks>
+			<DerivedDataSources />
+			<LinkType>Delayed</LinkType>
+		</AxFormDataSource>
 	</DataSources>
 	<Design>
 		<DataSource xmlns="">XAPI_APILogTable</DataSource>
@@ -194,6 +211,7 @@ public class XAPI_TestSuiteLogForm extends FormRun
 						<AlignChild>No</AlignChild>
 						<AlignChildren>No</AlignChildren>
 						<ArrangeMethod>Vertical</ArrangeMethod>
+						<DataSource>XAPI_APILogTable</DataSource>
 					</AxFormControl>
 				</Controls>
 				<AlignChild>No</AlignChild>
@@ -278,33 +296,6 @@ public class XAPI_TestSuiteLogForm extends FormRun
 					</AxFormControl>
 					<AxFormControl xmlns=""
 						i:type="AxFormStringControl">
-						<Name>LogGrid_Key</Name>
-						<Type>String</Type>
-						<FormControlExtension
-							i:nil="true" />
-						<DataField>Key</DataField>
-						<DataSource>XAPI_APILogTable</DataSource>
-					</AxFormControl>
-					<AxFormControl xmlns=""
-						i:type="AxFormStringControl">
-						<Name>LogGrid_Value</Name>
-						<Type>String</Type>
-						<FormControlExtension
-							i:nil="true" />
-						<DataField>Value</DataField>
-						<DataSource>XAPI_APILogTable</DataSource>
-					</AxFormControl>
-					<AxFormControl xmlns=""
-						i:type="AxFormStringControl">
-						<Name>LogGrid_Message</Name>
-						<Type>String</Type>
-						<FormControlExtension
-							i:nil="true" />
-						<DataField>Message</DataField>
-						<DataSource>XAPI_APILogTable</DataSource>
-					</AxFormControl>
-					<AxFormControl xmlns=""
-						i:type="AxFormStringControl">
 						<Name>LogGrid_RequestBody</Name>
 						<Type>String</Type>
 						<FormControlExtension
@@ -323,18 +314,81 @@ public class XAPI_TestSuiteLogForm extends FormRun
 						<DataSource>XAPI_APILogTable</DataSource>
 						<MultiLine>Yes</MultiLine>
 					</AxFormControl>
+				</Controls>
+				<DataSource>XAPI_APILogTable</DataSource>
+				<MultiSelect>No</MultiSelect>
+				<ShowRowLabels>No</ShowRowLabels>
+				<Style>Tabular</Style>
+			</AxFormControl>
+			<AxFormControl xmlns=""
+				i:type="AxFormGridControl">
+				<Name>LogValuesGrid</Name>
+				<AllowEdit>No</AllowEdit>
+				<Caption>Phase Detail</Caption>
+				<Type>Grid</Type>
+				<VerticalSpacing>-1</VerticalSpacing>
+				<FormControlExtension
+					i:nil="true" />
+				<Controls>
+					<AxFormControl xmlns=""
+						i:type="AxFormComboBoxControl">
+						<Name>LogValuesGrid_LogType</Name>
+						<Type>ComboBox</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>LogType</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+						<Items />
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormComboBoxControl">
+						<Name>LogValuesGrid_Status</Name>
+						<Type>ComboBox</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Status</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+						<Items />
+					</AxFormControl>
 					<AxFormControl xmlns=""
 						i:type="AxFormStringControl">
-						<Name>LogGrid_ErrorMessage</Name>
+						<Name>LogValuesGrid_FieldName</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>FieldName</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogValuesGrid_FieldValue</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>FieldValue</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogValuesGrid_Message</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Message</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogValuesGrid_ErrorMessage</Name>
 						<Type>String</Type>
 						<FormControlExtension
 							i:nil="true" />
 						<DataField>ErrorMessage</DataField>
-						<DataSource>XAPI_APILogTable</DataSource>
+						<DataSource>XAPI_APILogValues</DataSource>
 						<MultiLine>Yes</MultiLine>
 					</AxFormControl>
 				</Controls>
-				<DataSource>XAPI_APILogTable</DataSource>
+				<DataSource>XAPI_APILogValues</DataSource>
 				<MultiSelect>No</MultiSelect>
 				<ShowRowLabels>No</ShowRowLabels>
 				<Style>Tabular</Style>
