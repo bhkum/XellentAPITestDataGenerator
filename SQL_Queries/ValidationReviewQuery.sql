@@ -25,6 +25,7 @@ where --inst.INSTREADINGMETHODNUM like  'TS%'
 cust.CUSTGROUP like  'TS%'
 
 select REQUESTBODY,* from XAPI_APILogTable
+select * from XAPI_APILogValues
 where recid > 5637164841
 -------------------------------
 select * from custgroup where CUSTGROUP like 'Ts%'
@@ -43,5 +44,9 @@ select * from  EXU_INSTALLATION where INSTNUM = '19765'
 
 select * from EXU_CONTRACTTABLE where CONTRACTNUM =  '9367872'
 
+
+--truncate table XAPI_APILogValues
+
 --truncate table XAPI_APILogTable
 --drop table XAPI_APILogTable
+--drop table XAPI_APILogValues

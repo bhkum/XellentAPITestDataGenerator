@@ -127,28 +127,28 @@ class XAPI_AutomateScripts
 				<Source><![CDATA[
     public void execute()
     {
-        this.deleteAll();
+        //this.deleteAll();
 
-        XAPI_API_CallAutomator_del auto = XAPI_API_CallAutomator_del::construct();
+        //XAPI_API_CallAutomator_del auto = XAPI_API_CallAutomator_del::construct();
 
-        // 1. create customer
-        xapi_newcustomerdatagen::main(null);
-        auto.callcreatecustapi();
+        //// 1. create customer
+        //xapi_newcustomerdatagen::main(null);
+        //auto.callcreatecustapi();
 
-        // 2. create installation for the customer
-        xapi_newinstallationdatagen::main(null);
-        auto.callinstallationapi();
+        //// 2. create installation for the customer
+        //xapi_newinstallationdatagen::main(null);
+        //auto.callinstallationapi();
 
-        // 3. create contract for the installation
-        xapi_newcontractdatagen::main(null);
-        auto.callcontractapi("", "", "");
+        //// 3. create contract for the installation
+        //xapi_newcontractdatagen::main(null);
+        //auto.callcontractapi("", "", "");
 
-        // 4. create contract part for the contract
-        xapi_newcontractpartdatagen::main(null);
-        auto.callcontractpartapi("", "", "","","");
+        //// 4. create contract part for the contract
+        //xapi_newcontractpartdatagen::main(null);
+        //auto.callcontractpartapi("", "", "","","");
 
-        XAPI_NewMeterReadingDataGen::main(null);
-        auto.callMeterReadingAPI("", "", "", "");
+        //XAPI_NewMeterReadingDataGen::main(null);
+        //auto.callMeterReadingAPI("", "", "", "");
 
     }
 

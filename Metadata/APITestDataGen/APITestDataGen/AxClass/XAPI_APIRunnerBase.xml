@@ -43,7 +43,7 @@ abstract class XAPI_APIRunnerBase
     /// row and one XAPI_APILogValues child row (LogType = APIRunner) stamped with the
     /// suite-run SessionId and Sequence from the context.
     /// </summary>
-    public void execute(XAPI_TestStepContext _ctx)
+    public XAPI_APIStatus execute(XAPI_TestStepContext _ctx)
     {
         XAPI_APILogTable  logRow;
         XAPI_APILogValues logValues;
@@ -78,6 +78,8 @@ abstract class XAPI_APIRunnerBase
         logValues.Status       = status;
         logValues.ErrorMessage = errorMessage;
         logValues.insert();
+
+        return status;
     }
 
 ]]></Source>
