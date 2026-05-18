@@ -34,21 +34,22 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="Base Enums\" />
     <Folder Include="Classes\" />
     <Folder Include="Classes\Creation" />
     <Folder Include="Forms\" />
     <Folder Include="Tables\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AxClass\XAPI_APICaller_ContractPart">
+    <Content Include="AxClass\XAPI_APIRunner_BrightGetUserRoles">
       <SubType>Content</SubType>
-      <Name>XAPI_APICaller_ContractPart</Name>
-      <Link>Classes\XAPI_APICaller_ContractPart</Link>
+      <Name>XAPI_APIRunner_BrightGetUserRoles</Name>
+      <Link>Classes\XAPI_APIRunner_BrightGetUserRoles</Link>
     </Content>
-    <Content Include="AxClass\XAPI_APICaller_MeterReading">
+    <Content Include="AxClass\XAPI_APIRunner_BrightSearchCustomers">
       <SubType>Content</SubType>
-      <Name>XAPI_APICaller_MeterReading</Name>
-      <Link>Classes\XAPI_APICaller_MeterReading</Link>
+      <Name>XAPI_APIRunner_BrightSearchCustomers</Name>
+      <Link>Classes\XAPI_APIRunner_BrightSearchCustomers</Link>
     </Content>
     <Content Include="AxClass\XAPI_APIRunner_ContractPart">
       <SubType>Content</SubType>
@@ -114,6 +115,56 @@
       <SubType>Content</SubType>
       <Name>XAPI_NewInstallationDelDataGen</Name>
       <Link>Classes\Creation\XAPI_NewInstallationDelDataGen</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Setup_Agreement">
+      <SubType>Content</SubType>
+      <Name>XAPI_Setup_Agreement</Name>
+      <Link>Classes\XAPI_Setup_Agreement</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Setup_CampaignReply">
+      <SubType>Content</SubType>
+      <Name>XAPI_Setup_CampaignReply</Name>
+      <Link>Classes\XAPI_Setup_CampaignReply</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Setup_CustInvoiceAddress">
+      <SubType>Content</SubType>
+      <Name>XAPI_Setup_CustInvoiceAddress</Name>
+      <Link>Classes\XAPI_Setup_CustInvoiceAddress</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Setup_CustomerTopic">
+      <SubType>Content</SubType>
+      <Name>XAPI_Setup_CustomerTopic</Name>
+      <Link>Classes\XAPI_Setup_CustomerTopic</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Teardown_Agreement">
+      <SubType>Content</SubType>
+      <Name>XAPI_Teardown_Agreement</Name>
+      <Link>Classes\XAPI_Teardown_Agreement</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Teardown_CampaignReply">
+      <SubType>Content</SubType>
+      <Name>XAPI_Teardown_CampaignReply</Name>
+      <Link>Classes\XAPI_Teardown_CampaignReply</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Teardown_CustInvoiceAddress">
+      <SubType>Content</SubType>
+      <Name>XAPI_Teardown_CustInvoiceAddress</Name>
+      <Link>Classes\XAPI_Teardown_CustInvoiceAddress</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Teardown_CustomerTopic">
+      <SubType>Content</SubType>
+      <Name>XAPI_Teardown_CustomerTopic</Name>
+      <Link>Classes\XAPI_Teardown_CustomerTopic</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Teardown_MeterReading">
+      <SubType>Content</SubType>
+      <Name>XAPI_Teardown_MeterReading</Name>
+      <Link>Classes\XAPI_Teardown_MeterReading</Link>
+    </Content>
+    <Content Include="AxEnum\XAPI_APIS">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIS</Name>
+      <Link>Base Enums\XAPI_APIS</Link>
     </Content>
     <Content Include="AxForm\XAPI_TestSuiteForm">
       <SubType>Content</SubType>

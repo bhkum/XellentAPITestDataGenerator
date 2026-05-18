@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Setup_CustInvoiceAddress</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_Setup_CustInvoiceAddress
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Class entry point. The system will call this method when a designated menu 
+    /// is selected or when execution starts and this class is set as the startup class.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
+    public static void main(Args _args)
+    {
+        str zipCode         = '121212';
+        str city            = 'XAPI_City';
+        str countryRegionId = 'DK';
+
+        // ZipCode / City
+
+        LogisticsAddressZipCode         zipCodeTable, newZipCodeTable;
+        LogisticsAddressCountryRegion   countryRegion;
+
+        select firstonly countryRegion
+            where countryRegion.CountryRegionId == countryRegionId;
+
+        if (!countryRegion.RecId)
+        {
+            error(strFmt("CountryRegionId %1 not found — cannot create XAPI_ zip code.", countryRegionId));
+            return;
+        }
+
+        select firstonly zipCodeTable
+            where zipCodeTable.CountryRegionId == countryRegionId;
+        select firstonly newZipCodeTable
+            where newZipCodeTable.ZipCode == zipCode;
+
+        if (zipCodeTable.RecId && !newZipCodeTable.RecId)
+        {
+            buf2Buf(zipCodeTable, newZipCodeTable);
+            newZipCodeTable.ZipCode         = zipCode;
+            newZipCodeTable.City            = city;
+            newZipCodeTable.CountryRegionId = countryRegionId;
+            newZipCodeTable.insert();
+            info(strFmt("Inserted LogisticsAddressZipCode: %1 / %2 (%3)", zipCode, city, countryRegionId));
+        }
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

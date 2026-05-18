@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Teardown_CampaignReply</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_Teardown_CampaignReply
+{
+}
+
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Class entry point. The system will call this method when a designated menu 
+    /// is selected or when execution starts and this class is set as the startup class.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
+    public static void main(Args _args)
+    {
+        // ---- DECLARATIONS (must come before any executable statement) ----------
+        AccountNum              accountNum;
+        EXU_ContractNum         contractNum;
+        smmCampaignId           campaignId;
+
+        CustTable               custTable;
+        smmBusRelTable          smmBusRelTable;
+
+        smmCampaignSelection    delSelection;
+        smmCampaignTable        delCampaign;
+
+        int                     deletedSelections = 0;
+
+        // ---- EDIT THESE VALUES (must match what you used in the setup job) -----
+        accountNum   = '917393';            // <-- Specify the AccountNum you used in the setup job
+        contractNum  = '9367420';            // <-- Specify the ContractNum you used in the setup job
+        campaignId   = 'TST_CampId';       // <-- Specify the CampaignId you used in the setup job
+
+        // ---- 1. Resolve customer + BusRel (needed to identify the target row) --
+        select firstonly custTable
+        where custTable.AccountNum == accountNum;
+
+        if (!custTable.RecId)
+        {
+            warning(strFmt("Customer %1 not found. Nothing to tear down for this customer.", accountNum));
+        }
+
+        select firstonly smmBusRelTable
+        where smmBusRelTable.Party == custTable.Party;
+
+        // ---- 2. Delete smmCampaignSelection (the target row) -------------------
+        ttsbegin;
+
+        while select forupdate delSelection
+        where delSelection.CampaignId      == campaignId
+           && delSelection.EGS_ContractNum == contractNum
+           && delSelection.Party           == smmBusRelTable.Party
+        {
+            delSelection.delete();
+            deletedSelections++;
+            info(strFmt("Deleted smmCampaignSelection: CampaignId=%1, ContractNum=%2, Party=%3",
+                    campaignId, contractNum, smmBusRelTable.Party));
+        }
+
+        if (deletedSelections == 0)
+        {
+            info(strFmt("No smmCampaignSelection row to delete for (%1, %2, Party=%3).",
+                    campaignId, contractNum, smmBusRelTable.Party));
+        }
+
+        // ---- 3. Delete smmCampaignTable (the campaign header) ------------------
+        // Guarded by an TST/test prefix check so we never delete a real campaign.
+        select firstonly forupdate delCampaign
+        where delCampaign.CampaignId == campaignId;
+
+        if (delCampaign.RecId && strStartsWith(delCampaign.CampaignId, 'TST_'))
+        {
+            delCampaign.delete();
+            info(strFmt("Deleted smmCampaignTable: %1", campaignId));
+        }
+        else if (delCampaign.RecId)
+        {
+            warning(strFmt("Skipped smmCampaignTable %1 — does not start with 'TST_'. Edit the guard above if you really want to delete it.", campaignId));
+        }
+        else
+        {
+            info(strFmt("No smmCampaignTable row found for CampaignId=%1.", campaignId));
+        }
+
+        ttscommit;
+
+        // ---- 4. Intentionally NOT deleted -------------------------------------
+        // - CustTable (%accountNum)  : created by newCustomerAPI, may be reused
+        // - smmBusRelTable           : auto-created with CustTable, deleting it can corrupt the customer
+        // - EXU_ContractTable (%contractNum) : created by newContractAPI, may be reused
+        // If you need to remove these too, do it via the standard delete UI or write a separate cleanup.
+
+        info("====== Teardown complete ======");
+        info(strFmt("Deleted %1 smmCampaignSelection row(s) and the campaign header (if TST_prefixed).", deletedSelections));
+        info(strFmt("Kept    : CustTable %1, smmBusRelTable %2, EXU_ContractTable %3",
+                 accountNum,
+                 smmBusRelTable.RecId ? smmBusRelTable.BusRelAccount : "(none)",
+                 contractNum));
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

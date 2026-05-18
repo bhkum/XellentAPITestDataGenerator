@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Teardown_Agreement</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_Teardown_Agreement
+{
+}
+
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Class entry point. The system will call this method when a designated menu 
+    /// is selected or when execution starts and this class is set as the startup class.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
+    public static void main(Args _args)
+    {
+        // ── Identifiers — must match XAPI_Setup_EGS_API_newAgreement ─────────
+        EXU_DeliveryCategory    deliveryCategory        = 'TST_EL';
+        str                     categoryNum             = 'TST_CAT';
+        EXU_DeliveryGroupNum    deliveryGroupNum        = 'TST_RATE';
+        EXU_ProductNum          productNum              = 'TST_PROD';
+        ItemId                  itemId                  = 'TST_ITEM';
+        str                     contractTemplateNum     = 'TST_TMPL';
+        str                     supplyModelNum          = 'TST_SUPM';
+        str                     amrCode                 = 'TST_AMR';
+        str                     priceManagementCode     = 'TST_PM';
+        str                     netArea                 = 'TST_NET';
+        CustGroupId             custGroupId             = 'TST_CustGrp';
+        str                     custGroupInStr          = 'TST_CAT';
+        str                     meteringPoint           = '735999114999999996';
+
+        // ── 1. EGS_MASS_Input staging records ────────────────────────────────
+        // Delete first — these reference nothing but must be gone before
+        // agreement/delpoint cleanup
+        EGS_MASS_Input massInput;
+        ttsbegin;
+        while select forupdate massInput
+        where massInput.C010 == meteringPoint
+        {
+            massInput.delete();
+            info(strFmt("Deleted EGS_MASS_Input record — Group_id: %1 | SeqNo: %2",
+            massInput.Group_id, massInput.Group_SeqNo));
+        }
+        ttscommit;
+
+        // ── 2. Agreement + DelPoint (created by batch job) ────────────────────
+        // Must delete before reference data to avoid FK violations
+        EXU_AgreementTable  agreementTable;
+        EXU_DelPoint        delPoint;
+        select firstonly forupdate delPoint
+        where delPoint.MeteringPoint    == meteringPoint
+           && delPoint.DeliveryCategory == deliveryCategory;
+        if (delPoint.RecId)
+        {
+            select firstonly forupdate agreementTable
+            where agreementTable.AgreementNum == delPoint.AttachmentNum;
+            if (agreementTable.RecId)
+            {
+                ttsbegin;
+                agreementTable.delete();
+                ttscommit;
+                info(strFmt("Deleted EXU_AgreementTable: %1", agreementTable.AgreementNum));
+            }
+            ttsbegin;
+            delPoint.delete();
+            ttscommit;
+            info(strFmt("Deleted EXU_DelPoint: %1", meteringPoint));
+        }
+
+        // ── 3. Product Extend ─────────────────────────────────────────────────
+        EXU_ProductExtendTable productExtend;
+        ttsbegin;
+        while select forupdate productExtend
+        where productExtend.ProductNum          == productNum
+           && productExtend.PriceManagementCode == priceManagementCode
+        {
+            productExtend.delete();
+            info(strFmt("Deleted EXU_ProductExtendTable: %1 | %2", productNum, priceManagementCode));
+        }
+        ttscommit;
+
+        // ── 4. Product Table ──────────────────────────────────────────────────
+        EXU_ProductTable productTable;
+        ttsbegin;
+        while select forupdate productTable
+        where productTable.ProductNum == productNum
+        {
+            productTable.delete();
+            info(strFmt("Deleted EXU_ProductTable: %1", productNum));
+        }
+        ttscommit;
+
+        // ── 5. Price Management Code ──────────────────────────────────────────
+
+
+        // ── 6. InventTable ────────────────────────────────────────────────────
+        InventTable inventTable;
+        ttsbegin;
+        while select forupdate inventTable
+        where inventTable.ItemId == itemId
+        {
+            inventTable.delete();
+            info(strFmt("Deleted InventTable: %1", itemId));
+        }
+        ttscommit;
+
+        // ── 7. AMR Code / Flex pricing ────────────────────────────────────────
+        exu_FlexBAMRTable flexBAMR;
+        ttsbegin;
+        while select forupdate flexBAMR
+        where flexBAMR.AMRCode == amrCode
+        {
+            flexBAMR.delete();
+            info(strFmt("Deleted exu_FlexBAMRTable: %1", amrCode));
+        }
+        ttscommit;
+
+        // ── 8. Supply Model ───────────────────────────────────────────────────
+        EXU_supplyModel supplyModel;
+        ttsbegin;
+        while select forupdate supplyModel
+        where supplyModel.SupplyNum == supplyModelNum
+        {
+            supplyModel.delete();
+            info(strFmt("Deleted EXU_supplyModel: %1", supplyModelNum));
+        }
+        ttscommit;
+
+        // ── 9. Contract Template ──────────────────────────────────────────────
+        EXU_ContractTemplate contractTemplate;
+        ttsbegin;
+        while select forupdate contractTemplate
+        where contractTemplate.ContractTemplateNum == contractTemplateNum
+        {
+            contractTemplate.delete();
+            info(strFmt("Deleted EXU_ContractTemplate: %1", contractTemplateNum));
+        }
+        ttscommit;
+
+        // ── 10. Rate Code (DeliveryGroupTable) ────────────────────────────────
+        EXU_DeliveryGroupTable deliveryGroup;
+        ttsbegin;
+        while select forupdate deliveryGroup
+        where deliveryGroup.DeliveryGroupNum == deliveryGroupNum
+        {
+            deliveryGroup.delete();
+            info(strFmt("Deleted EXU_DeliveryGroupTable: %1", deliveryGroupNum));
+        }
+        ttscommit;
+
+        // ── 11. Net Area ──────────────────────────────────────────────────────
+        EMS_SupplierNetAreaTable supplierNetArea;
+        ttsbegin;
+        while select forupdate supplierNetArea
+        where supplierNetArea.DeliveryCategory == deliveryCategory
+           && supplierNetArea.NetArea          == netArea
+        {
+            supplierNetArea.delete();
+            info(strFmt("Deleted EMS_SupplierNetAreaTable: %1 | %2", deliveryCategory, netArea));
+        }
+        ttscommit;
+
+        // ── 12. Category ──────────────────────────────────────────────────────
+        eXU_Category category;
+        ttsbegin;
+        while select forupdate category
+        where category.DeliveryCategory == deliveryCategory
+           && category.CategoryNum      == categoryNum
+        {
+            category.delete();
+            info(strFmt("Deleted eXU_Category: %1 | %2", deliveryCategory, categoryNum));
+        }
+        ttscommit;
+
+        // ── 12b. Delivery Relation ────────────────────────────────────────────
+        EXU_DeliveryRelationTable deliveryRelation;
+        ttsbegin;
+        while select forupdate deliveryRelation
+        where deliveryRelation.DeliveryCategory == deliveryCategory
+           && deliveryRelation.CompanyId        == curExt()
+        {
+            deliveryRelation.delete();
+            info(strFmt("Deleted EXU_DeliveryRelationTable: %1 | %2", deliveryCategory, curExt()));
+        }
+        ttscommit;
+
+        // ── 13. Delivery Category ─────────────────────────────────────────────
+        // Deleted last — other records reference it
+        EXU_DeliveryCategoryTable deliveryCategoryTable;
+        ttsbegin;
+        while select forupdate deliveryCategoryTable
+        where deliveryCategoryTable.DeliveryCategory == deliveryCategory
+        {
+            deliveryCategoryTable.delete();
+            info(strFmt("Deleted EXU_DeliveryCategoryTable: %1", deliveryCategory));
+        }
+        ttscommit;
+
+        // ── 14. EXU_RateTable ─────────────────────────────────────────────────
+        EXU_RateTable rateTable;
+        ttsbegin;
+        while select forupdate rateTable
+        where rateTable.DeliveryCategory          == deliveryCategory
+           && rateTable.ProductNum                == productNum
+           && rateTable.DeliveryGroupNum_RateCode == deliveryGroupNum
+        {
+            rateTable.delete();
+            info(strFmt("Deleted EXU_RateTable: %1 | %2 | %3", deliveryCategory, productNum, deliveryGroupNum));
+        }
+        ttscommit;
+
+        // ── 15. EGS_MASS_Params ───────────────────────────────────────────────
+        EGS_MASS_Params massParams;
+        ttsbegin;
+        while select forupdate massParams
+        where massParams.CustGroup == custGroupId
+        {
+            massParams.delete();
+            info(strFmt("Deleted EGS_MASS_Params: %1", custGroupId));
+        }
+        ttscommit;
+
+        // ── 15. EGS_MASS_ConvInString (C003) ─────────────────────────────────
+        EGS_MASS_ConvInString convInStr;
+        ttsbegin;
+        while select forupdate convInStr
+        where convInStr.MASS_ImportType == EGS_MASS_ImportType::CUSTINST
+           && convInStr.InField         == 'C003'
+           && convInStr.InString        == custGroupInStr
+        {
+            convInStr.delete();
+            info(strFmt("Deleted EGS_MASS_ConvInString: CUSTINST | C003 | %1", custGroupInStr));
+        }
+        ttscommit;
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

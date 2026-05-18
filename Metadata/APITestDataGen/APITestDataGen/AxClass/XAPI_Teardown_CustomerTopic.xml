@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Teardown_CustomerTopic</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_Teardown_CustomerTopic
+{
+}
+
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Class entry point. The system will call this method when a designated menu 
+    /// is selected or when execution starts and this class is set as the startup class.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
+    public static void main(Args _args)
+    {
+        EXU_Topic topic = 'FinalTestSMS2';    // <-- Specify the Communication Topic name here
+
+        ttsbegin;
+
+        // Delete EXU_CommunicationTopicMethod
+        EXU_CommunicationTopicMethod commTopicMethod;
+
+        select forupdate commTopicMethod
+      where commTopicMethod.Topic               == topic
+         && commTopicMethod.CommunicationMethod == EXU_CommunicationMethod::SMS; // <-- Specify the CommunicationMethod enum value here
+
+        if (commTopicMethod.RecId)
+        {
+            commTopicMethod.delete();
+            info(strFmt("Deleted EXU_CommunicationTopicMethod: %1 / %2", topic, EXU_CommunicationMethod::SMS));
+        }
+
+        // Delete EXU_CommunicationTopics
+        EXU_CommunicationTopics commTopics;
+
+        select forupdate commTopics
+      where commTopics.Topic == topic;
+
+        if (commTopics.RecId)
+        {
+            commTopics.delete();
+            info(strFmt("Deleted EXU_CommunicationTopics: %1", topic));
+        }
+
+        ttscommit;
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

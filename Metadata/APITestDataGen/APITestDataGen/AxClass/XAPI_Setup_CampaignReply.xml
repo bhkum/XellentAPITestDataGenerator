@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Setup_CampaignReply</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_Setup_CampaignReply
+{
+}
+
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    public static void main(Args _args)
+    {
+        // ---- DECLARATIONS (must come before any executable statement) ----------
+        AccountNum              accountNum;
+        EXU_ContractNum         contractNum;
+        smmCampaignId           campaignId;
+        smmCampaignName         campaignName;
+
+        CustTable               custTable;
+        smmBusRelTable          smmBusRelTable;
+        EXU_ContractTable       exuContractTable;
+
+        smmCampaignTable        campTemplate, newCamp;
+        smmCampaignSelection    campSelTemplate, newCampSel;
+
+        // ---- EDIT THESE VALUES -------------------------------------------------
+        accountNum   = '917393';            // <-- Specify the existing CustTable.AccountNum here
+        contractNum  = '9367420';            // <-- Specify the existing EXU_ContractTable.ContractNum here
+        campaignId   = 'TST_CampId';       // <-- Specify the CampaignId you want to create here
+        campaignName = 'Emergency test campaign';// <-- Specify the campaign display name here
+
+        // ---- 1. Resolve customer ----------------------------------------------
+        select firstonly custTable
+        where custTable.AccountNum == accountNum;
+
+        if (!custTable.RecId)
+        {
+            error(strFmt("Customer %1 not found. Run newCustomerAPI first.", accountNum));
+        }
+
+        // ---- 2. Resolve business relation -------------------------------------
+        select firstonly smmBusRelTable
+        where smmBusRelTable.Party == custTable.Party;
+
+        if (!smmBusRelTable.RecId)
+        {
+            error(strFmt("No smmBusRelTable for customer %1.", accountNum));
+        }
+
+        // ---- 3. Resolve contract ----------------------------------------------
+        select firstonly exuContractTable
+        where exuContractTable.ContractNum == contractNum;
+
+        if (!exuContractTable.RecId || exuContractTable.CustAccount != accountNum)
+        {
+            error(strFmt("Contract %1 missing or not owned by customer %2.", contractNum, accountNum));
+        }
+
+        // ---- 4. Insert campaign header (smmCampaignTable) ---------------------
+        select firstonly campTemplate;
+        select firstonly newCamp
+        where newCamp.CampaignId == campaignId;
+
+        if (campTemplate.RecId && !newCamp.RecId)
+        {
+            buf2Buf(campTemplate, newCamp);
+            newCamp.CampaignId       = campaignId;
+            newCamp.CampaignName     = campaignName;
+            newCamp.CampaignDate     = DateTimeUtil::getSystemDate(DateTimeUtil::getUserPreferredTimeZone());          // <-- Specify campaign start date here
+            newCamp.CampaignEndDate  = DateTimeUtil::getSystemDate(DateTimeUtil::getUserPreferredTimeZone()) + 30;     // <-- Specify campaign end date here
+            newCamp.insert();
+            info(strFmt("Inserted smmCampaignTable: %1", campaignId));
+        }
+
+        // ---- 5. Insert target row (smmCampaignSelection) ----------------------
+        // This is the row newCampaignReplyAPI looks up via (CampaignId, EGS_ContractNum, Party).
+        select firstonly campSelTemplate;
+        select firstonly newCampSel
+        where newCampSel.CampaignId      == campaignId
+           && newCampSel.EGS_ContractNum == contractNum
+           && newCampSel.Party           == smmBusRelTable.Party;
+
+        if (campSelTemplate.RecId && !newCampSel.RecId)
+        {
+            buf2Buf(campSelTemplate, newCampSel);
+            newCampSel.CampaignId          = campaignId;
+            newCampSel.Party               = smmBusRelTable.Party;
+            newCampSel.EGS_ContractNum     = contractNum;
+            newCampSel.Responded           = NoYes::No;             // newCampaignReplyAPI will flip this to Yes
+            newCampSel.insert();
+            info(strFmt("Inserted smmCampaignSelection: %1 / %2 / %3", campaignId, contractNum, smmBusRelTable.BusRelAccount));
+        }
+
+        info(strFmt("DONE. Use in newCampaignReplyAPI: AccountNum=%1, BusRelAccount=%2, ContractNum=%3, CampaignId=%4",
+                 accountNum, smmBusRelTable.BusRelAccount, contractNum, campaignId));
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>
