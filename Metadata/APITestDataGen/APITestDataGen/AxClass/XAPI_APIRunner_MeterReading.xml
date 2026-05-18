@@ -43,34 +43,25 @@ class XAPI_APIRunner_MeterReading extends XAPI_APIRunnerBase
 				<Source><![CDATA[
     protected str body()
     {
-        XAPI_APILogTable        logRow;
         EXU_UtilityInstallation uinst;
         Map                     configMap;
+        str                     instNum;
+        str                     meterNum;
 
         configMap = new Map(Types::String, Types::String);
         configMap.insert('<DataAreaId>', curExt());
 
-        select firstonly logRow
-            order by RecId desc
-            where logRow.ApiName == XAPI_APIS::CreateCustomer
-               && logRow.Key     == 'CustAccount';
-        configMap.insert('<custAccount>', logRow.Value);
+        configMap.insert('<custAccount>', XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount'));
 
-        select firstonly logRow
-            order by RecId desc
-            where logRow.ApiName == XAPI_APIS::CreateInstallation
-               && logRow.Key     == 'InstNum';
-        configMap.insert('<InstNum>', logRow.Value);
+        instNum = XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateInstallation, 'InstNum');
+        configMap.insert('<InstNum>', instNum);
 
         select firstonly uinst
-            where uinst.InstNum == logRow.Value;
+            where uinst.InstNum == instNum;
         configMap.insert('<deliveryCategory>', uinst.DeliveryCategory);
 
-        select firstonly logRow
-            order by RecId desc
-            where logRow.ApiName == XAPI_APIS::CreateMeterReading
-               && logRow.Key     == 'meterNum';
-        configMap.insert('<meterNum>', logRow.Value);
+        meterNum = XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateMeterReading, 'meterNum');
+        configMap.insert('<meterNum>', meterNum);
 
         return this.prepareBody(configMap);
     }
