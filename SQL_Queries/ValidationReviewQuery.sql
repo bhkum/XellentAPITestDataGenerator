@@ -46,9 +46,8 @@ select * from  EXU_INSTALLATION where INSTNUM = '19765'
 select * from EXU_CONTRACTTABLE where CONTRACTNUM =  '9367872'
 
 
-	truncate table XAPI_APILogValues
-
-	truncate table XAPI_APILogTable
+--truncate table XAPI_APILogValues
+--truncate table XAPI_APILogTable
 --drop table XAPI_APILogTable
 --drop table XAPI_APILogValues
 

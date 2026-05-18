@@ -60,6 +60,9 @@ class XAPI_APIRunner_MeterReading extends XAPI_APIRunnerBase
             where uinst.InstNum == instNum;
         configMap.insert('<deliveryCategory>', uinst.DeliveryCategory);
 
+        EXU_MeterTable meterTable;
+        select firstonly 
+
         meterNum = XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateMeterReading, 'meterNum');
         configMap.insert('<meterNum>', meterNum);
 

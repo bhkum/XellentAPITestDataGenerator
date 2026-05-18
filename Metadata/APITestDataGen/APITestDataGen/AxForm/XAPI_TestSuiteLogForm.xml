@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <AxForm xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="Microsoft.Dynamics.AX.Metadata.V6">
 	<Name>XAPI_TestSuiteLogForm</Name>
 	<SourceCode>
@@ -55,6 +55,49 @@ public class XAPI_TestSuiteLogForm extends FormRun
 
             this.query().dataSourceTable(tableNum(XAPI_APILogTable))
                 .addSortField(fieldNum(XAPI_APILogTable, Sequence), SortOrder::Ascending);
+        }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>selectionChanged</Name>
+						<Source><![CDATA[
+        public void selectionChanged()
+        {
+            super();
+            XAPI_APILogValues_ds.executeQuery();
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+				<Fields />
+			</DataSource>
+			<DataSource>
+				<Name>XAPI_APILogValues</Name>
+				<Methods>
+					<Method>
+						<Name>executeQuery</Name>
+						<Source><![CDATA[
+        public void executeQuery()
+        {
+            QueryBuildDataSource qbds = this.queryBuildDataSource();
+            qbds.clearRanges();
+
+            if (XAPI_APILogTable.RecId)
+            {
+                qbds.addRange(fieldNum(XAPI_APILogValues, SessionId))
+                    .value(guid2Str(XAPI_APILogTable.SessionId));
+                qbds.addRange(fieldNum(XAPI_APILogValues, Sequence))
+                    .value(int2Str(XAPI_APILogTable.Sequence));
+            }
+            else
+            {
+                qbds.addRange(fieldNum(XAPI_APILogValues, SessionId))
+                    .value(SysQuery::valueEmptyString());
+            }
+
+            super();
         }
 
 ]]></Source>

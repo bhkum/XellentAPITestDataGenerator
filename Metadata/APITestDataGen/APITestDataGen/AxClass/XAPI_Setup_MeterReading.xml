@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-	<Name>XAPI_NewMeterReadingDataGen</Name>
+	<Name>XAPI_Setup_MeterReading</Name>
 	<SourceCode>
 		<Declaration><![CDATA[
-internal final class XAPI_NewMeterReadingDataGen
+internal final class XAPI_Setup_MeterReading
 {
 }
 ]]></Declaration>
@@ -18,8 +18,8 @@ internal final class XAPI_NewMeterReadingDataGen
     /// <param name = "_args">The specified arguments.</param>
     public static void main(Args _args)
     {
-        EXU_InstNum           installationNum   =   XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateInstallation, 'InstNum');                            //Enter Installation Number
-        Transdate             mountingDate      = str2Date('22/04/2026', 123);          // Enter Mounting Date
+        EXU_InstNum           installationNum   =   XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateInstallation, 'InstNum');                       //todo: change this logic     //Enter Installation Number
+        Transdate             mountingDate      = today();
         EXU_QuantityCodeValue quantityCodeValue = 'kWh';
         EXU_GroupNum          readingMethodNum  = 'TST_RMN';
 

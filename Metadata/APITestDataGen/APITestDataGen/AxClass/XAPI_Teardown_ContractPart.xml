@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-	<Name>XAPI_newContractPartDelDataGen</Name>
+	<Name>XAPI_Teardown_ContractPart</Name>
 	<SourceCode>
 		<Declaration><![CDATA[
-internal final class XAPI_newContractPartDelDataGen
+internal final class XAPI_Teardown_ContractPart
 {
 }
 ]]></Declaration>

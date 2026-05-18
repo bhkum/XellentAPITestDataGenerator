@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-	<Name>XAPI_NewContractDataGen</Name>
+	<Name>XAPI_Setup_Contract</Name>
 	<SourceCode>
 		<Declaration><![CDATA[
-class XAPI_NewContractDataGen
+class XAPI_Setup_Contract
 {
 }
 ]]></Declaration>

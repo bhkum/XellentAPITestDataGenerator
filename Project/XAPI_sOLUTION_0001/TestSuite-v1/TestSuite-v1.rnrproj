@@ -34,6 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Classes\" />
+    <Folder Include="Forms\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="AxClass\XAPI_APIPostProcessorBase">
@@ -75,6 +76,11 @@
       <SubType>Content</SubType>
       <Name>XAPI_SuiteOrchestrator</Name>
       <Link>Classes\XAPI_SuiteOrchestrator</Link>
+    </Content>
+    <Content Include="AxForm\XAPI_TestSuiteForm">
+      <SubType>Content</SubType>
+      <Name>XAPI_TestSuiteForm</Name>
+      <Link>Forms\XAPI_TestSuiteForm</Link>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />

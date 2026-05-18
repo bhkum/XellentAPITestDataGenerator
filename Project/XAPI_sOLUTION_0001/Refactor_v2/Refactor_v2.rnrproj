@@ -32,9 +32,37 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="Action Menu Items\" />
     <Folder Include="Candidate del" />
     <Folder Include="API runner old" />
     <Folder Include="Classes\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="AxClass\XAPI_Setup_Contract">
+      <SubType>Content</SubType>
+      <Name>XAPI_Setup_Contract</Name>
+      <Link>Classes\XAPI_Setup_Contract</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Setup_ContractPart">
+      <SubType>Content</SubType>
+      <Name>XAPI_Setup_ContractPart</Name>
+      <Link>Classes\XAPI_Setup_ContractPart</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Setup_Customer">
+      <SubType>Content</SubType>
+      <Name>XAPI_Setup_Customer</Name>
+      <Link>Classes\XAPI_Setup_Customer</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Setup_Installation">
+      <SubType>Content</SubType>
+      <Name>XAPI_Setup_Installation</Name>
+      <Link>Classes\XAPI_Setup_Installation</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_Setup_MeterReading">
+      <SubType>Content</SubType>
+      <Name>XAPI_Setup_MeterReading</Name>
+      <Link>Classes\XAPI_Setup_MeterReading</Link>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
   <Import Project="$(BuildTasksDirectory)\Microsoft.Dynamics.Framework.Tools.BuildTasks.17.0.targets" />
