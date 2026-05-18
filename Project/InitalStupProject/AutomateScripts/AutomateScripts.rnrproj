@@ -40,6 +40,31 @@
     <Folder Include="Tables\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AxClass\XAPI_APICaller_ContractPart">
+      <SubType>Content</SubType>
+      <Name>XAPI_APICaller_ContractPart</Name>
+      <Link>Classes\XAPI_APICaller_ContractPart</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_APICaller_MeterReading">
+      <SubType>Content</SubType>
+      <Name>XAPI_APICaller_MeterReading</Name>
+      <Link>Classes\XAPI_APICaller_MeterReading</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_APIRunner_ContractPart">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIRunner_ContractPart</Name>
+      <Link>Classes\XAPI_APIRunner_ContractPart</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_APIRunner_Customer">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIRunner_Customer</Name>
+      <Link>Classes\XAPI_APIRunner_Customer</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_APIRunner_MeterReading">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIRunner_MeterReading</Name>
+      <Link>Classes\XAPI_APIRunner_MeterReading</Link>
+    </Content>
     <Content Include="AxClass\XAPI_AutomateScripts">
       <SubType>Content</SubType>
       <Name>XAPI_AutomateScripts</Name>
@@ -64,6 +89,11 @@
       <SubType>Content</SubType>
       <Name>XAPI_NewContractDelDataGen</Name>
       <Link>Classes\Creation\XAPI_NewContractDelDataGen</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_NewContractPartDataGen">
+      <SubType>Content</SubType>
+      <Name>XAPI_NewContractPartDataGen</Name>
+      <Link>Classes\XAPI_NewContractPartDataGen</Link>
     </Content>
     <Content Include="AxClass\XAPI_NewCustomerDataGen">
       <SubType>Content</SubType>
@@ -104,6 +134,16 @@
       <SubType>Content</SubType>
       <Name>XAPI_TestCase</Name>
       <Link>Tables\XAPI_TestCase</Link>
+    </Content>
+    <Content Include="AxTable\XAPI_TestParameters">
+      <SubType>Content</SubType>
+      <Name>XAPI_TestParameters</Name>
+      <Link>Tables\XAPI_TestParameters</Link>
+    </Content>
+    <Content Include="AxTable\XAPI_TestSuite">
+      <SubType>Content</SubType>
+      <Name>XAPI_TestSuite</Name>
+      <Link>Tables\XAPI_TestSuite</Link>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
