@@ -47,11 +47,6 @@
       <Name>XAPI_APICaller_ContactInfo</Name>
       <Link>API runner old\XAPI_APICaller_ContactInfo</Link>
     </Content>
-    <Content Include="AxClass\XAPI_APICaller_ContractPart">
-      <SubType>Content</SubType>
-      <Name>XAPI_APICaller_ContractPart</Name>
-      <Link>API runner old\XAPI_APICaller_ContractPart</Link>
-    </Content>
     <Content Include="AxClass\XAPI_APICaller_Customer">
       <SubType>Content</SubType>
       <Name>XAPI_APICaller_Customer</Name>

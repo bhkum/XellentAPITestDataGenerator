@@ -23,6 +23,7 @@ on cust.ACCOUNTNUM = ct.CUSTACCOUNT
 where --inst.INSTREADINGMETHODNUM like  'TS%'
 --and
 cust.CUSTGROUP like  'TS%'
+order by ct.RECID desc
 
 select REQUESTBODY,* from XAPI_APILogTable
 select * from XAPI_APILogValues
@@ -45,8 +46,10 @@ select * from  EXU_INSTALLATION where INSTNUM = '19765'
 select * from EXU_CONTRACTTABLE where CONTRACTNUM =  '9367872'
 
 
---truncate table XAPI_APILogValues
+	truncate table XAPI_APILogValues
 
---truncate table XAPI_APILogTable
+	truncate table XAPI_APILogTable
 --drop table XAPI_APILogTable
 --drop table XAPI_APILogValues
+
+

@@ -1,0 +1,93 @@
+{
+  "setupClassName": "XAPI_NewContractPartDataGen",
+  "apiClassNames": [
+    "EGS_MASS_ImportContractExt"
+  ],
+  "jsonBody": 
+ {
+  "_newContractParts": {
+    "NewContractPart": [
+      {
+        "AlternativeCustomerNumber": "197403290385", 
+        "AccountNum": "917665",
+        "ContractNum": "9367899",
+        "ContractCodeDescription": "abcd12321",
+        "GroupOldProduct": {
+          "ProductNum": "ProductNum",
+          "DeliveryGroupNum_RateCode": "",
+          "CompanyId": "OAB",
+          "DeliveryCategory": "TST_DelCat",
+          "InstAgreeNum": "19792",
+          "StartDate": "2026-05-16", 
+          "EndDate": "1900-01-01"
+        },
+        "GroupNewProduct": {
+          "ProductNum": "TST_Produc",
+          "DeliveryGroupNum_RateCode": "",
+          "AMRCode": "",
+          "AgreementLength": 12,
+          "StartDate": "2026-05-23",
+          "EndDate": "1900-01-01",
+          "PurchasePriceCode": ""
+        },
+        "Source": "TST_Source",
+        "ContractCodeDescription": "",
+        "EnvironmentCode": "",
+        "SendConfirmationLetter": "",
+        "TechnicGroupContractPart1": "",
+        "TechnicGroupContractPart2": "",
+        "TechnicGroupContractPart3": "",
+        "TechnicGroupContractPart4": "",
+        "ContractPartPriceManagements": [
+          {
+            "PriceManagementCode": "TST_PM",
+            "PurchasePrice": 0.0,
+            "SalesPrice": 0.0,
+            "SalesChargeDeduction": 0,
+            "FixedRate": 1.5
+          }
+        ],
+        "ContractPartFixedServices": [
+          {
+            "ServiceType": "TST_Item",
+            "Text": "",
+            "Billing": "0",
+            "AgreementLength": 0,
+            "StartDate": "2026-05-23",
+            "EndDate": "1900-01-01",
+            "Quantity": 0,
+            "Price": 0,
+            "AlternateText": "",
+            "OfferStartDate": "2026-05-21"
+          }
+        ],
+        "ContractPartIndividualServices": [
+          {
+            "Itemid": "TST_Item",
+            "AgreementLength": "0",
+            "StartDate": "2026-05-23",
+            "EndDate": "1900-01-01",
+            "OfferStartDate": "2026-05-23",
+            "PriceManagementCode": "TST_PM",
+            "PurchasePrice": 0,
+            "SalesChargeDeduction": 0,
+            "FixedRate": 1.5
+          }
+        ],
+        "ContractPartSecuredVolumeFlex": [],
+        "ContractPartSecuredVolumeDate": [
+          {
+            "StartDate": "2026-05-23",
+            "EndDate": "2027-01-31",
+            "FixedRate": 0.0,
+            "ForecastedVolumekWh": 5000,
+            "SecuredVolumeInPercent": 80
+          }
+        ]
+      }
+    ],
+    "DataAreaId": "OAB"
+  }
+},
+  "errorLog": ""
+}

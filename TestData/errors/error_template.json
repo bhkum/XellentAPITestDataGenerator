@@ -1,0 +1,7 @@
+{
+  "setupClassName": "XAPI_Setup_<APIClassName>",
+  "apiClassName": "<APIHandlingClassName>",
+  "jsonBody": {
+  },
+  "errorLog": ""
+}
