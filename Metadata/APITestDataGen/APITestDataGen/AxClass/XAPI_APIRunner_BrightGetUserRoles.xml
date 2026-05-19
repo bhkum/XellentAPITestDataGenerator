@@ -6,7 +6,6 @@
 class XAPI_APIRunner_BrightGetUserRoles extends XAPI_APIRunnerBase
 {
 }
-
 ]]></Declaration>
 		<Methods>
 			<Method>

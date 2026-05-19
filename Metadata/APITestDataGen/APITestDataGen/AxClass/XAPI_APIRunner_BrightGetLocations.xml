@@ -6,7 +6,6 @@
 class XAPI_APIRunner_BrightGetLocations extends XAPI_APIRunnerBase
 {
 }
-
 ]]></Declaration>
 		<Methods>
 			<Method>
@@ -53,7 +52,7 @@ class XAPI_APIRunner_BrightGetLocations extends XAPI_APIRunnerBase
         Map configMap = new Map(Types::String, Types::String);
 
         configMap.insert('<DataAreaId>',  curExt());
-        configMap.insert('<accountNum>',  XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount'));
+        configMap.insert('<custAccount>',  XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount'));
 
         return this.prepareBody(configMap);
     }

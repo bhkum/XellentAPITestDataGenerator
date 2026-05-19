@@ -6,7 +6,6 @@
 class XAPI_APIRunner_BrightGetAgreement extends XAPI_APIRunnerBase
 {
 }
-
 ]]></Declaration>
 		<Methods>
 			<Method>
@@ -47,7 +46,7 @@ class XAPI_APIRunner_BrightGetAgreement extends XAPI_APIRunnerBase
         Map configMap = new Map(Types::String, Types::String);
 
         configMap.insert('<DataAreaId>',    curExt());
-        configMap.insert('<accountNum>',    XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount'));
+        configMap.insert('<custAccount>',    XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount'));
         configMap.insert('<delPointRecId>', XAPI_APILogTable::getValueByKey(XAPI_APIS::GetLocations, 'DelPointRecId'));
 
         return this.prepareBody(configMap);
