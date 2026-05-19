@@ -61,12 +61,12 @@ final class XAPI_SuiteOrchestrator
 
             try
             {
-                if (testCase.PreProcessClass == '')
+                if (testCase.PreProcessClass != '')
                 {
-                    throw Error("No preprocess class found");
+                    //throw Error("No preprocess class found");
+                    XAPI_SuiteOrchestrator::runMain(testCase.PreProcessClass);
                 }
 
-                XAPI_SuiteOrchestrator::runMain(testCase.PreProcessClass);
 
                 preLog.Status  = XAPI_APIStatus::Success;
                 preLog.Message = strFmt("PreProcess %1 completed.", testCase.PreProcessClass);
