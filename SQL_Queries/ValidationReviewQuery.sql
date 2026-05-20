@@ -51,7 +51,7 @@ truncate table XAPI_APILogTable
 --drop table XAPI_APILogTable
 --drop table XAPI_APILogValues
 
-select * from XAPI_APILogTable l
+select v.FIELDNAME, v.FIELDVALUE,* from XAPI_APILogTable l
 join XAPI_APILogValues v
 on l.SESSIONID = v.sessionid
 

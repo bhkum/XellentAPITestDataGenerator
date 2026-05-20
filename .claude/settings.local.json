@@ -24,7 +24,12 @@
       "Bash(awk 'NR==228,NR==234' \"C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxForm\\\\XAPI_TestSuiteForm.xml\")",
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(Sort-Object)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(Select-Object -First 10)",
+      "PowerShell(ls \"J:\\\\AosService\\\\PackagesLocalDirectory\" -Directory | Where-Object {$_.Name -match \"^\\(Foundation|Directory|CRM|Common\\)\"} | Select-Object -ExpandProperty Name)",
+      "Bash(rtk find *)",
+      "Bash(xargs grep -l \"getEmail\\\\|getPhone\\\\|primaryEmail\")",
+      "Bash(rtk grep *)"
     ]
   }
 }

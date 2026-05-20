@@ -13,7 +13,7 @@ class XAPI_APIRunner_BrightAddUserRole extends XAPI_APIRunnerBase
 				<Source><![CDATA[
     protected void init()
     {
-        api = XAPI_APIS::CreateContract;
+        api = XAPI_APIS::AddUserRoles;
         super();
     }
 
@@ -24,17 +24,20 @@ class XAPI_APIRunner_BrightAddUserRole extends XAPI_APIRunnerBase
 				<Source><![CDATA[
     protected str body()
     {
-        XAPI_APILogValues       ownerLogValues;
-        XAPI_APILogValues       guestLogValues;
-        XAPI_APILogTable        logTable;
-        CustTable               ownerCustTable;
-        CustTable               guestCustTable;
-        Map                     configMap;
+        XAPI_APILogValues           ownerLogValues;
+        XAPI_APILogValues           guestLogValues;
+        XAPI_APILogTable            logTable;
+        CustTable                   ownerCustTable;
+        CustTable                   guestCustTable;
+        DirPersonName               guestPersonName;
+        DirPartyContactInfoView     emailInfo;
+        DirPartyContactInfoView     phoneInfo;
+        Map                         configMap;
 
         configMap = new Map(Types::String, Types::String);
         configMap.insert('<DataAreaId>', curExt());
 
-        // Guest = most recent CreateCustomer entry
+        // Guest = most recent CreateCustomer entry (Role: guest)
         select firstonly guestLogValues
             order by guestLogValues.RecId desc
             where guestLogValues.FieldName == 'CustAccount'
@@ -44,12 +47,32 @@ class XAPI_APIRunner_BrightAddUserRole extends XAPI_APIRunnerBase
                    && logTable.ApiName   == XAPI_APIS::CreateCustomer
                    && logTable.Archived  == NoYes::No;
         guestCustTable = CustTable::find(guestLogValues.FieldValue);
-        configMap.insert('<guestCustAccount>', guestCustTable.AccountNum);
 
-        // Owner = second most recent CreateCustomer entry (one before guest)
+        select firstonly guestPersonName
+            order by guestPersonName.ValidFrom desc
+            where guestPersonName.Person == guestCustTable.Party;
+
+        select firstonly emailInfo
+            where emailInfo.Party     == guestCustTable.Party
+               && emailInfo.Type      == LogisticsElectronicAddressMethodType::Email
+               && emailInfo.IsPrimary == true;
+
+        select firstonly phoneInfo
+            where phoneInfo.Party     == guestCustTable.Party
+               && phoneInfo.Type      == LogisticsElectronicAddressMethodType::Phone
+               && phoneInfo.IsPrimary == true;
+
+        configMap.insert('<FirstName>',                 guestPersonName.FirstName);
+        configMap.insert('<LastName>',                  guestPersonName.LastName);
+        configMap.insert('<Email>',                     emailInfo.Locator);
+        configMap.insert('<Phone>',                     phoneInfo.Locator);
+        configMap.insert('<Name>',                      guestCustTable.name());
+        configMap.insert('<AlternativeCustomerNumber>', guestCustTable.EXU_AlternativeCustomerNumber);
+
+        // Owner = second most recent CreateCustomer entry (Inviter)
         select firstonly ownerLogValues
             order by ownerLogValues.RecId desc
-            where ownerLogValues.RecId    <  guestLogValues.RecId
+            where ownerLogValues.RecId     <  guestLogValues.RecId
                && ownerLogValues.FieldName == 'CustAccount'
             join logTable
                 where logTable.SessionId == ownerLogValues.SessionId
@@ -57,7 +80,9 @@ class XAPI_APIRunner_BrightAddUserRole extends XAPI_APIRunnerBase
                    && logTable.ApiName   == XAPI_APIS::CreateCustomer
                    && logTable.Archived  == NoYes::No;
         ownerCustTable = CustTable::find(ownerLogValues.FieldValue);
-        configMap.insert('<ownerCustAccount>', ownerCustTable.AccountNum);
+
+        configMap.insert('<RecId>', ownerCustTable.AccountNum);
+
         return this.prepareBody(configMap);
     }
 

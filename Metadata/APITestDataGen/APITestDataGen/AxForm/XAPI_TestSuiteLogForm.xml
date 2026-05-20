@@ -195,6 +195,36 @@ public class XAPI_TestSuiteLogForm extends FormRun
 					</Method>
 				</Methods>
 			</Control>
+			<Control>
+				<Name>ClearAllButton</Name>
+				<Type>Button</Type>
+				<Methods>
+					<Method>
+						<Name>clicked</Name>
+						<Source><![CDATA[
+        public void clicked()
+        {
+            XAPI_APILogValues   logValues;
+            XAPI_APILogTable    logTable;
+
+            super();
+
+            if (Box::okCancel("Clear all log records? This cannot be undone.", DialogButton::Cancel, "Clear log") == DialogButton::Ok)
+            {
+                ttsbegin;
+                delete_from logValues;
+                delete_from logTable;
+                ttscommit;
+
+                XAPI_APILogTable_ds.research();
+                info("Log cleared.");
+            }
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</Control>
 		</DataControls>
 		<Members xmlns="" />
 	</SourceCode>
@@ -273,6 +303,15 @@ public class XAPI_TestSuiteLogForm extends FormRun
 											i:nil="true" />
 										<Command>DeleteRecord</Command>
 										<DataSource>XAPI_APILogTable</DataSource>
+									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormButtonControl">
+										<Name>ClearAllButton</Name>
+										<AutoDeclaration>Yes</AutoDeclaration>
+										<Type>Button</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<Text>Clear All</Text>
 									</AxFormControl>
 								</Controls>
 							</AxFormControl>
