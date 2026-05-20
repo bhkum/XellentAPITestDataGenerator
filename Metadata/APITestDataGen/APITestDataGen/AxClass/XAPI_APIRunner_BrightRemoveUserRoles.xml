@@ -24,30 +24,40 @@ class XAPI_APIRunner_BrightRemoveUserRoles extends XAPI_APIRunnerBase
 				<Source><![CDATA[
     protected str body()
     {
-        XAPI_APILogTable                               userRolesLog;
-        System.Text.RegularExpressions.Regex           regex;
-        System.Text.RegularExpressions.MatchCollection matches;
-        str                                            userRolesResponse;
-        str                                            firstRecId;
-        str                                            secondRecId;
-        Map                                            configMap;
+        XAPI_APILogValues   ownerLogValues;
+        XAPI_APILogValues   guestLogValues;
+        XAPI_APILogTable    logTable;
+        CustTable           ownerCustTable;
+        CustTable           guestCustTable;
+        Map                 configMap;
 
-        select firstonly Response from userRolesLog
-            where userRolesLog.ApiName  == XAPI_APIS::GetUserRoles
-               && userRolesLog.Archived == NoYes::No;
+        // Guest = most recent CreateCustomer entry
+        select firstonly guestLogValues
+            order by guestLogValues.RecId desc
+            where guestLogValues.FieldName == 'CustAccount'
+            join logTable
+                where logTable.SessionId == guestLogValues.SessionId
+                   && logTable.Sequence  == guestLogValues.Sequence
+                   && logTable.ApiName   == XAPI_APIS::CreateCustomer
+                   && logTable.Archived  == NoYes::No;
+        guestCustTable = CustTable::find(guestLogValues.FieldValue);
 
-        userRolesResponse = userRolesLog.Response;
-
-        regex   = new System.Text.RegularExpressions.Regex('"recid"\\s*:\\s*"(\\d+)"');
-        matches = regex.Matches(userRolesResponse);
-
-        firstRecId  = matches.get_Count() > 0 ? matches.get_Item(0).Groups.get_Item(1).get_Value() : '';
-        secondRecId = matches.get_Count() > 1 ? matches.get_Item(1).Groups.get_Item(1).get_Value() : '';
+        // Owner = second most recent CreateCustomer entry
+        select firstonly ownerLogValues
+            order by ownerLogValues.RecId desc
+            where ownerLogValues.RecId     <  guestLogValues.RecId
+               && ownerLogValues.FieldName == 'CustAccount'
+            join logTable
+                where logTable.SessionId == ownerLogValues.SessionId
+                   && logTable.Sequence  == ownerLogValues.Sequence
+                   && logTable.ApiName   == XAPI_APIS::CreateCustomer
+                   && logTable.Archived  == NoYes::No;
+        ownerCustTable = CustTable::find(ownerLogValues.FieldValue);
 
         configMap = new Map(Types::String, Types::String);
         configMap.insert('<DataAreaId>',  curExt());
-        configMap.insert('<userRecord>',  firstRecId);
-        configMap.insert('<accountNum>',  secondRecId);
+        configMap.insert('<RecId>',  ownerCustTable.AccountNum);
+        configMap.insert('<custAccount>',  guestCustTable.AccountNum);
 
         return this.prepareBody(configMap);
     }

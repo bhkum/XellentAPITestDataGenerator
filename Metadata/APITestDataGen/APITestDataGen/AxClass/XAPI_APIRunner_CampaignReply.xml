@@ -24,14 +24,16 @@ class XAPI_APIRunner_CampaignReply extends XAPI_APIRunnerBase
 				<Source><![CDATA[
     protected str body()
     {
+        CustTable       custTable;
         smmBusRelTable  busRelTable;
         str             custAccount;
         Map             configMap;
 
         custAccount = XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount');
+        custTable   = CustTable::find(custAccount);
 
         select firstonly BusRelAccount from busRelTable
-            where busRelTable.CustAccount == custAccount;
+            where busRelTable.Party == custTable.Party;
 
         configMap = new Map(Types::String, Types::String);
         configMap.insert('<DataAreaId>',    curExt());
