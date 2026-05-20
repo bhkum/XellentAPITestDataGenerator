@@ -70,6 +70,23 @@ public class XAPI_TestSuiteLogForm extends FormRun
 
 ]]></Source>
 					</Method>
+					<Method>
+						<Name>delete</Name>
+						<Source><![CDATA[
+        public void delete()
+        {
+            XAPI_APILogValues   logValues;
+
+            ttsbegin;
+            delete_from logValues
+                where logValues.SessionId == XAPI_APILogTable.SessionId
+                   && logValues.Sequence  == XAPI_APILogTable.Sequence;
+            super();
+            ttscommit;
+        }
+
+]]></Source>
+					</Method>
 				</Methods>
 				<Fields />
 			</DataSource>
@@ -188,7 +205,7 @@ public class XAPI_TestSuiteLogForm extends FormRun
 			<Fields />
 			<ReferencedDataSources />
 			<AllowCreate>No</AllowCreate>
-			<AllowDelete>No</AllowDelete>
+			<AllowDelete>Yes</AllowDelete>
 			<AllowEdit>No</AllowEdit>
 			<DataSourceLinks />
 			<DerivedDataSources />
@@ -247,6 +264,15 @@ public class XAPI_TestSuiteLogForm extends FormRun
 										<FormControlExtension
 											i:nil="true" />
 										<Text>Archive</Text>
+									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormCommandButtonControl">
+										<Name>DeleteButton</Name>
+										<Type>CommandButton</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<Command>DeleteRecord</Command>
+										<DataSource>XAPI_APILogTable</DataSource>
 									</AxFormControl>
 								</Controls>
 							</AxFormControl>

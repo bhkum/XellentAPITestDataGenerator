@@ -23,7 +23,8 @@
       "Bash(awk 'NR==148' \"C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxTable\\\\XAPI_TestCase.xml\")",
       "Bash(awk 'NR==228,NR==234' \"C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxForm\\\\XAPI_TestSuiteForm.xml\")",
       "Bash(Select-Object -ExpandProperty FullName)",
-      "Bash(Sort-Object)"
+      "Bash(Sort-Object)",
+      "Bash(python3 *)"
     ]
   }
 }
