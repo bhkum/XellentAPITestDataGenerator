@@ -83,6 +83,26 @@
 			<Label>Update User</Label>
 			<Value>15</Value>
 		</AxEnumValue>
+		<AxEnumValue>
+			<Name>CreateCustomerTopic</Name>
+			<Label>Customer Topic</Label>
+			<Value>16</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>CreateCustInvoiceAddress</Name>
+			<Label>Customer Invoice Address</Label>
+			<Value>17</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>CreateCampaignReply</Name>
+			<Label>Campaign Reply</Label>
+			<Value>18</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>CreateAgreement</Name>
+			<Label>Agreement</Label>
+			<Value>19</Value>
+		</AxEnumValue>
 	</EnumValues>
 	<IsExtensible>true</IsExtensible>
 </AxEnum>
