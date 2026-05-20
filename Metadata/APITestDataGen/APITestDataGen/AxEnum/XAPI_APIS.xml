@@ -100,7 +100,7 @@
 		</AxEnumValue>
 		<AxEnumValue>
 			<Name>CreateAgreement</Name>
-			<Label>Agreement</Label>
+			<Label>Create Agreement</Label>
 			<Value>19</Value>
 		</AxEnumValue>
 	</EnumValues>
