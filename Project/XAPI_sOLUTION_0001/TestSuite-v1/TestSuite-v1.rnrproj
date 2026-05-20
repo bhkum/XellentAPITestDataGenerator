@@ -33,6 +33,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Folder Include="Base Enums\" />
     <Folder Include="Classes\" />
     <Folder Include="Forms\" />
   </ItemGroup>
@@ -86,6 +87,11 @@
       <SubType>Content</SubType>
       <Name>XAPI_SuiteOrchestrator</Name>
       <Link>Classes\XAPI_SuiteOrchestrator</Link>
+    </Content>
+    <Content Include="AxEnum\XAPI_APIS">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIS</Name>
+      <Link>Base Enums\XAPI_APIS</Link>
     </Content>
     <Content Include="AxForm\XAPI_TestSuiteForm">
       <SubType>Content</SubType>
