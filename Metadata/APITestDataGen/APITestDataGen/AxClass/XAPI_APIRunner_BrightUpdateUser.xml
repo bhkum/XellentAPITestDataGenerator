@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APIRunner_BrightUpdateUser</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_APIRunner_BrightUpdateUser extends XAPI_APIRunnerBase
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>init</Name>
+				<Source><![CDATA[
+    protected void init()
+    {
+        api = XAPI_APIS::UpdateUser;
+        super();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>body</Name>
+				<Source><![CDATA[
+    protected str body()
+    {
+        XAPI_APILogTable                               userRolesLog;
+        System.Text.RegularExpressions.Regex           regex;
+        System.Text.RegularExpressions.MatchCollection matches;
+        str                                            userRolesResponse;
+        str                                            firstRecId;
+        str                                            secondRecId;
+        Map                                            configMap;
+
+        select firstonly Response from userRolesLog
+            where userRolesLog.ApiName  == XAPI_APIS::GetUserRoles
+               && userRolesLog.Archived == NoYes::No;
+
+        userRolesResponse = userRolesLog.Response;
+
+        regex   = new System.Text.RegularExpressions.Regex('"recid"\\s*:\\s*"(\\d+)"');
+        matches = regex.Matches(userRolesResponse);
+
+        firstRecId  = matches.get_Count() > 0 ? matches.get_Item(0).Groups.get_Item(1).get_Value() : '';
+        secondRecId = matches.get_Count() > 1 ? matches.get_Item(1).Groups.get_Item(1).get_Value() : '';
+
+        configMap = new Map(Types::String, Types::String);
+        configMap.insert('<DataAreaId>',  curExt());
+        configMap.insert('<userRecord>',  firstRecId);
+        configMap.insert('<custAccount>',  secondRecId);
+
+        return this.prepareBody(configMap);
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

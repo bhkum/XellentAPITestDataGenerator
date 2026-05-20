@@ -28,7 +28,7 @@ class XAPI_APIRunner_BrightGetCost extends XAPI_APIRunnerBase
 
         configMap.insert('<DataAreaId>',    curExt());
         configMap.insert('<custAccount>',    XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount'));
-        configMap.insert('<costId>',        XAPI_APILogTable::getValueByKey(XAPI_APIS::GetLocations, 'DelPointRecId'));
+        configMap.insert('<delPointRecId>',        XAPI_APILogTable::getValueByKey(XAPI_APIS::GetLocations, 'DelPointRecId'));
 
         return this.prepareBody(configMap);
     }
