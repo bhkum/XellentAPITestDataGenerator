@@ -6,7 +6,6 @@
 class XAPI_Setup_CampaignReply
 {
 }
-
 ]]></Declaration>
 		<Methods>
 			<Method>
@@ -34,31 +33,31 @@ class XAPI_Setup_CampaignReply
         campaignName = 'Emergency test campaign';// <-- Specify the campaign display name here
 
         // ---- 1. Resolve customer ----------------------------------------------
-        select firstonly custTable
-        where custTable.AccountNum == accountNum;
+        //select firstonly custTable
+        //where custTable.AccountNum == accountNum;
 
-        if (!custTable.RecId)
-        {
-            error(strFmt("Customer %1 not found. Run newCustomerAPI first.", accountNum));
-        }
+        //if (!custTable.RecId)
+        //{
+        //    error(strFmt("Customer %1 not found. Run newCustomerAPI first.", accountNum));
+        //}
 
-        // ---- 2. Resolve business relation -------------------------------------
-        select firstonly smmBusRelTable
-        where smmBusRelTable.Party == custTable.Party;
+        //// ---- 2. Resolve business relation -------------------------------------
+        //select firstonly smmBusRelTable
+        //where smmBusRelTable.Party == custTable.Party;
 
-        if (!smmBusRelTable.RecId)
-        {
-            error(strFmt("No smmBusRelTable for customer %1.", accountNum));
-        }
+        //if (!smmBusRelTable.RecId)
+        //{
+        //    error(strFmt("No smmBusRelTable for customer %1.", accountNum));
+        //}
 
-        // ---- 3. Resolve contract ----------------------------------------------
-        select firstonly exuContractTable
-        where exuContractTable.ContractNum == contractNum;
+        //// ---- 3. Resolve contract ----------------------------------------------
+        //select firstonly exuContractTable
+        //where exuContractTable.ContractNum == contractNum;
 
-        if (!exuContractTable.RecId || exuContractTable.CustAccount != accountNum)
-        {
-            error(strFmt("Contract %1 missing or not owned by customer %2.", contractNum, accountNum));
-        }
+        //if (!exuContractTable.RecId || exuContractTable.CustAccount != accountNum)
+        //{
+        //    error(strFmt("Contract %1 missing or not owned by customer %2.", contractNum, accountNum));
+        //}
 
         // ---- 4. Insert campaign header (smmCampaignTable) ---------------------
         select firstonly campTemplate;
@@ -95,8 +94,8 @@ class XAPI_Setup_CampaignReply
             info(strFmt("Inserted smmCampaignSelection: %1 / %2 / %3", campaignId, contractNum, smmBusRelTable.BusRelAccount));
         }
 
-        info(strFmt("DONE. Use in newCampaignReplyAPI: AccountNum=%1, BusRelAccount=%2, ContractNum=%3, CampaignId=%4",
-                 accountNum, smmBusRelTable.BusRelAccount, contractNum, campaignId));
+        //info(strFmt("DONE. Use in newCampaignReplyAPI: AccountNum=%1, BusRelAccount=%2, ContractNum=%3, CampaignId=%4",
+        //         accountNum, smmBusRelTable.BusRelAccount, contractNum, campaignId));
     }
 
 ]]></Source>

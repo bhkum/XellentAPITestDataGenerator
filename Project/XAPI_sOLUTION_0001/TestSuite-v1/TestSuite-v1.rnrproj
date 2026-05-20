@@ -77,6 +77,11 @@
       <Name>XAPI_AutomationHelper</Name>
       <Link>Classes\XAPI_AutomationHelper</Link>
     </Content>
+    <Content Include="AxClass\XAPI_Setup_CampaignReply">
+      <SubType>Content</SubType>
+      <Name>XAPI_Setup_CampaignReply</Name>
+      <Link>Classes\XAPI_Setup_CampaignReply</Link>
+    </Content>
     <Content Include="AxClass\XAPI_SuiteOrchestrator">
       <SubType>Content</SubType>
       <Name>XAPI_SuiteOrchestrator</Name>
