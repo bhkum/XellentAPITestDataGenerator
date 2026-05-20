@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APIRunner_CampaignReply</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_APIRunner_CampaignReply extends XAPI_APIRunnerBase
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>init</Name>
+				<Source><![CDATA[
+    protected void init()
+    {
+        api = XAPI_APIS::CreateCampaignReply;
+        super();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>body</Name>
+				<Source><![CDATA[
+    protected str body()
+    {
+        smmBusRelTable  busRelTable;
+        str             custAccount;
+        Map             configMap;
+
+        custAccount = XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount');
+
+        select firstonly BusRelAccount from busRelTable
+            where busRelTable.CustAccount == custAccount;
+
+        configMap = new Map(Types::String, Types::String);
+        configMap.insert('<DataAreaId>',    curExt());
+        configMap.insert('<CustAccount>',   custAccount);
+        configMap.insert('<BusRelAccount>', busRelTable.BusRelAccount);
+        configMap.insert('<ContractNum>',   XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateContract, 'ContractNum'));
+
+        return this.prepareBody(configMap);
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>
