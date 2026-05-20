@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_MeteringPointGenerator</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_MeteringPointGenerator
+{
+    private static System.Random rnd;
+
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>initialize</Name>
+				<Source><![CDATA[
+    static void initialize()
+    {
+        if (!rnd)
+        {
+            rnd = new System.Random();
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>randRange</Name>
+				<Source><![CDATA[
+    private static int randRange(int min, int max)
+    {
+        XAPI_MeteringPointGenerator::initialize();
+        return rnd.Next(min, max + 1);
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>luhnCheckDigit</Name>
+				<Source><![CDATA[
+    private static int luhnCheckDigit(str seventeen)
+    {
+        str digits = seventeen + '0';
+        int length = strLen(digits);
+        int total  = 0;
+
+        for (int i = 1; i <= length; i++)
+        {
+            int posFromRight = length - i;
+            int multiplier   = (posFromRight mod 2 == 1) ? 2 : 1;
+            int value        = str2Int(subStr(digits, i, 1)) * multiplier;
+            total += (value mod 10) + (value div 10);
+        }
+
+        return (10 - total mod 10) mod 10;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>generateMeteringPoint</Name>
+				<Source><![CDATA[
+    /// Generates a valid 18-digit GSRN metering point number (prefix 7359 + 13 random digits + Luhn check digit).
+    public static str generateMeteringPoint()
+    {
+        str seventeen = '7359';
+
+        for (int i = 1; i <= 13; i++)
+        {
+            seventeen += int2str(XAPI_MeteringPointGenerator::randRange(0, 9));
+        }
+
+        return seventeen + int2str(XAPI_MeteringPointGenerator::luhnCheckDigit(seventeen));
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

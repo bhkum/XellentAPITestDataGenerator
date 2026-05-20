@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APIPostProcessor_Agreement</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_APIPostProcessor_Agreement extends XAPI_APIPostProcessorBase
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>run</Name>
+				<Source><![CDATA[
+    public void run()
+    {
+        EGS_MASS_ImportCustInst importBatch = EGS_MASS_ImportCustInst::construct();
+        importBatch.run();
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>
