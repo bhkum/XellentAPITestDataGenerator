@@ -120,8 +120,7 @@ final class XAPI_SuiteOrchestrator
             }
 
             // --- Post-process phase ---
-            XAPI_APIPostProcessorBase postProc = XAPI_APIPostProcessorBase::construct(testCase.API);
-            if (postProc)
+            if (testCase.PostProcessBatchClass != '')
             {
                 XAPI_APILogValues postLog;
                 postLog.SessionId = context.parmSessionId();
@@ -132,15 +131,15 @@ final class XAPI_SuiteOrchestrator
                 {
                     try
                     {
-                        postProc.run();
+                        XAPI_SuiteOrchestrator::runPostStep(testCase.PostProcessBatchClass);
 
                         postLog.Status  = XAPI_APIStatus::Success;
-                        postLog.Message = strFmt("PostProcess for %1 completed.", enum2Str(testCase.API));
+                        postLog.Message = strFmt("PostProcess %1 completed.", testCase.PostProcessBatchClass);
                     }
                     catch (Exception::Error)
                     {
                         postLog.Status       = XAPI_APIStatus::Error;
-                        postLog.Message      = strFmt("PostProcess for %1 failed.", enum2Str(testCase.API));
+                        postLog.Message      = strFmt("PostProcess %1 failed.", testCase.PostProcessBatchClass);
                         postLog.ErrorMessage = infolog().text();
 
                         if (suiteType == XAPI_SuiteType::Chained)
@@ -227,6 +226,31 @@ final class XAPI_SuiteOrchestrator
         }
 
         return runner.execute(_ctx);
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runPostStep</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Instantiates the named post-process class and invokes its run() method.
+    /// </summary>
+    private static void runPostStep(str _className)
+    {
+        ClassId      classId;
+        SysDictClass dictClass;
+        Object       obj;
+
+        classId = className2Id(_className);
+        if (!classId)
+        {
+            throw error(strFmt("Class %1 not found.", _className));
+        }
+
+        dictClass = new SysDictClass(classId);
+        obj       = dictClass.makeObject();
+        dictClass.callObject('run', obj);
     }
 
 ]]></Source>
