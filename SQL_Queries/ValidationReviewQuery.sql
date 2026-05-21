@@ -51,8 +51,33 @@ truncate table XAPI_APILogTable
 --drop table XAPI_APILogTable
 --drop table XAPI_APILogValues
 
-select v.FIELDNAME, v.FIELDVALUE,* from XAPI_APILogTable l
+select v.recid,v.FIELDNAME, v.FIELDVALUE,* from XAPI_APILogTable l
 join XAPI_APILogValues v
 on l.SESSIONID = v.sessionid
+
+----------------------------------
+
+
+SELECT 
+    lt.*,
+    lv.*
+FROM XAPI_APILogTable lt
+INNER JOIN XAPI_APILogValues lv
+    ON  lv.SessionId = lt.SessionId
+    AND lv.Sequence  = lt.Sequence
+WHERE lt.ApiName = 19;  -- Replace with your API name
+
+-- Step 2: Delete from XAPI_APILogValues first (child table)
+DELETE lv
+FROM XAPI_APILogValues lv
+INNER JOIN XAPI_APILogTable lt
+    ON  lt.SessionId = lv.SessionId
+    AND lt.Sequence  = lv.Sequence
+WHERE lt.ApiName = 19;  -- Replace with your API name
+
+-- Step 3: Delete from XAPI_APILogTable (parent table)
+DELETE lt
+FROM XAPI_APILogTable lt
+WHERE lt.ApiName = 19;  -- Replace with your API name
 
 
