@@ -391,6 +391,7 @@ public class XAPI_TestSuiteForm extends FormRun
 		</AxFormDataSource>
 	</DataSources>
 	<Design>
+		<Caption xmlns="">Test Suite</Caption>
 		<DataSource xmlns="">XAPI_TestSuite</DataSource>
 		<HeightMode xmlns="">Column</HeightMode>
 		<Pattern xmlns="">SimpleListDetails-Grid</Pattern>
@@ -598,6 +599,7 @@ public class XAPI_TestSuiteForm extends FormRun
 				<FormControlExtension
 					i:nil="true" />
 				<Controls />
+				<Caption>Test Suite</Caption>
 				<Style>SplitterVerticalContainer</Style>
 			</AxFormControl>
 			<AxFormControl xmlns=""
@@ -748,34 +750,6 @@ public class XAPI_TestSuiteForm extends FormRun
 										<Type>Integer</Type>
 										<FormControlExtension
 											i:nil="true" />
-										<Methods>
-											<Method>
-												<Name>validate</Name>
-												<Source><![CDATA[
-        public boolean validate()
-        {
-            boolean         ret = super();
-            XAPI_TestCase   duplicate;
-
-            if (ret && XAPI_TestCase.Sequence)
-            {
-                select firstOnly RecId from duplicate
-                    where duplicate.SuiteId  == XAPI_TestCase.SuiteId
-                       && duplicate.Sequence == XAPI_TestCase.Sequence
-                       && duplicate.RecId    != XAPI_TestCase.RecId;
-
-                if (duplicate.RecId)
-                {
-                    ret = checkFailed(strFmt("Sequence %1 already exists in this suite. Choose a different number.", XAPI_TestCase.Sequence));
-                }
-            }
-
-            return ret;
-        }
-
-]]></Source>
-											</Method>
-										</Methods>
 										<DataField>Sequence</DataField>
 										<DataSource>XAPI_TestCase</DataSource>
 									</AxFormControl>

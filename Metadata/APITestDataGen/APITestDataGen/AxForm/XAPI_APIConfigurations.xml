@@ -81,6 +81,7 @@ public class XAPI_APIConfigurations extends FormRun
 		</AxFormDataSource>
 	</DataSources>
 	<Design>
+		<Caption xmlns="">Configurations</Caption>
 		<DataSource xmlns="">XAPI_APIConfigurations</DataSource>
 		<HeightMode xmlns="">Column</HeightMode>
 		<Pattern xmlns="">SimpleListDetails-Grid</Pattern>
@@ -154,6 +155,7 @@ public class XAPI_APIConfigurations extends FormRun
 						<AlignChild>No</AlignChild>
 						<AlignChildren>No</AlignChildren>
 						<ArrangeMethod>Vertical</ArrangeMethod>
+						<Caption>Runner</Caption>
 					</AxFormControl>
 				</Controls>
 				<AlignChild>No</AlignChild>
@@ -301,6 +303,14 @@ public class XAPI_APIConfigurations extends FormRun
 									</AxFormControl>
 									<AxFormControl xmlns=""
 										i:type="AxFormStringControl">
+										<Name>Description</Name>
+										<Type>String</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<Label>Description</Label>
+									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormStringControl">
 										<Name>XAPI_APIConfigurations_URL_1</Name>
 										<HeightMode>Auto</HeightMode>
 										<Type>String</Type>
@@ -310,6 +320,7 @@ public class XAPI_APIConfigurations extends FormRun
 											i:nil="true" />
 										<DataField>URL</DataField>
 										<DataSource>XAPI_APIConfigurations</DataSource>
+										<Label>Endpoint</Label>
 									</AxFormControl>
 									<AxFormControl xmlns=""
 										i:type="AxFormStringControl">
