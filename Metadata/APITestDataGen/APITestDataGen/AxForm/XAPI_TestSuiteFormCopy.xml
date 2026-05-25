@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <AxForm xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="Microsoft.Dynamics.AX.Metadata.V6">
 	<Name>XAPI_TestSuiteFormCopy</Name>
 	<SourceCode>
@@ -13,7 +13,6 @@ public class XAPI_TestSuiteFormCopy extends FormRun
     boolean formInitialized;
 
 }
-
 ]]></Source>
 			</Method>
 			<Method>
@@ -26,6 +25,7 @@ public class XAPI_TestSuiteFormCopy extends FormRun
 
         formInitialized = false; // BEFORE super() — keeps form empty on open
         super();
+        JsonHtmlDisplay.allowEdit(false);
 
         // Calculate lastSuiteNum so next New gets correct ID (S003 after S001, S002)
         while select SuiteId from existing
@@ -73,8 +73,10 @@ public class XAPI_TestSuiteFormCopy extends FormRun
         public void selectionChanged()
         {
             super();
-            // When switching S001 <-> S002, refresh test cases for selected suite
+            element.lock();
             XAPI_TestCase_ds.executeQuery();
+            XAPI_TestCase_ds.refresh();
+            element.unLock();
         }
 
 ]]></Source>
@@ -203,6 +205,16 @@ public class XAPI_TestSuiteFormCopy extends FormRun
         {
             super();
             this.insertIfEmpty(false);
+        }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>active</Name>
+						<Source><![CDATA[
+        public int active()
+        {
+            return super();
         }
 
 ]]></Source>
@@ -818,6 +830,7 @@ public class XAPI_TestSuiteFormCopy extends FormRun
 						<Controls>
 							<AxFormControl>
 								<Name>JsonHtmlDisplay</Name>
+								<AutoDeclaration>Yes</AutoDeclaration>
 								<HeightMode>SizeToAvailable</HeightMode>
 								<WidthMode>SizeToAvailable</WidthMode>
 								<FormControlExtension>
@@ -828,10 +841,6 @@ public class XAPI_TestSuiteFormCopy extends FormRun
 											<Name>parmDataSourceName</Name>
 											<Type>String</Type>
 											<Value>XAPI_TestCase</Value>
-										</AxFormControlExtensionProperty>
-										<AxFormControlExtensionProperty>
-											<Name>parmDataFieldName</Name>
-											<Type>String</Type>
 										</AxFormControlExtensionProperty>
 										<AxFormControlExtensionProperty>
 											<Name>parmDataMethodName</Name>

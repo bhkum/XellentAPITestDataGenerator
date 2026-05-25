@@ -33,7 +33,7 @@ public class XAPI_JsonHtmlFormatter
 
         if (!_rawJson)
         {
-            return '<pre style="' + containerCss + ';color:#888">(empty)</pre>';
+            return '';
         }
 
         try
@@ -86,6 +86,29 @@ public class XAPI_JsonHtmlFormatter
         pretty = strReplace(pretty, bClose, '</span>');
 
         return '<pre style="' + containerCss + '">' + pretty + '</pre>';
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>toPrettyText</Name>
+				<Source><![CDATA[
+    public static str toPrettyText(str _rawJson)
+    {
+        if (!_rawJson)
+        {
+            return '';
+        }
+
+        try
+        {
+            var parsed = JsonConvert::DeserializeObject(_rawJson);
+            return JsonConvert::SerializeObject(parsed, Newtonsoft.Json.Formatting::Indented);
+        }
+        catch
+        {
+            return _rawJson;
+        }
     }
 
 ]]></Source>
