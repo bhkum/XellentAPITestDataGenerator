@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <AxForm xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="Microsoft.Dynamics.AX.Metadata.V6">
 	<Name>XAPI_TestSuiteLogForm</Name>
 	<SourceCode>
@@ -144,6 +144,36 @@ public class XAPI_TestSuiteLogForm extends FormRun
 				</Methods>
 			</Control>
 			<Control>
+				<Name>ClearAllButton</Name>
+				<Type>Button</Type>
+				<Methods>
+					<Method>
+						<Name>clicked</Name>
+						<Source><![CDATA[
+        public void clicked()
+        {
+            XAPI_APILogValues   logValues;
+            XAPI_APILogTable    logTable;
+
+            super();
+
+            if (Box::okCancel("Clear all log records? This cannot be undone.", DialogButton::Cancel, "Clear log") == DialogButton::Ok)
+            {
+                ttsbegin;
+                delete_from logValues;
+                delete_from logTable;
+                ttscommit;
+
+                XAPI_APILogTable_ds.research();
+                info("Log cleared.");
+            }
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</Control>
+			<Control>
 				<Name>SessionIdFilter</Name>
 				<Type>String</Type>
 				<Methods>
@@ -195,36 +225,6 @@ public class XAPI_TestSuiteLogForm extends FormRun
 					</Method>
 				</Methods>
 			</Control>
-			<Control>
-				<Name>ClearAllButton</Name>
-				<Type>Button</Type>
-				<Methods>
-					<Method>
-						<Name>clicked</Name>
-						<Source><![CDATA[
-        public void clicked()
-        {
-            XAPI_APILogValues   logValues;
-            XAPI_APILogTable    logTable;
-
-            super();
-
-            if (Box::okCancel("Clear all log records? This cannot be undone.", DialogButton::Cancel, "Clear log") == DialogButton::Ok)
-            {
-                ttsbegin;
-                delete_from logValues;
-                delete_from logTable;
-                ttscommit;
-
-                XAPI_APILogTable_ds.research();
-                info("Log cleared.");
-            }
-        }
-
-]]></Source>
-					</Method>
-				</Methods>
-			</Control>
 		</DataControls>
 		<Members xmlns="" />
 	</SourceCode>
@@ -235,7 +235,6 @@ public class XAPI_TestSuiteLogForm extends FormRun
 			<Fields />
 			<ReferencedDataSources />
 			<AllowCreate>No</AllowCreate>
-			<AllowDelete>Yes</AllowDelete>
 			<AllowEdit>No</AllowEdit>
 			<DataSourceLinks />
 			<DerivedDataSources />
@@ -248,17 +247,12 @@ public class XAPI_TestSuiteLogForm extends FormRun
 			<AllowCreate>No</AllowCreate>
 			<AllowDelete>No</AllowDelete>
 			<AllowEdit>No</AllowEdit>
-			<DataSourceLinks>
-				<AxFormDataSourceLink>
-					<DataSource>XAPI_APILogTable</DataSource>
-					<JoinRelation>XAPI_APILogTable</JoinRelation>
-				</AxFormDataSourceLink>
-			</DataSourceLinks>
+			<DataSourceLinks />
 			<DerivedDataSources />
-			<LinkType>Delayed</LinkType>
 		</AxFormDataSource>
 	</DataSources>
 	<Design>
+		<Caption xmlns="">Test Suite Log</Caption>
 		<DataSource xmlns="">XAPI_APILogTable</DataSource>
 		<Controls xmlns="">
 			<AxFormControl xmlns=""
@@ -302,7 +296,6 @@ public class XAPI_TestSuiteLogForm extends FormRun
 										<FormControlExtension
 											i:nil="true" />
 										<Command>DeleteRecord</Command>
-										<DataSource>XAPI_APILogTable</DataSource>
 									</AxFormControl>
 									<AxFormControl xmlns=""
 										i:type="AxFormButtonControl">
@@ -319,12 +312,14 @@ public class XAPI_TestSuiteLogForm extends FormRun
 						<AlignChild>No</AlignChild>
 						<AlignChildren>No</AlignChildren>
 						<ArrangeMethod>Vertical</ArrangeMethod>
+						<Caption>Runner</Caption>
 						<DataSource>XAPI_APILogTable</DataSource>
 					</AxFormControl>
 				</Controls>
 				<AlignChild>No</AlignChild>
 				<AlignChildren>No</AlignChildren>
 				<ArrangeMethod>Vertical</ArrangeMethod>
+				<Caption>Runner</Caption>
 				<DataSource>XAPI_APILogTable</DataSource>
 			</AxFormControl>
 			<AxFormControl xmlns=""
@@ -432,7 +427,6 @@ public class XAPI_TestSuiteLogForm extends FormRun
 				i:type="AxFormGridControl">
 				<Name>LogValuesGrid</Name>
 				<AllowEdit>No</AllowEdit>
-				<Caption>Phase Detail</Caption>
 				<Type>Grid</Type>
 				<VerticalSpacing>-1</VerticalSpacing>
 				<FormControlExtension
