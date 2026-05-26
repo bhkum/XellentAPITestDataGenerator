@@ -12,8 +12,36 @@ public class XAPI_APIConfigurations extends FormRun
 }
 ]]></Source>
 			</Method>
+			<Method>
+				<Name>init</Name>
+				<Source><![CDATA[
+    public void init()
+    {
+        super();
+        JsonHtmlDisplay.allowEdit(false);
+    }
+
+]]></Source>
+			</Method>
 		</Methods>
-		<DataSources xmlns="" />
+		<DataSources xmlns="">
+			<DataSource>
+				<Name>XAPI_APIConfigurations</Name>
+				<Methods>
+					<Method>
+						<Name>jsonHtml</Name>
+						<Source><![CDATA[
+        public display str jsonHtml()
+        {
+            return XAPI_JsonHtmlFormatter::toColoredHtml(XAPI_APIConfigurations.JSON);
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+				<Fields />
+			</DataSource>
+		</DataSources>
 		<DataControls xmlns="">
 			<Control>
 				<Name>RunButton</Name>
@@ -222,8 +250,16 @@ public class XAPI_APIConfigurations extends FormRun
 								<DataSource>XAPI_APIConfigurations</DataSource>
 								<Items />
 							</AxFormControl>
+							<AxFormControl xmlns=""
+								i:type="AxFormStringControl">
+								<Name>Grid_Description</Name>
+								<Type>String</Type>
+								<FormControlExtension
+									i:nil="true" />
+								<DataField>Description</DataField>
+								<DataSource>XAPI_APIConfigurations</DataSource>
+							</AxFormControl>
 						</Controls>
-						<DataGroup>Main</DataGroup>
 						<DataSource>XAPI_APIConfigurations</DataSource>
 						<MultiSelect>No</MultiSelect>
 						<ShowRowLabels>No</ShowRowLabels>
@@ -377,6 +413,39 @@ public class XAPI_APIConfigurations extends FormRun
 						<Caption>General</Caption>
 						<DataSource>XAPI_APIConfigurations</DataSource>
 						<Scrollbars>Auto</Scrollbars>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormTabPageControl">
+						<Name>JSON</Name>
+						<Type>TabPage</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<Controls>
+							<AxFormControl>
+								<Name>JsonHtmlDisplay</Name>
+								<AutoDeclaration>Yes</AutoDeclaration>
+								<HeightMode>SizeToAvailable</HeightMode>
+								<WidthMode>SizeToAvailable</WidthMode>
+								<FormControlExtension>
+									<Name>HTMLEditor</Name>
+									<ExtensionComponents />
+									<ExtensionProperties>
+										<AxFormControlExtensionProperty>
+											<Name>parmDataSourceName</Name>
+											<Type>String</Type>
+											<Value>XAPI_APIConfigurations</Value>
+										</AxFormControlExtensionProperty>
+										<AxFormControlExtensionProperty>
+											<Name>parmDataMethodName</Name>
+											<Type>String</Type>
+											<Value>jsonHtml</Value>
+										</AxFormControlExtensionProperty>
+									</ExtensionProperties>
+								</FormControlExtension>
+							</AxFormControl>
+						</Controls>
+						<Caption>JSON</Caption>
+						<DataSource>XAPI_APIConfigurations</DataSource>
 					</AxFormControl>
 				</Controls>
 				<AlignChild>No</AlignChild>
