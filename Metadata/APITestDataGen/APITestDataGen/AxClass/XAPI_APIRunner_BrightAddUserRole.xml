@@ -20,6 +20,25 @@ class XAPI_APIRunner_BrightAddUserRole extends XAPI_APIRunnerBase
 ]]></Source>
 			</Method>
 			<Method>
+				<Name>postRun</Name>
+				<Source><![CDATA[
+    protected void postRun()
+    {
+        // The Bright AddUserRole API returns a non-2xx HTTP status even on success,
+        // which causes .NET's HttpWebRequest to throw a WebException and land in the
+        // Error branch. Detect the success message and correct the status here.
+        if (status == XAPI_APIStatus::Error
+            && responseText
+            && strContains(responseText, 'added to account'))
+        {
+            status       = XAPI_APIStatus::Success;
+            errorMessage = '';
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
 				<Name>body</Name>
 				<Source><![CDATA[
     protected str body()
