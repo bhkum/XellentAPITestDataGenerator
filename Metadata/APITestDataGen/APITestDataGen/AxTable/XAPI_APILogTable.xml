@@ -32,6 +32,7 @@ public class XAPI_APILogTable extends common
         XAPI_APILogTable  logTable;
 
         select firstonly logValues
+            order by RecId desc
             join logTable
                 where logTable.SessionId == logValues.SessionId
                     && logTable.Sequence  == logValues.Sequence

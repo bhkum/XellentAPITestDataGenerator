@@ -96,40 +96,59 @@ final class XAPI_TestSuiteCopyFromConfig
 
         if (config.RecId)
         {
-            select forupdate testCase
-                where testCase.SuiteId == _suiteId
-                   && testCase.API     == config.API;
+            //select forupdate testCase
+            //    where testCase.SuiteId == _suiteId
+            //       && testCase.API     == config.API;
 
-            if (testCase.RecId)
-            {
-                testCase.URL                   = config.URL;
-                testCase.JSON                  = config.JSON;
-                testCase.PreProcessClass       = config.PreProcessClass;
-                testCase.RunnerClass           = config.RunnerClass;
-                testCase.PostProcessBatchClass = config.PostProcessBatchClass;
-                testCase.update();
-            }
-            else
-            {
-                int nextSeq;
+            //if (testCase.RecId)
+            //{
+            //    testCase.URL                   = config.URL;
+            //    testCase.JSON                  = config.JSON;
+            //    testCase.PreProcessClass       = config.PreProcessClass;
+            //    testCase.RunnerClass           = config.RunnerClass;
+            //    testCase.PostProcessBatchClass = config.PostProcessBatchClass;
+            //    testCase.update();
+            //}
+            //else
+            //{
+            //    int nextSeq;
 
-                select maxof(Sequence) from testCase
+            //    select maxof(Sequence) from testCase
+            //        where testCase.SuiteId == _suiteId;
+
+            //    nextSeq = max(testCase.Sequence + 10, 10);
+
+            //    testCase.clear();
+            //    testCase.SuiteId               = _suiteId;
+            //    testCase.Sequence              = nextSeq;
+            //    testCase.TestCaseId            = XAPI_TestSuiteCopyFromConfig::nextTestCaseId(_suiteId);
+            //    testCase.API                   = config.API;
+            //    testCase.URL                   = config.URL;
+            //    testCase.JSON                  = config.JSON;
+            //    testCase.PreProcessClass       = config.PreProcessClass;
+            //    testCase.RunnerClass           = config.RunnerClass;
+            //    testCase.PostProcessBatchClass = config.PostProcessBatchClass;
+            //    testCase.insert();
+            //}
+
+            int nextSeq;
+
+            select maxof(Sequence) from testCase
                     where testCase.SuiteId == _suiteId;
 
-                nextSeq = max(testCase.Sequence + 10, 10);
+            nextSeq = max(testCase.Sequence + 10, 10);
 
-                testCase.clear();
-                testCase.SuiteId               = _suiteId;
-                testCase.Sequence              = nextSeq;
-                testCase.TestCaseId            = XAPI_TestSuiteCopyFromConfig::nextTestCaseId(_suiteId);
-                testCase.API                   = config.API;
-                testCase.URL                   = config.URL;
-                testCase.JSON                  = config.JSON;
-                testCase.PreProcessClass       = config.PreProcessClass;
-                testCase.RunnerClass           = config.RunnerClass;
-                testCase.PostProcessBatchClass = config.PostProcessBatchClass;
-                testCase.insert();
-            }
+            testCase.clear();
+            testCase.SuiteId               = _suiteId;
+            testCase.Sequence              = nextSeq;
+            testCase.TestCaseId            = XAPI_TestSuiteCopyFromConfig::nextTestCaseId(_suiteId);
+            testCase.API                   = config.API;
+            testCase.URL                   = config.URL;
+            testCase.JSON                  = config.JSON;
+            testCase.PreProcessClass       = config.PreProcessClass;
+            testCase.RunnerClass           = config.RunnerClass;
+            testCase.PostProcessBatchClass = config.PostProcessBatchClass;
+            testCase.insert();
 
             ncount++;
         }
