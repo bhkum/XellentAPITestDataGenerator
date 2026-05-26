@@ -294,7 +294,7 @@ public class XAPI_APIConfigurations extends FormRun
 										<HeightMode>Auto</HeightMode>
 										<Type>ComboBox</Type>
 										<VerticalSpacing>-1</VerticalSpacing>
-										<WidthMode>Auto</WidthMode>
+										<WidthMode>SizeToAvailable</WidthMode>
 										<FormControlExtension
 											i:nil="true" />
 										<DataField>API</DataField>
@@ -305,17 +305,18 @@ public class XAPI_APIConfigurations extends FormRun
 										i:type="AxFormStringControl">
 										<Name>Description</Name>
 										<Type>String</Type>
+										<WidthMode>SizeToAvailable</WidthMode>
 										<FormControlExtension
 											i:nil="true" />
 										<Label>Description</Label>
+										<MultiLine>Yes</MultiLine>
 									</AxFormControl>
 									<AxFormControl xmlns=""
 										i:type="AxFormStringControl">
 										<Name>XAPI_APIConfigurations_URL_1</Name>
-										<HeightMode>Auto</HeightMode>
 										<Type>String</Type>
 										<VerticalSpacing>-1</VerticalSpacing>
-										<WidthMode>Auto</WidthMode>
+										<WidthMode>SizeToAvailable</WidthMode>
 										<FormControlExtension
 											i:nil="true" />
 										<DataField>URL</DataField>
@@ -338,6 +339,7 @@ public class XAPI_APIConfigurations extends FormRun
 										i:type="AxFormStringControl">
 										<Name>XAPI_APIConfigurations_PreProcessClass</Name>
 										<Type>String</Type>
+										<WidthMode>SizeToAvailable</WidthMode>
 										<FormControlExtension
 											i:nil="true" />
 										<DataField>PreProcessClass</DataField>
@@ -347,6 +349,7 @@ public class XAPI_APIConfigurations extends FormRun
 										i:type="AxFormStringControl">
 										<Name>XAPI_APIConfigurations_RunnerClass</Name>
 										<Type>String</Type>
+										<WidthMode>SizeToAvailable</WidthMode>
 										<FormControlExtension
 											i:nil="true" />
 										<DataField>RunnerClass</DataField>
@@ -356,6 +359,7 @@ public class XAPI_APIConfigurations extends FormRun
 										i:type="AxFormStringControl">
 										<Name>XAPI_APIConfigurations_PostProcessBatchClass</Name>
 										<Type>String</Type>
+										<WidthMode>SizeToAvailable</WidthMode>
 										<FormControlExtension
 											i:nil="true" />
 										<DataField>PostProcessBatchClass</DataField>

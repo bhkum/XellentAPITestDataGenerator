@@ -25,6 +25,7 @@ public class XAPI_TestSuiteForm extends FormRun
 
         formInitialized = false; // BEFORE super() — keeps form empty on open
         super();
+        JsonHtmlDisplay.allowEdit(false);
 
         // Calculate lastSuiteNum so next New gets correct ID (S003 after S001, S002)
         while select SuiteId from existing
@@ -809,6 +810,39 @@ public class XAPI_TestSuiteForm extends FormRun
 						<Caption>Test Cases</Caption>
 						<DataSource>XAPI_TestCase</DataSource>
 						<Scrollbars>Auto</Scrollbars>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormTabPageControl">
+						<Name>JSON</Name>
+						<Type>TabPage</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<Controls>
+							<AxFormControl>
+								<Name>JsonHtmlDisplay</Name>
+								<AutoDeclaration>Yes</AutoDeclaration>
+								<HeightMode>SizeToAvailable</HeightMode>
+								<WidthMode>SizeToAvailable</WidthMode>
+								<FormControlExtension>
+									<Name>HTMLEditor</Name>
+									<ExtensionComponents />
+									<ExtensionProperties>
+										<AxFormControlExtensionProperty>
+											<Name>parmDataSourceName</Name>
+											<Type>String</Type>
+											<Value>XAPI_TestCase</Value>
+										</AxFormControlExtensionProperty>
+										<AxFormControlExtensionProperty>
+											<Name>parmDataMethodName</Name>
+											<Type>String</Type>
+											<Value>jsonHtml</Value>
+										</AxFormControlExtensionProperty>
+									</ExtensionProperties>
+								</FormControlExtension>
+							</AxFormControl>
+						</Controls>
+						<Caption>JSON</Caption>
+						<DataSource>XAPI_TestCase</DataSource>
 					</AxFormControl>
 				</Controls>
 				<AlignChild>No</AlignChild>
