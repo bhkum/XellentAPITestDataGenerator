@@ -51,6 +51,9 @@ public class XAPI_APIConfigurations extends FormRun
 					<DataField>DataAreaId</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
+					<DataField>Description</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
 					<DataField>JSON</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
@@ -308,7 +311,8 @@ public class XAPI_APIConfigurations extends FormRun
 										<WidthMode>SizeToAvailable</WidthMode>
 										<FormControlExtension
 											i:nil="true" />
-										<Label>Description</Label>
+										<DataField>Description</DataField>
+										<DataSource>XAPI_APIConfigurations</DataSource>
 										<MultiLine>Yes</MultiLine>
 									</AxFormControl>
 									<AxFormControl xmlns=""

@@ -70,6 +70,9 @@ public class XAPI_APIConfigurations extends common
 					<DataField>API</DataField>
 				</AxTableFieldGroupField>
 				<AxTableFieldGroupField>
+					<DataField>Description</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
 					<DataField>URL</DataField>
 				</AxTableFieldGroupField>
 				<AxTableFieldGroupField>
@@ -93,6 +96,12 @@ public class XAPI_APIConfigurations extends common
 			<Name>API</Name>
 			<Label>API</Label>
 			<EnumType>XAPI_APIS</EnumType>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>Description</Name>
+			<Label>Description</Label>
+			<StringSize>-1</StringSize>
 		</AxTableField>
 		<AxTableField xmlns=""
 			i:type="AxTableFieldString">
