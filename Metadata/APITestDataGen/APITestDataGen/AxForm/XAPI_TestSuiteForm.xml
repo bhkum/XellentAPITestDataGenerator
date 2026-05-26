@@ -278,6 +278,29 @@ public class XAPI_TestSuiteForm extends FormRun
 				</Methods>
 			</Control>
 			<Control>
+				<Name>BackfillDescButton</Name>
+				<Type>Button</Type>
+				<Methods>
+					<Method>
+						<Name>clicked</Name>
+						<Source><![CDATA[
+        public void clicked()
+        {
+            super();
+            if (!XAPI_TestSuite.SuiteId)
+            {
+                warning("Select a test suite first.");
+                return;
+            }
+            XAPI_TestSuiteCopyFromConfig::backfillDescriptions(XAPI_TestSuite.SuiteId);
+            XAPI_TestCase_ds.research();
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</Control>
+			<Control>
 				<Name>RunSuiteButton</Name>
 				<Type>Button</Type>
 				<Methods>
@@ -348,10 +371,7 @@ public class XAPI_TestSuiteForm extends FormRun
 					<DataField>DataAreaId</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
-					<DataField>ExtractAs</DataField>
-				</AxFormDataSourceField>
-				<AxFormDataSourceField>
-					<DataField>ExtractField</DataField>
+					<DataField>Description</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>JSON</DataField>
@@ -367,6 +387,9 @@ public class XAPI_TestSuiteForm extends FormRun
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>RecId</DataField>
+				</AxFormDataSourceField>
+				<AxFormDataSourceField>
+					<DataField>RunnerClass</DataField>
 				</AxFormDataSourceField>
 				<AxFormDataSourceField>
 					<DataField>Sequence</DataField>
@@ -468,6 +491,15 @@ public class XAPI_TestSuiteForm extends FormRun
 										<FormControlExtension
 											i:nil="true" />
 										<Text>Copy Single from Config</Text>
+									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormButtonControl">
+										<Name>BackfillDescButton</Name>
+										<AutoDeclaration>Yes</AutoDeclaration>
+										<Type>Button</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<Text>Backfill Descriptions</Text>
 									</AxFormControl>
 								</Controls>
 							</AxFormControl>
@@ -766,8 +798,18 @@ public class XAPI_TestSuiteForm extends FormRun
 									</AxFormControl>
 									<AxFormControl xmlns=""
 										i:type="AxFormStringControl">
+										<Name>XAPI_TestCase_Description</Name>
+										<Type>String</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<DataField>Description</DataField>
+										<DataSource>XAPI_TestCase</DataSource>
+									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormStringControl">
 										<Name>TestCaseGrid_PreProcessClass</Name>
 										<Type>String</Type>
+										<Visible>No</Visible>
 										<FormControlExtension
 											i:nil="true" />
 										<DataField>PreProcessClass</DataField>
@@ -777,6 +819,7 @@ public class XAPI_TestSuiteForm extends FormRun
 										i:type="AxFormStringControl">
 										<Name>TestCaseGrid_PostProcessBatchClass</Name>
 										<Type>String</Type>
+										<Visible>No</Visible>
 										<FormControlExtension
 											i:nil="true" />
 										<DataField>PostProcessBatchClass</DataField>
@@ -786,6 +829,7 @@ public class XAPI_TestSuiteForm extends FormRun
 										i:type="AxFormStringControl">
 										<Name>TestCaseGrid_URL</Name>
 										<Type>String</Type>
+										<Visible>No</Visible>
 										<FormControlExtension
 											i:nil="true" />
 										<DataField>URL</DataField>
@@ -837,11 +881,15 @@ public class XAPI_TestSuiteForm extends FormRun
 											<Type>String</Type>
 											<Value>jsonHtml</Value>
 										</AxFormControlExtensionProperty>
+										<AxFormControlExtensionProperty>
+											<Name>parmDataFieldName</Name>
+											<Type>String</Type>
+										</AxFormControlExtensionProperty>
 									</ExtensionProperties>
 								</FormControlExtension>
 							</AxFormControl>
 						</Controls>
-						<Caption>JSON</Caption>
+						<Caption>Request</Caption>
 						<DataSource>XAPI_TestCase</DataSource>
 					</AxFormControl>
 				</Controls>

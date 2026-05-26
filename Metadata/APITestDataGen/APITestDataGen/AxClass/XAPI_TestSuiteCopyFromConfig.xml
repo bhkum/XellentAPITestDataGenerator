@@ -38,6 +38,7 @@ final class XAPI_TestSuiteCopyFromConfig
                 testCase.PreProcessClass       = config.PreProcessClass;
                 testCase.RunnerClass           = config.RunnerClass;
                 testCase.PostProcessBatchClass = config.PostProcessBatchClass;
+                testCase.Description           = config.Description;
                 testCase.update();
             }
             else
@@ -59,6 +60,7 @@ final class XAPI_TestSuiteCopyFromConfig
                 testCase.PreProcessClass       = config.PreProcessClass;
                 testCase.RunnerClass           = config.RunnerClass;
                 testCase.PostProcessBatchClass = config.PostProcessBatchClass;
+                testCase.Description           = config.Description;
                 testCase.insert();
             }
 
@@ -148,6 +150,7 @@ final class XAPI_TestSuiteCopyFromConfig
             testCase.PreProcessClass       = config.PreProcessClass;
             testCase.RunnerClass           = config.RunnerClass;
             testCase.PostProcessBatchClass = config.PostProcessBatchClass;
+            testCase.Description           = config.Description;
             testCase.insert();
 
             ncount++;
@@ -156,6 +159,48 @@ final class XAPI_TestSuiteCopyFromConfig
         ttscommit;
 
         info(strFmt("Copied %1 API configs into suite %2.", ncount, _suiteId));
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>backfillDescriptions</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// For every test case in the given suite whose Description is blank,
+    /// looks up the matching XAPI_APIConfigurations row by API and copies
+    /// the Description across. Cases that already have a description are
+    /// left untouched.
+    /// </summary>
+    /// <param name = "_suiteId">Target test suite identifier.</param>
+    public static void backfillDescriptions(str _suiteId)
+    {
+        XAPI_TestCase           testCase;
+        XAPI_APIConfigurations  config;
+        int                     ncount;
+
+        ttsbegin;
+
+        while select forupdate testCase
+            where testCase.SuiteId == _suiteId
+        {
+            if (testCase.Description)
+                continue;
+
+            select config
+                where config.API == testCase.API;
+
+            if (config.RecId && config.Description)
+            {
+                testCase.Description = config.Description;
+                testCase.update();
+                ncount++;
+            }
+        }
+
+        ttscommit;
+
+        info(strFmt("Updated description for %1 test case(s) in suite %2.", ncount, _suiteId));
     }
 
 ]]></Source>

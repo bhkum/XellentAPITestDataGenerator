@@ -1,0 +1,734 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxForm xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="Microsoft.Dynamics.AX.Metadata.V6">
+	<Name>XAPI_TestSuiteLogFormCopy</Name>
+	<SourceCode>
+		<Methods xmlns="">
+			<Method>
+				<Name>classDeclaration</Name>
+				<Source><![CDATA[
+[Form]
+public class XAPI_TestSuiteLogFormCopy extends FormRun
+{
+}
+]]></Source>
+			</Method>
+			<Method>
+				<Name>init</Name>
+				<Source><![CDATA[
+    public void init()
+    {
+        super();
+        RequestBodyHtmlDisplay.allowEdit(false);
+        ResponseHtmlDisplay.allowEdit(false);
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>applySessionFilter</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Re-applies the SessionId range on the data source from the filter
+    /// control's current text. Empty text clears the range.
+    /// </summary>
+    public void applySessionFilter()
+    {
+        QueryBuildDataSource    qbds;
+        QueryBuildRange         range;
+        str                     filterText;
+
+        qbds = XAPI_APILogTable_ds.query().dataSourceTable(tableNum(XAPI_APILogTable));
+        qbds.clearRange(fieldNum(XAPI_APILogTable, SessionId));
+
+        filterText = SessionIdFilter.text();
+
+        if (filterText)
+        {
+            range = qbds.addRange(fieldNum(XAPI_APILogTable, SessionId));
+            range.value(queryValue(str2Guid(filterText)));
+        }
+
+        XAPI_APILogTable_ds.executeQuery();
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+		<DataSources xmlns="">
+			<DataSource>
+				<Name>XAPI_APILogTable</Name>
+				<Methods>
+					<Method>
+						<Name>init</Name>
+						<Source><![CDATA[
+        public void init()
+        {
+            super();
+
+            this.query().dataSourceTable(tableNum(XAPI_APILogTable))
+                .addSortField(fieldNum(XAPI_APILogTable, Sequence), SortOrder::Ascending);
+        }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>selectionChanged</Name>
+						<Source><![CDATA[
+        public void selectionChanged()
+        {
+            super();
+            XAPI_APILogValues_ds.executeQuery();
+        }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>delete</Name>
+						<Source><![CDATA[
+        public void delete()
+        {
+            XAPI_APILogValues   logValues;
+
+            ttsbegin;
+            delete_from logValues
+                where logValues.SessionId == XAPI_APILogTable.SessionId
+                   && logValues.Sequence  == XAPI_APILogTable.Sequence;
+            super();
+            ttscommit;
+        }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>displayOption</Name>
+						<Source><![CDATA[
+        public void displayOption(Common _record, FormRowDisplayOption _options)
+        {
+            XAPI_APILogTable logTable = _record;
+
+            super(_record, _options);
+
+            switch (logTable.Status)
+            {
+                case XAPI_APIStatus::Success:
+                    _options.textColor(WinAPI::RGB2int(0, 153, 0));
+                    break;
+
+                case XAPI_APIStatus::Error:
+                    _options.textColor(WinAPI::RGB2int(255, 0, 0));
+                    break;
+            }
+        }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>requestBodyHtml</Name>
+						<Source><![CDATA[
+        public display str requestBodyHtml()
+        {
+            return XAPI_JsonHtmlFormatter::toColoredHtml(XAPI_APILogTable.RequestBody);
+        }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>responseHtml</Name>
+						<Source><![CDATA[
+        public display str responseHtml()
+        {
+            return XAPI_JsonHtmlFormatter::toColoredHtml(XAPI_APILogTable.Response);
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+				<Fields />
+			</DataSource>
+			<DataSource>
+				<Name>XAPI_APILogValues</Name>
+				<Methods>
+					<Method>
+						<Name>displayOption</Name>
+						<Source><![CDATA[
+        public void displayOption(Common _record, FormRowDisplayOption _options)
+        {
+            XAPI_APILogValues logValues = _record;
+
+            super(_record, _options);
+
+            switch (logValues.Status)
+            {
+                case XAPI_APIStatus::Success:
+                    _options.textColor(WinAPI::RGB2int(0, 153, 0));
+                    break;
+
+                case XAPI_APIStatus::Error:
+                    _options.textColor(WinAPI::RGB2int(255, 0, 0));
+                    break;
+            }
+        }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>executeQuery</Name>
+						<Source><![CDATA[
+        public void executeQuery()
+        {
+            QueryBuildDataSource qbds = this.queryBuildDataSource();
+            qbds.clearRanges();
+
+            if (XAPI_APILogTable.RecId)
+            {
+                qbds.addRange(fieldNum(XAPI_APILogValues, SessionId))
+                    .value(guid2Str(XAPI_APILogTable.SessionId));
+                qbds.addRange(fieldNum(XAPI_APILogValues, Sequence))
+                    .value(int2Str(XAPI_APILogTable.Sequence));
+            }
+            else
+            {
+                qbds.addRange(fieldNum(XAPI_APILogValues, SessionId))
+                    .value(SysQuery::valueEmptyString());
+            }
+
+            super();
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+				<Fields />
+			</DataSource>
+		</DataSources>
+		<DataControls xmlns="">
+			<Control>
+				<Name>ArchiveButton</Name>
+				<Type>Button</Type>
+				<Methods>
+					<Method>
+						<Name>clicked</Name>
+						<Source><![CDATA[
+        public void clicked()
+        {
+            super();
+
+            XAPI_APILogTable::archive();
+            XAPI_APILogTable_ds.research();
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</Control>
+			<Control>
+				<Name>ClearAllButton</Name>
+				<Type>Button</Type>
+				<Methods>
+					<Method>
+						<Name>clicked</Name>
+						<Source><![CDATA[
+        public void clicked()
+        {
+            XAPI_APILogValues   logValues;
+            XAPI_APILogTable    logTable;
+
+            super();
+
+            if (Box::okCancel("Clear all log records? This cannot be undone.", DialogButton::Cancel, "Clear log") == DialogButton::Ok)
+            {
+                ttsbegin;
+                delete_from logValues;
+                delete_from logTable;
+                ttscommit;
+
+                XAPI_APILogTable_ds.research();
+                info("Log cleared.");
+            }
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</Control>
+			<Control>
+				<Name>SessionIdFilter</Name>
+				<Type>String</Type>
+				<Methods>
+					<Method>
+						<Name>modified</Name>
+						<Source><![CDATA[
+        public boolean modified()
+        {
+            boolean ret;
+            ret = super();
+
+            element.applySessionFilter();
+
+            return ret;
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</Control>
+			<Control>
+				<Name>LatestRunButton</Name>
+				<Type>Button</Type>
+				<Methods>
+					<Method>
+						<Name>clicked</Name>
+						<Source><![CDATA[
+        public void clicked()
+        {
+            XAPI_APILogTable    latestRow;
+
+            super();
+
+            select firstonly SessionId from latestRow
+                order by RecId desc;
+
+            if (latestRow.SessionId != emptyGuid())
+            {
+                SessionIdFilter.text(guid2Str(latestRow.SessionId));
+                element.applySessionFilter();
+            }
+            else
+            {
+                info("No log rows found.");
+            }
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</Control>
+			<Control>
+				<Name>AllRunsButton</Name>
+				<Type>Button</Type>
+				<Methods>
+					<Method>
+						<Name>clicked</Name>
+						<Source><![CDATA[
+        public void clicked()
+        {
+            super();
+
+            SessionIdFilter.text('');
+            element.applySessionFilter();
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</Control>
+		</DataControls>
+		<Members xmlns="" />
+	</SourceCode>
+	<DataSources>
+		<AxFormDataSource xmlns="">
+			<Name>XAPI_APILogTable</Name>
+			<Table>XAPI_APILogTable</Table>
+			<Fields />
+			<ReferencedDataSources />
+			<AllowCreate>No</AllowCreate>
+			<AllowEdit>No</AllowEdit>
+			<DataSourceLinks />
+			<DerivedDataSources />
+		</AxFormDataSource>
+		<AxFormDataSource xmlns="">
+			<Name>XAPI_APILogValues</Name>
+			<Table>XAPI_APILogValues</Table>
+			<Fields />
+			<ReferencedDataSources />
+			<AllowCreate>No</AllowCreate>
+			<AllowDelete>No</AllowDelete>
+			<AllowEdit>No</AllowEdit>
+			<DataSourceLinks />
+			<DerivedDataSources />
+		</AxFormDataSource>
+	</DataSources>
+	<Design>
+		<Caption xmlns="">Test Suite Log</Caption>
+		<DataSource xmlns="">XAPI_APILogTable</DataSource>
+		<HeightMode xmlns="">Column</HeightMode>
+		<Controls xmlns="">
+			<AxFormControl xmlns=""
+				i:type="AxFormActionPaneControl">
+				<Name>ActionPaneMain</Name>
+				<Type>ActionPane</Type>
+				<VerticalSpacing>-1</VerticalSpacing>
+				<FormControlExtension
+					i:nil="true" />
+				<Controls>
+					<AxFormControl xmlns=""
+						i:type="AxFormActionPaneTabControl">
+						<Name>ActionPaneTabMain</Name>
+						<HeightMode>Auto</HeightMode>
+						<Type>ActionPaneTab</Type>
+						<VerticalSpacing>-1</VerticalSpacing>
+						<WidthMode>Auto</WidthMode>
+						<FormControlExtension
+							i:nil="true" />
+						<Controls>
+							<AxFormControl xmlns=""
+								i:type="AxFormButtonGroupControl">
+								<Name>ButtonGroupMaintain</Name>
+								<Type>ButtonGroup</Type>
+								<FormControlExtension
+									i:nil="true" />
+								<Controls>
+									<AxFormControl xmlns=""
+										i:type="AxFormButtonControl">
+										<Name>ArchiveButton</Name>
+										<AutoDeclaration>Yes</AutoDeclaration>
+										<Type>Button</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<Text>Archive</Text>
+									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormCommandButtonControl">
+										<Name>DeleteButton</Name>
+										<Type>CommandButton</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<Command>DeleteRecord</Command>
+									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormButtonControl">
+										<Name>ClearAllButton</Name>
+										<AutoDeclaration>Yes</AutoDeclaration>
+										<Type>Button</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<Text>Clear All</Text>
+									</AxFormControl>
+								</Controls>
+							</AxFormControl>
+						</Controls>
+						<AlignChild>No</AlignChild>
+						<AlignChildren>No</AlignChildren>
+						<ArrangeMethod>Vertical</ArrangeMethod>
+						<Caption>Runner</Caption>
+						<DataSource>XAPI_APILogTable</DataSource>
+					</AxFormControl>
+				</Controls>
+				<AlignChild>No</AlignChild>
+				<AlignChildren>No</AlignChildren>
+				<ArrangeMethod>Vertical</ArrangeMethod>
+				<Caption>Runner</Caption>
+				<DataSource>XAPI_APILogTable</DataSource>
+			</AxFormControl>
+			<AxFormControl xmlns=""
+				i:type="AxFormGroupControl">
+				<Name>FilterGroup</Name>
+				<HeightMode>Auto</HeightMode>
+				<Type>Group</Type>
+				<VerticalSpacing>-1</VerticalSpacing>
+				<WidthMode>SizeToAvailable</WidthMode>
+				<FormControlExtension
+					i:nil="true" />
+				<Controls>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>SessionIdFilter</Name>
+						<AutoDeclaration>Yes</AutoDeclaration>
+						<HeightMode>Auto</HeightMode>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<Label>Session ID</Label>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormButtonControl">
+						<Name>LatestRunButton</Name>
+						<AutoDeclaration>Yes</AutoDeclaration>
+						<HeightMode>Auto</HeightMode>
+						<Type>Button</Type>
+						<VerticalSpacing>-1</VerticalSpacing>
+						<WidthMode>Auto</WidthMode>
+						<FormControlExtension
+							i:nil="true" />
+						<Text>Latest Run</Text>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormButtonControl">
+						<Name>AllRunsButton</Name>
+						<AutoDeclaration>Yes</AutoDeclaration>
+						<HeightMode>Auto</HeightMode>
+						<Type>Button</Type>
+						<VerticalSpacing>-1</VerticalSpacing>
+						<WidthMode>Auto</WidthMode>
+						<FormControlExtension
+							i:nil="true" />
+						<Text>All Runs</Text>
+					</AxFormControl>
+				</Controls>
+				<ArrangeMethod>HorizontalLeft</ArrangeMethod>
+				<Caption>Filter</Caption>
+				<FrameType>None</FrameType>
+			</AxFormControl>
+			<AxFormControl xmlns=""
+				i:type="AxFormGridControl">
+				<Name>LogGrid</Name>
+				<AllowEdit>No</AllowEdit>
+				<Type>Grid</Type>
+				<VerticalSpacing>-1</VerticalSpacing>
+				<FormControlExtension
+					i:nil="true" />
+				<Controls>
+					<AxFormControl xmlns=""
+						i:type="AxFormIntegerControl">
+						<Name>LogGrid_Sequence</Name>
+						<Type>Integer</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Sequence</DataField>
+						<DataSource>XAPI_APILogTable</DataSource>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormComboBoxControl">
+						<Name>LogGrid_ApiName</Name>
+						<Type>ComboBox</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>ApiName</DataField>
+						<DataSource>XAPI_APILogTable</DataSource>
+						<Items />
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormComboBoxControl">
+						<Name>LogGrid_Status</Name>
+						<Type>ComboBox</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Status</DataField>
+						<DataSource>XAPI_APILogTable</DataSource>
+						<Items />
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogGrid_RequestBody</Name>
+						<Type>String</Type>
+						<Visible>No</Visible>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>RequestBody</DataField>
+						<DataSource>XAPI_APILogTable</DataSource>
+						<MultiLine>Yes</MultiLine>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogGrid_Response</Name>
+						<Type>String</Type>
+						<Visible>No</Visible>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Response</DataField>
+						<DataSource>XAPI_APILogTable</DataSource>
+						<MultiLine>Yes</MultiLine>
+					</AxFormControl>
+				</Controls>
+				<DataSource>XAPI_APILogTable</DataSource>
+				<MultiSelect>No</MultiSelect>
+				<ShowRowLabels>No</ShowRowLabels>
+				<Style>Tabular</Style>
+			</AxFormControl>
+			<AxFormControl xmlns=""
+				i:type="AxFormGridControl">
+				<Name>LogValuesGrid</Name>
+				<AllowEdit>No</AllowEdit>
+				<Type>Grid</Type>
+				<VerticalSpacing>-1</VerticalSpacing>
+				<FormControlExtension
+					i:nil="true" />
+				<Controls>
+					<AxFormControl xmlns=""
+						i:type="AxFormComboBoxControl">
+						<Name>LogValuesGrid_LogType</Name>
+						<Type>ComboBox</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>LogType</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+						<Items />
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormComboBoxControl">
+						<Name>LogValuesGrid_Status</Name>
+						<Type>ComboBox</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Status</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+						<Items />
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogValuesGrid_FieldName</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>FieldName</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogValuesGrid_FieldValue</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>FieldValue</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogValuesGrid_Message</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Message</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogValuesGrid_ErrorMessage</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>ErrorMessage</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+						<MultiLine>Yes</MultiLine>
+					</AxFormControl>
+				</Controls>
+				<DataSource>XAPI_APILogValues</DataSource>
+				<MultiSelect>No</MultiSelect>
+				<ShowRowLabels>No</ShowRowLabels>
+				<Style>Tabular</Style>
+			</AxFormControl>
+			<AxFormControl xmlns=""
+				i:type="AxFormTabControl">
+				<Name>LogJsonTab</Name>
+				<Type>Tab</Type>
+				<VerticalSpacing>-1</VerticalSpacing>
+				<FormControlExtension
+					i:nil="true" />
+				<Controls>
+					<AxFormControl xmlns=""
+						i:type="AxFormTabPageControl">
+						<Name>RequestResponseTab</Name>
+						<HeightMode>SizeToAvailable</HeightMode>
+						<Type>TabPage</Type>
+						<VerticalSpacing>-1</VerticalSpacing>
+						<WidthMode>SizeToAvailable</WidthMode>
+						<FormControlExtension
+							i:nil="true" />
+						<Controls>
+							<AxFormControl xmlns=""
+								i:type="AxFormGroupControl">
+								<Name>LogJsonSplitGroup</Name>
+								<HeightMode>SizeToAvailable</HeightMode>
+								<Type>Group</Type>
+								<VerticalSpacing>-1</VerticalSpacing>
+								<WidthMode>SizeToAvailable</WidthMode>
+								<FormControlExtension
+									i:nil="true" />
+								<Controls>
+									<AxFormControl xmlns=""
+										i:type="AxFormGroupControl">
+										<Name>RequestBodyGroup</Name>
+										<HeightMode>SizeToAvailable</HeightMode>
+										<Type>Group</Type>
+										<VerticalSpacing>-1</VerticalSpacing>
+										<WidthMode>SizeToAvailable</WidthMode>
+										<FormControlExtension
+											i:nil="true" />
+										<Controls>
+											<AxFormControl>
+												<Name>RequestBodyHtmlDisplay</Name>
+												<AutoDeclaration>Yes</AutoDeclaration>
+												<HeightMode>SizeToAvailable</HeightMode>
+												<WidthMode>SizeToAvailable</WidthMode>
+												<FormControlExtension>
+													<Name>HTMLEditor</Name>
+													<ExtensionComponents />
+													<ExtensionProperties>
+														<AxFormControlExtensionProperty>
+															<Name>parmDataSourceName</Name>
+															<Type>String</Type>
+															<Value>XAPI_APILogTable</Value>
+														</AxFormControlExtensionProperty>
+														<AxFormControlExtensionProperty>
+															<Name>parmDataMethodName</Name>
+															<Type>String</Type>
+															<Value>requestBodyHtml</Value>
+														</AxFormControlExtensionProperty>
+														<AxFormControlExtensionProperty>
+															<Name>parmDataFieldName</Name>
+															<Type>String</Type>
+														</AxFormControlExtensionProperty>
+													</ExtensionProperties>
+												</FormControlExtension>
+											</AxFormControl>
+										</Controls>
+										<Caption>Request</Caption>
+										<DataSource>XAPI_APILogTable</DataSource>
+									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormGroupControl">
+										<Name>ResponseGroup</Name>
+										<HeightMode>SizeToAvailable</HeightMode>
+										<Type>Group</Type>
+										<VerticalSpacing>-1</VerticalSpacing>
+										<WidthMode>SizeToAvailable</WidthMode>
+										<FormControlExtension
+											i:nil="true" />
+										<Controls>
+											<AxFormControl>
+												<Name>ResponseHtmlDisplay</Name>
+												<AutoDeclaration>Yes</AutoDeclaration>
+												<HeightMode>SizeToAvailable</HeightMode>
+												<WidthMode>SizeToAvailable</WidthMode>
+												<FormControlExtension>
+													<Name>HTMLEditor</Name>
+													<ExtensionComponents />
+													<ExtensionProperties>
+														<AxFormControlExtensionProperty>
+															<Name>parmDataSourceName</Name>
+															<Type>String</Type>
+															<Value>XAPI_APILogTable</Value>
+														</AxFormControlExtensionProperty>
+														<AxFormControlExtensionProperty>
+															<Name>parmDataMethodName</Name>
+															<Type>String</Type>
+															<Value>responseHtml</Value>
+														</AxFormControlExtensionProperty>
+														<AxFormControlExtensionProperty>
+															<Name>parmDataFieldName</Name>
+															<Type>String</Type>
+														</AxFormControlExtensionProperty>
+													</ExtensionProperties>
+												</FormControlExtension>
+											</AxFormControl>
+										</Controls>
+										<Caption>Response</Caption>
+										<DataSource>XAPI_APILogTable</DataSource>
+									</AxFormControl>
+								</Controls>
+								<ArrangeMethod>HorizontalLeft</ArrangeMethod>
+								<FrameType>None</FrameType>
+							</AxFormControl>
+						</Controls>
+						<Caption>Request / Response</Caption>
+						<DataSource>XAPI_APILogTable</DataSource>
+					</AxFormControl>
+				</Controls>
+				<AlignChild>No</AlignChild>
+				<ArrangeMethod>Vertical</ArrangeMethod>
+				<Style>FastTabs</Style>
+			</AxFormControl>
+		</Controls>
+	</Design>
+	<Parts />
+</AxForm>

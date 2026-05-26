@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <AxForm xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="Microsoft.Dynamics.AX.Metadata.V6">
 	<Name>XAPI_TestSuiteFormCopy</Name>
 	<SourceCode>
@@ -25,7 +25,6 @@ public class XAPI_TestSuiteFormCopy extends FormRun
 
         formInitialized = false; // BEFORE super() — keeps form empty on open
         super();
-        JsonHtmlDisplay.allowEdit(false);
 
         // Calculate lastSuiteNum so next New gets correct ID (S003 after S001, S002)
         while select SuiteId from existing
@@ -222,8 +221,18 @@ public class XAPI_TestSuiteFormCopy extends FormRun
 					<Method>
 						<Name>jsonHtml</Name>
 						<Source><![CDATA[
-        public display str jsonHtml()
+        public edit str jsonHtml(boolean _set, str _value)
         {
+            if (_set)
+            {
+                str raw = System.Text.RegularExpressions.Regex::Replace(_value, '<[^>]+>', '');
+                raw = strReplace(raw, '&quot;', '"');
+                raw = strReplace(raw, '&amp;',  '&');
+                raw = strReplace(raw, '&lt;',   '<');
+                raw = strReplace(raw, '&gt;',   '>');
+                raw = strReplace(raw, '&nbsp;', ' ');
+                XAPI_TestCase.JSON = raw;
+            }
             return XAPI_JsonHtmlFormatter::toColoredHtml(XAPI_TestCase.JSON);
         }
 
@@ -846,6 +855,10 @@ public class XAPI_TestSuiteFormCopy extends FormRun
 											<Name>parmDataMethodName</Name>
 											<Type>String</Type>
 											<Value>jsonHtml</Value>
+										</AxFormControlExtensionProperty>
+										<AxFormControlExtensionProperty>
+											<Name>parmDataFieldName</Name>
+											<Type>String</Type>
 										</AxFormControlExtensionProperty>
 									</ExtensionProperties>
 								</FormControlExtension>

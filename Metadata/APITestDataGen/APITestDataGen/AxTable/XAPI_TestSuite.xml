@@ -113,21 +113,19 @@ public class XAPI_TestSuite extends common
 		<AxTableField xmlns=""
 			i:type="AxTableFieldString">
 			<Name>Description</Name>
-			<ExtendedDataType>Description</ExtendedDataType>
 			<Label>Description</Label>
+			<StringSize>-1</StringSize>
 		</AxTableField>
 		<AxTableField xmlns=""
 			i:type="AxTableFieldEnum">
 			<Name>SuiteType</Name>
 			<EnumType>XAPI_SuiteType</EnumType>
-			<Label>Suite Type</Label>
 		</AxTableField>
 	</Fields>
 	<FullTextIndexes />
 	<Indexes>
 		<AxTableIndex>
 			<Name>SuiteIdx</Name>
-			<AllowDuplicates>No</AllowDuplicates>
 			<AlternateKey>Yes</AlternateKey>
 			<Fields>
 				<AxTableIndexField>

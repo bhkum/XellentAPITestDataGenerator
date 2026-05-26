@@ -13,6 +13,16 @@ public class XAPI_TestSuiteLogForm extends FormRun
 ]]></Source>
 			</Method>
 			<Method>
+				<Name>init</Name>
+				<Source><![CDATA[
+    public void init()
+    {
+        super();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
 				<Name>applySessionFilter</Name>
 				<Source><![CDATA[
     /// <summary>
@@ -83,6 +93,26 @@ public class XAPI_TestSuiteLogForm extends FormRun
                    && logValues.Sequence  == XAPI_APILogTable.Sequence;
             super();
             ttscommit;
+        }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>requestBodyHtml</Name>
+						<Source><![CDATA[
+        public display str requestBodyHtml()
+        {
+            return XAPI_JsonHtmlFormatter::toColoredHtml(XAPI_APILogTable.RequestBody);
+        }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>responseHtml</Name>
+						<Source><![CDATA[
+        public display str responseHtml()
+        {
+            return XAPI_JsonHtmlFormatter::toColoredHtml(XAPI_APILogTable.Response);
         }
 
 ]]></Source>

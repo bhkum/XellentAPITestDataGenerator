@@ -342,14 +342,13 @@ public class XAPI_APIConfigurations extends FormRun
 									</AxFormControl>
 									<AxFormControl xmlns=""
 										i:type="AxFormStringControl">
-										<Name>Description</Name>
+										<Name>XAPI_APIConfigurations_Description</Name>
 										<Type>String</Type>
 										<WidthMode>SizeToAvailable</WidthMode>
 										<FormControlExtension
 											i:nil="true" />
 										<DataField>Description</DataField>
 										<DataSource>XAPI_APIConfigurations</DataSource>
-										<MultiLine>Yes</MultiLine>
 									</AxFormControl>
 									<AxFormControl xmlns=""
 										i:type="AxFormStringControl">
@@ -439,6 +438,10 @@ public class XAPI_APIConfigurations extends FormRun
 											<Name>parmDataMethodName</Name>
 											<Type>String</Type>
 											<Value>jsonHtml</Value>
+										</AxFormControlExtensionProperty>
+										<AxFormControlExtensionProperty>
+											<Name>parmDataFieldName</Name>
+											<Type>String</Type>
 										</AxFormControlExtensionProperty>
 									</ExtensionProperties>
 								</FormControlExtension>
