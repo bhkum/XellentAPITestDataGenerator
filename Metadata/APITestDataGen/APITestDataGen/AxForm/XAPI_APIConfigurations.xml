@@ -186,7 +186,7 @@ public class XAPI_APIConfigurations extends FormRun
 						<AlignChild>No</AlignChild>
 						<AlignChildren>No</AlignChildren>
 						<ArrangeMethod>Vertical</ArrangeMethod>
-						<Caption>Runner</Caption>
+						<Caption>Execution</Caption>
 					</AxFormControl>
 				</Controls>
 				<AlignChild>No</AlignChild>

@@ -82,6 +82,12 @@ public class XAPI_APIConfigurationsEntity extends common
 			<DataField>PostProcessBatchClass</DataField>
 			<DataSource>XAPI_APIConfigurations</DataSource>
 		</AxDataEntityViewField>
+		<AxDataEntityViewField xmlns=""
+			i:type="AxDataEntityViewMappedField">
+			<Name>Description</Name>
+			<DataField>Description</DataField>
+			<DataSource>XAPI_APIConfigurations</DataSource>
+		</AxDataEntityViewField>
 	</Fields>
 	<Keys>
 		<AxDataEntityViewKey>

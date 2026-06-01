@@ -20,6 +20,44 @@ class XAPI_APIRunner_BrightUpdateUser extends XAPI_APIRunnerBase
 ]]></Source>
 			</Method>
 			<Method>
+				<Name>postRun</Name>
+				<Source><![CDATA[
+    protected void postRun()
+    {
+        EGS_API_DataContract_UpdateUserResponse res;
+        EGS_API_DataContract_Response           innerRes;
+
+        if (!responseText)
+        {
+            return;
+        }
+
+        // Response is nested: { "User": {...}, "Response": { "Status": "Ok"/"Not Ok", ... } }
+        // The base class regex reads top-level ResponseCode which is absent here, so it
+        // cannot detect success or failure. Re-evaluate from the inner Response object.
+        res      = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_UpdateUserResponse), responseText);
+        innerRes = res.parmResponse();
+
+        if (!innerRes || !innerRes.parmStatus())
+        {
+            return;
+        }
+
+        if (strLwr(innerRes.parmStatus()) == 'ok')
+        {
+            status       = XAPI_APIStatus::Success;
+            errorMessage = '';
+        }
+        else
+        {
+            status       = XAPI_APIStatus::Error;
+            errorMessage = innerRes.parmMessage();
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
 				<Name>body</Name>
 				<Source><![CDATA[
     protected str body()

@@ -20,33 +20,55 @@ class XAPI_APIRunner_BrightRemoveUserRoles extends XAPI_APIRunnerBase
 ]]></Source>
 			</Method>
 			<Method>
+				<Name>postRun</Name>
+				<Source><![CDATA[
+    protected void postRun()
+    {
+        EGS_API_DataContract_Response res;
+
+        if (!responseText)
+        {
+            return;
+        }
+
+        // Both success and failure return HTTP 200 with JSON. The base class regex
+        // incorrectly flags success (non-empty ResponseCode != "Ok") as Error, and
+        // misses failure (empty ResponseCode). Always re-evaluate from parmStatus().
+        res = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+
+        if (!res.parmStatus())
+        {
+            return;
+        }
+
+        if (strLwr(res.parmStatus()) == 'ok')
+        {
+            status       = XAPI_APIStatus::Success;
+            errorMessage = '';
+        }
+        else
+        {
+            status       = XAPI_APIStatus::Error;
+            errorMessage = res.parmMessage();
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
 				<Name>body</Name>
 				<Source><![CDATA[
     protected str body()
     {
         XAPI_APILogValues   ownerLogValues;
-        XAPI_APILogValues   guestLogValues;
         XAPI_APILogTable    logTable;
         CustTable           ownerCustTable;
-        CustTable           guestCustTable;
         Map                 configMap;
 
-        // Guest = most recent CreateCustomer entry
-        select firstonly guestLogValues
-            order by guestLogValues.RecId desc
-            where guestLogValues.FieldName == 'CustAccount'
-            join logTable
-                where logTable.SessionId == guestLogValues.SessionId
-                   && logTable.Sequence  == guestLogValues.Sequence
-                   && logTable.ApiName   == XAPI_APIS::CreateCustomer
-                   && logTable.Archived  == NoYes::No;
-        guestCustTable = CustTable::find(guestLogValues.FieldValue);
-
-        // Owner = second most recent CreateCustomer entry
+        // Owner = most recent CreateCustomer entry
         select firstonly ownerLogValues
             order by ownerLogValues.RecId desc
-            where ownerLogValues.RecId     <  guestLogValues.RecId
-               && ownerLogValues.FieldName == 'CustAccount'
+            where ownerLogValues.FieldName == 'CustAccount'
             join logTable
                 where logTable.SessionId == ownerLogValues.SessionId
                    && logTable.Sequence  == ownerLogValues.Sequence
@@ -56,8 +78,8 @@ class XAPI_APIRunner_BrightRemoveUserRoles extends XAPI_APIRunnerBase
 
         configMap = new Map(Types::String, Types::String);
         configMap.insert('<DataAreaId>',  curExt());
-        configMap.insert('<RecId>',  ownerCustTable.AccountNum);
-        configMap.insert('<custAccount>',  guestCustTable.AccountNum);
+        configMap.insert('<RecId>',       ownerCustTable.AccountNum);
+        configMap.insert('<custAccount>', XAPI_APILogTable::getValueByKey(XAPI_APIS::GetUserRoles, 'UserRoles'));
 
         return this.prepareBody(configMap);
     }

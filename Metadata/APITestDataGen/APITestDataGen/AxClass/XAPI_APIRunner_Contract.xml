@@ -31,9 +31,18 @@ class XAPI_APIRunner_Contract extends XAPI_APIRunnerBase
             return;
         }
 
-        res      = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
-        logKey   = "ContractNum";
-        logValue = res.parmMessage();
+        res = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+
+        if (res.parmStatus() && strLwr(res.parmStatus()) != 'ok')
+        {
+            status       = XAPI_APIStatus::Error;
+            errorMessage = res.parmMessage();
+        }
+        else
+        {
+            logKey   = "ContractNum";
+            logValue = res.parmMessage();
+        }
     }
 
 ]]></Source>

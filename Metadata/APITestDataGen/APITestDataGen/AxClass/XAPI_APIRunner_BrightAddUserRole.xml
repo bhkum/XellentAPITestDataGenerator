@@ -24,15 +24,32 @@ class XAPI_APIRunner_BrightAddUserRole extends XAPI_APIRunnerBase
 				<Source><![CDATA[
     protected void postRun()
     {
-        // The Bright AddUserRole API returns a non-2xx HTTP status even on success,
-        // which causes .NET's HttpWebRequest to throw a WebException and land in the
-        // Error branch. Detect the success message and correct the status here.
-        if (status == XAPI_APIStatus::Error
-            && responseText
-            && strContains(responseText, 'added to account'))
+        EGS_API_DataContract_Response res;
+
+        if (!responseText)
+        {
+            return;
+        }
+
+        // Both success and failure return HTTP 200 with JSON. The base class regex
+        // incorrectly flags success (non-empty ResponseCode != "Ok") as Error, and
+        // misses failure (empty ResponseCode). Always re-evaluate from parmStatus().
+        res = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+
+        if (!res.parmStatus())
+        {
+            return;
+        }
+
+        if (strLwr(res.parmStatus()) == 'ok')
         {
             status       = XAPI_APIStatus::Success;
             errorMessage = '';
+        }
+        else
+        {
+            status       = XAPI_APIStatus::Error;
+            errorMessage = res.parmMessage();
         }
     }
 
@@ -56,10 +73,22 @@ class XAPI_APIRunner_BrightAddUserRole extends XAPI_APIRunnerBase
         configMap = new Map(Types::String, Types::String);
         configMap.insert('<DataAreaId>', curExt());
 
-        // Guest = most recent CreateCustomer entry (Role: guest)
+        // Owner = most recent CreateCustomer entry (Inviter)
+        select firstonly ownerLogValues
+            order by ownerLogValues.RecId desc
+            where ownerLogValues.FieldName == 'CustAccount'
+            join logTable
+                where logTable.SessionId == ownerLogValues.SessionId
+                   && logTable.Sequence  == ownerLogValues.Sequence
+                   && logTable.ApiName   == XAPI_APIS::CreateCustomer
+                   && logTable.Archived  == NoYes::No;
+        ownerCustTable = CustTable::find(ownerLogValues.FieldValue);
+
+        // Guest = second most recent CreateCustomer entry (Role: guest)
         select firstonly guestLogValues
             order by guestLogValues.RecId desc
-            where guestLogValues.FieldName == 'CustAccount'
+            where guestLogValues.RecId     <  ownerLogValues.RecId
+               && guestLogValues.FieldName == 'CustAccount'
             join logTable
                 where logTable.SessionId == guestLogValues.SessionId
                    && logTable.Sequence  == guestLogValues.Sequence
@@ -87,18 +116,6 @@ class XAPI_APIRunner_BrightAddUserRole extends XAPI_APIRunnerBase
         configMap.insert('<Phone>',                     phoneInfo.Locator);
         configMap.insert('<Name>',                      guestCustTable.name());
         configMap.insert('<AlternativeCustomerNumber>', guestCustTable.EXU_AlternativeCustomerNumber);
-
-        // Owner = second most recent CreateCustomer entry (Inviter)
-        select firstonly ownerLogValues
-            order by ownerLogValues.RecId desc
-            where ownerLogValues.RecId     <  guestLogValues.RecId
-               && ownerLogValues.FieldName == 'CustAccount'
-            join logTable
-                where logTable.SessionId == ownerLogValues.SessionId
-                   && logTable.Sequence  == ownerLogValues.Sequence
-                   && logTable.ApiName   == XAPI_APIS::CreateCustomer
-                   && logTable.Archived  == NoYes::No;
-        ownerCustTable = CustTable::find(ownerLogValues.FieldValue);
 
         configMap.insert('<RecId>', ownerCustTable.AccountNum);
 

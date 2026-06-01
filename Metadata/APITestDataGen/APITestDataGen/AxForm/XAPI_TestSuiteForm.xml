@@ -497,6 +497,7 @@ public class XAPI_TestSuiteForm extends FormRun
 										<Name>BackfillDescButton</Name>
 										<AutoDeclaration>Yes</AutoDeclaration>
 										<Type>Button</Type>
+										<Visible>No</Visible>
 										<FormControlExtension
 											i:nil="true" />
 										<Text>Backfill Descriptions</Text>
@@ -525,7 +526,7 @@ public class XAPI_TestSuiteForm extends FormRun
 						<AlignChild>No</AlignChild>
 						<AlignChildren>No</AlignChildren>
 						<ArrangeMethod>Vertical</ArrangeMethod>
-						<Caption>Runner</Caption>
+						<Caption>Execution</Caption>
 					</AxFormControl>
 				</Controls>
 				<AlignChild>No</AlignChild>

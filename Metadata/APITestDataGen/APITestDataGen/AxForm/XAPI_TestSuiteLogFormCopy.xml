@@ -410,7 +410,7 @@ public class XAPI_TestSuiteLogFormCopy extends FormRun
 						<AlignChild>No</AlignChild>
 						<AlignChildren>No</AlignChildren>
 						<ArrangeMethod>Vertical</ArrangeMethod>
-						<Caption>Runner</Caption>
+						<Caption>Execution</Caption>
 						<DataSource>XAPI_APILogTable</DataSource>
 					</AxFormControl>
 				</Controls>
