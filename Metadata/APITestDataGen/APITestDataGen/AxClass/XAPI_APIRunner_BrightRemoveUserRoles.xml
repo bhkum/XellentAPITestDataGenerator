@@ -78,8 +78,8 @@ class XAPI_APIRunner_BrightRemoveUserRoles extends XAPI_APIRunnerBase
 
         configMap = new Map(Types::String, Types::String);
         configMap.insert('<DataAreaId>',  curExt());
-        configMap.insert('<RecId>',       ownerCustTable.AccountNum);
-        configMap.insert('<custAccount>', XAPI_APILogTable::getValueByKey(XAPI_APIS::GetUserRoles, 'UserRoles'));
+        configMap.insert('<custAccount>', ownerCustTable.AccountNum);
+        configMap.insert('<RecId>',       XAPI_APILogTable::getValueByKey(XAPI_APIS::GetUserRoles, 'UserRoles'));
 
         return this.prepareBody(configMap);
     }

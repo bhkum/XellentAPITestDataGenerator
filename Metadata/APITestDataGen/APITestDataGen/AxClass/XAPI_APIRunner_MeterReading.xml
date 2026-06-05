@@ -45,8 +45,7 @@ class XAPI_APIRunner_MeterReading extends XAPI_APIRunnerBase
             return;
         }
 
-        logKey   = "MeterNum";
-        logValue = res.parmMessage();
+        logValue = XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateMeterReading, 'meterNum');
     }
 
 ]]></Source>

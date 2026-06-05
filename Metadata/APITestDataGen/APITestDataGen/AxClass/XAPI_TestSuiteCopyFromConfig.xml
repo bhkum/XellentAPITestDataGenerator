@@ -164,6 +164,66 @@ final class XAPI_TestSuiteCopyFromConfig
 ]]></Source>
 			</Method>
 			<Method>
+				<Name>copyMultiple</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Copies a set of XAPI_APIConfigurations rows (identified by a container of API enum values)
+    /// into XAPI_TestCase rows under the given suite. Each selected API is appended as a new row
+    /// with Sequence = max(Sequence) + 10.
+    /// </summary>
+    /// <param name = "_suiteId">Target test suite identifier.</param>
+    /// <param name = "_apis">Container of XAPI_APIS enum values to copy.</param>
+    public static void copyMultiple(str _suiteId, container _apis)
+    {
+        XAPI_APIConfigurations    config;
+        XAPI_TestCase             testCase;
+        int                       ncount;
+        int                       i;
+        XAPI_APIS                 api;
+
+        ttsbegin;
+
+        for (i = 1; i <= conLen(_apis); i++)
+        {
+            api = conPeek(_apis, i);
+
+            select config
+                where config.API == api;
+
+            if (config.RecId)
+            {
+                int nextSeq;
+
+                select maxof(Sequence) from testCase
+                    where testCase.SuiteId == _suiteId;
+
+                nextSeq = max(testCase.Sequence + 10, 10);
+
+                testCase.clear();
+                testCase.SuiteId               = _suiteId;
+                testCase.Sequence              = nextSeq;
+                testCase.TestCaseId            = XAPI_TestSuiteCopyFromConfig::nextTestCaseId(_suiteId);
+                testCase.API                   = api;
+                testCase.URL                   = config.URL;
+                testCase.JSON                  = config.JSON;
+                testCase.PreProcessClass       = config.PreProcessClass;
+                testCase.RunnerClass           = config.RunnerClass;
+                testCase.PostProcessBatchClass = config.PostProcessBatchClass;
+                testCase.Description           = config.Description;
+                testCase.insert();
+
+                ncount++;
+            }
+        }
+
+        ttscommit;
+
+        info(strFmt("Copied %1 API configs into suite %2.", ncount, _suiteId));
+    }
+
+]]></Source>
+			</Method>
+			<Method>
 				<Name>backfillDescriptions</Name>
 				<Source><![CDATA[
     /// <summary>

@@ -278,6 +278,62 @@ public class XAPI_TestSuiteForm extends FormRun
 				</Methods>
 			</Control>
 			<Control>
+				<Name>CopyMultipleButton</Name>
+				<Type>Button</Type>
+				<Methods>
+					<Method>
+						<Name>clicked</Name>
+						<Source><![CDATA[
+        public void clicked()
+        {
+            Args                    args;
+            FormRun                 lookupForm;
+            FormDataSource          configDs;
+            XAPI_APIConfigurations  config;
+            container               selectedApis;
+
+            super();
+
+            if (!XAPI_TestSuite.SuiteId)
+            {
+                warning("Select a test suite first.");
+                return;
+            }
+
+            args = new Args(formStr(XAPI_MultiSelectAPILookup));
+            args.caller(element);
+            lookupForm = classfactory.formRunClass(args);
+            lookupForm.init();
+            lookupForm.run();
+            lookupForm.wait();
+
+            if (lookupForm.closedOk())
+            {
+                configDs = lookupForm.dataSource(1);
+                config   = configDs.getFirst(true);
+                while (config.RecId)
+                {
+                    selectedApis = conIns(selectedApis, conLen(selectedApis) + 1, config.API);
+                    config       = configDs.getNext();
+                }
+
+                if (conLen(selectedApis) > 0)
+                {
+                    XAPI_TestSuiteCopyFromConfig::copyMultiple(XAPI_TestSuite.SuiteId, selectedApis);
+                    XAPI_TestCase_ds.research();
+                }
+                else
+                {
+                    warning("No APIs selected.");
+                }
+            }
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</Control>
+			<Control>
 				<Name>BackfillDescButton</Name>
 				<Type>Button</Type>
 				<Methods>
@@ -491,6 +547,15 @@ public class XAPI_TestSuiteForm extends FormRun
 										<FormControlExtension
 											i:nil="true" />
 										<Text>Copy Single from Config</Text>
+									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormButtonControl">
+										<Name>CopyMultipleButton</Name>
+										<AutoDeclaration>Yes</AutoDeclaration>
+										<Type>Button</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<Text>Copy Multiple from Config</Text>
 									</AxFormControl>
 									<AxFormControl xmlns=""
 										i:type="AxFormButtonControl">

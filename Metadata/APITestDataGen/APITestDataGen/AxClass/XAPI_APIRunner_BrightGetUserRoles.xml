@@ -24,26 +24,26 @@ class XAPI_APIRunner_BrightGetUserRoles extends XAPI_APIRunnerBase
 				<Source><![CDATA[
     protected void postRun()
     {
-        int pos, lastPos, colonPos, q1, q2;
-        str segment;
+        System.String sysResponseText;
+        int           lastRecidPos;
+        int           colonPos, q1, q2;
+        str           segment;
 
         if (!responseText)
         {
             return;
         }
 
-        // Walk forward to find the last "recid" in the UserRoles array.
-        // The last entry is the most recently added user role.
-        pos = strScan(responseText, '"recid"', 1, strLen(responseText));
-        while (pos > 0)
-        {
-            lastPos = pos;
-            pos     = strScan(responseText, '"recid"', pos + 1, strLen(responseText) - pos);
-        }
+        // LastIndexOf gives the last "recid" occurrence in the UserRoles array
+        // (the most recently added user role). strScan cannot search for a literal
+        // substring — it scans for any character in a set — so we use System.String.
+        sysResponseText = responseText;
+        lastRecidPos    = sysResponseText.LastIndexOf('"recid"');
 
-        if (lastPos)
+        if (lastRecidPos >= 0)
         {
-            segment  = subStr(responseText, lastPos, strLen(responseText) - lastPos + 1);
+            // Convert from 0-based CLR index to 1-based X++ position.
+            segment  = subStr(responseText, lastRecidPos + 1, strLen(responseText) - lastRecidPos);
             colonPos = strScan(segment, ':', 1, strLen(segment));
             q1       = strScan(segment, '"', colonPos + 1, strLen(segment) - colonPos);
             q2       = strScan(segment, '"', q1 + 1,       strLen(segment) - q1);

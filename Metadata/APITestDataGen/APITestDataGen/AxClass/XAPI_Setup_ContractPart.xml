@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
 	<Name>XAPI_Setup_ContractPart</Name>
 	<SourceCode>
@@ -49,7 +49,8 @@ class XAPI_Setup_ContractPart
         }
 
 
-        select firstonly productTable;
+        select firstonly productTable
+            where productTable.RegistrationEndDate == dateNull();
         select firstonly newProductTable
             where newProductTable.ProductNum == productNum;
 

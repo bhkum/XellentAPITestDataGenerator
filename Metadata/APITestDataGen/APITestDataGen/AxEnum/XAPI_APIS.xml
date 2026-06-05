@@ -103,6 +103,31 @@
 			<Label>Create Agreement</Label>
 			<Value>19</Value>
 		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetTimeValuesPerTimeResolution</Name>
+			<Label>Time Values </Label>
+			<Value>20</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetCustomers</Name>
+			<Label>Get Customers</Label>
+			<Value>21</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetInstallations</Name>
+			<Label>Get Installations</Label>
+			<Value>22</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetInstallationDetail</Name>
+			<Label>Get Installation Detail</Label>
+			<Value>23</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetContracts</Name>
+			<Label>Get Contracts</Label>
+			<Value>24</Value>
+		</AxEnumValue>
 	</EnumValues>
 	<IsExtensible>true</IsExtensible>
 </AxEnum>
