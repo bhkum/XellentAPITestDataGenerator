@@ -20,7 +20,7 @@
 		</AxEnumValue>
 		<AxEnumValue>
 			<Name>CreateCustContactInfo</Name>
-			<Label>Contact Info</Label>
+			<Label> Customer Contact Info</Label>
 			<Value>3</Value>
 		</AxEnumValue>
 		<AxEnumValue>
