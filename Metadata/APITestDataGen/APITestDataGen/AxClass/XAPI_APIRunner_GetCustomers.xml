@@ -32,7 +32,20 @@ class XAPI_APIRunner_GetCustomers extends XAPI_APIRunnerBase
             return;
         }
 
-        res      = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+        res = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+
+        if (status == XAPI_APIStatus::Error)
+        {
+            return;
+        }
+
+        if (res.parmStatus() && strLwr(res.parmStatus()) != 'ok')
+        {
+            status       = XAPI_APIStatus::Error;
+            errorMessage = res.parmMessage();
+            return;
+        }
+
         logKey   = "Customers";
         logValue = res.parmMessage();
     }
@@ -44,9 +57,18 @@ class XAPI_APIRunner_GetCustomers extends XAPI_APIRunnerBase
 				<Source><![CDATA[
     protected str body()
     {
-        Map configMap = new Map(Types::String, Types::String);
+        Map       configMap;
+        str       accNum;
 
+        configMap = new Map(Types::String, Types::String);
         configMap.insert('<DataAreaId>', curExt());
+
+        accNum = XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount');
+
+        CustTable custTable = CustTable::find(accNum);
+
+        configMap.insert('<CustAccount>', accNum);
+        configMap.insert('<AlternativeCustomerNumber>', custTable.EXU_AlternativeCustomerNumber);
 
         return this.prepareBody(configMap);
     }

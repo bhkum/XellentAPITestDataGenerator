@@ -32,7 +32,20 @@ class XAPI_APIRunner_GetInstallations extends XAPI_APIRunnerBase
             return;
         }
 
-        res      = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+        res = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+
+        if (status == XAPI_APIStatus::Error)
+        {
+            return;
+        }
+
+        if (res.parmStatus() && strLwr(res.parmStatus()) != 'ok')
+        {
+            status       = XAPI_APIStatus::Error;
+            errorMessage = res.parmMessage();
+            return;
+        }
+
         logKey   = "Installations";
         logValue = res.parmMessage();
     }
@@ -44,9 +57,10 @@ class XAPI_APIRunner_GetInstallations extends XAPI_APIRunnerBase
 				<Source><![CDATA[
     protected str body()
     {
-        Map configMap = new Map(Types::String, Types::String);
+        Map     configMap;
 
-        configMap.insert('<DataAreaId>', curExt());
+        configMap = new Map(Types::String, Types::String);
+        configMap.insert('<CustAccount>', XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount'));
 
         return this.prepareBody(configMap);
     }
