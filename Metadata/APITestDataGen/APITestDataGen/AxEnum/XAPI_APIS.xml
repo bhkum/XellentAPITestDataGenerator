@@ -128,6 +128,36 @@
 			<Label>Get Contracts</Label>
 			<Value>24</Value>
 		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetProductAndPrices</Name>
+			<Label>Get Product And Prices</Label>
+			<Value>25</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetSubscriptionTypes</Name>
+			<Label>Get Subscription Types</Label>
+			<Value>26</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetSubscriptions</Name>
+			<Label>Get Subscriptions</Label>
+			<Value>27</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetTimeValues</Name>
+			<Label>Get Time Values</Label>
+			<Value>28</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBillingAddressInfo</Name>
+			<Label>Get Billing Address Info</Label>
+			<Value>29</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetConsDevelopmentSum</Name>
+			<Label>Get Cons Development Sum</Label>
+			<Value>30</Value>
+		</AxEnumValue>
 	</EnumValues>
 	<IsExtensible>true</IsExtensible>
 </AxEnum>
