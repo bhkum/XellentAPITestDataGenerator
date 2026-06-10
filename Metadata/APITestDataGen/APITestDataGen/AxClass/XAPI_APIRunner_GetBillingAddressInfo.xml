@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-	<Name>XAPI_Runner_GetConsDevelopmentSum</Name>
+	<Name>XAPI_APIRunner_GetBillingAddressInfo</Name>
 	<SourceCode>
 		<Declaration><![CDATA[
-class XAPI_Runner_GetConsDevelopmentSum extends XAPI_APIRunnerBase
+class XAPI_APIRunner_GetBillingAddressInfo extends XAPI_APIRunnerBase
 {
 }
 ]]></Declaration>
@@ -13,7 +13,7 @@ class XAPI_Runner_GetConsDevelopmentSum extends XAPI_APIRunnerBase
 				<Source><![CDATA[
     protected void init()
     {
-        api = XAPI_APIS::GetConsDevelopmentSum;
+        api = XAPI_APIS::GetBillingAddressInfo;
         super();
     }
 
@@ -45,7 +45,7 @@ class XAPI_Runner_GetConsDevelopmentSum extends XAPI_APIRunnerBase
             return;
         }
 
-        logKey   = "ConsDevelopmentSum";
+        logKey   = "BillingAddressInfo";
         logValue = res.parmMessage();
     }
 
@@ -59,8 +59,7 @@ class XAPI_Runner_GetConsDevelopmentSum extends XAPI_APIRunnerBase
         Map configMap;
 
         configMap = new Map(Types::String, Types::String);
-        configMap.insert('<CustAccount>',     XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer,     'CustAccount'));
-        configMap.insert('<InstallationNum>', XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateInstallation, 'InstNum'));
+        configMap.insert('<CustAccount>', XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount'));
 
         return this.prepareBody(configMap);
     }

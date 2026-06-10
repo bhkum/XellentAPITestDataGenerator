@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-	<Name>XAPI_Runner_GetSubscriptions</Name>
+	<Name>XAPI_APIRunner_GetSubscriptions</Name>
 	<SourceCode>
 		<Declaration><![CDATA[
-class XAPI_Runner_GetSubscriptions extends XAPI_APIRunnerBase
+class XAPI_APIRunner_GetSubscriptions extends XAPI_APIRunnerBase
 {
 }
 ]]></Declaration>

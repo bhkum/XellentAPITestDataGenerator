@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-	<Name>XAPI_Runner_GetProductAndPrices</Name>
+	<Name>XAPI_APIRunner_GetConsDevelopmentSum</Name>
 	<SourceCode>
 		<Declaration><![CDATA[
-class XAPI_Runner_GetProductAndPrices extends XAPI_APIRunnerBase
+class XAPI_APIRunner_GetConsDevelopmentSum extends XAPI_APIRunnerBase
 {
 }
 ]]></Declaration>
@@ -13,7 +13,7 @@ class XAPI_Runner_GetProductAndPrices extends XAPI_APIRunnerBase
 				<Source><![CDATA[
     protected void init()
     {
-        api = XAPI_APIS::GetProductAndPrices;
+        api = XAPI_APIS::GetConsDevelopmentSum;
         super();
     }
 
@@ -45,7 +45,7 @@ class XAPI_Runner_GetProductAndPrices extends XAPI_APIRunnerBase
             return;
         }
 
-        logKey   = "ProductAndPrices";
+        logKey   = "ConsDevelopmentSum";
         logValue = res.parmMessage();
     }
 
@@ -59,8 +59,8 @@ class XAPI_Runner_GetProductAndPrices extends XAPI_APIRunnerBase
         Map configMap;
 
         configMap = new Map(Types::String, Types::String);
+        configMap.insert('<CustAccount>',     XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer,     'CustAccount'));
         configMap.insert('<InstallationNum>', XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateInstallation, 'InstNum'));
-        configMap.insert('<ContractNum>',     XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateContract,     'ContractNum'));
 
         return this.prepareBody(configMap);
     }
