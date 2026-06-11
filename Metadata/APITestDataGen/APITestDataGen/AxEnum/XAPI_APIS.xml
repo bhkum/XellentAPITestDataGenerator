@@ -158,6 +158,56 @@
 			<Label>Get Cons Development Sum</Label>
 			<Value>30</Value>
 		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetMeterReadings</Name>
+			<Label>Get Meter Readings</Label>
+			<Value>31</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetPurchaseDetail</Name>
+			<Label>Get Purchase Detail</Label>
+			<Value>32</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetPurchases</Name>
+			<Label>Get Purchases</Label>
+			<Value>33</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBusRelActivities</Name>
+			<Label>Get BusRel Activities</Label>
+			<Value>34</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBusRelDocuments</Name>
+			<Label>Get BusRel Documents</Label>
+			<Value>35</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBusRelContactPerson</Name>
+			<Label>Get BusRel Contact Person</Label>
+			<Value>36</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBusRelExpectedConsumption</Name>
+			<Label>Get BusRel Expected Consumption</Label>
+			<Value>37</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBusRelInfo</Name>
+			<Label>Get BusRel Info</Label>
+			<Value>38</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBusRelInstallationInfo</Name>
+			<Label>Get BusRel Installation Info</Label>
+			<Value>39</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBusRelResponsibilitiesInfo</Name>
+			<Label>Get BusRel Responsibilities Info</Label>
+			<Value>40</Value>
+		</AxEnumValue>
 	</EnumValues>
 	<IsExtensible>true</IsExtensible>
 </AxEnum>
