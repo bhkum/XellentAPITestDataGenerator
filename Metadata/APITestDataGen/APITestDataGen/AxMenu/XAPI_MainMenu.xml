@@ -36,6 +36,11 @@
 					<Name>XAPI_APIConfigurations</Name>
 					<MenuItemName>XAPI_APIConfigurations</MenuItemName>
 				</AxMenuElement>
+				<AxMenuElement xmlns=""
+					i:type="AxMenuElementMenuItem">
+					<Name>XAPI_ExecuteScripts</Name>
+					<MenuItemName>XAPI_ExecuteScripts</MenuItemName>
+				</AxMenuElement>
 			</Elements>
 		</AxMenuElement>
 	</Elements>

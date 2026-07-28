@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
 	<Name>XAPI_Setup_Customer</Name>
 	<SourceCode>
@@ -20,6 +20,11 @@ class XAPI_Setup_Customer
     {
         CustGroupId custGroupId = 'TST_CustGrp';
         Description name = 'Test Customer Group for API Testing';
+        str apiName = enum2str(XAPI_APIS::CreateCustomer);
+
+        // AdditionalName - passed straight through to the API payload, no setup required
+        str additionalName = "TST_AdditionalName";
+        XAPI_AutomationHelper::logKeyValue(apiName, 'AdditionalName', additionalName);
 
         // CustGroup Creation
 
@@ -30,6 +35,7 @@ class XAPI_Setup_Customer
         where newCustGroup.CustGroup == custGroupId;
 
         if (custGroup.RecId && !newCustGroup.RecId)
+
         {
             buf2Buf(custGroup, newCustGroup);
 
@@ -38,6 +44,8 @@ class XAPI_Setup_Customer
 
             newCustGroup.insert();
             info(strFmt("Inserted CustGroup: %1", custGroupId));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'CustGroup', newCustGroup.CustGroup);
         }
 
         // PaymMode
@@ -56,6 +64,8 @@ class XAPI_Setup_Customer
             newPaymModeTable.PaymMode = paymMode;
             newPaymModeTable.insert();
             info(strFmt("Inserted PaymMode: %1", paymMode));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'PaymMode', newPaymModeTable.PaymMode);
         }
 
         // Technique Group Fields
@@ -85,6 +95,8 @@ class XAPI_Setup_Customer
             newGroupTable.GroupName = techniqueField1Name;
             newGroupTable.insert();
             info(strFmt("Inserted technique group: %1", techniqueField1Name));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'TechnicGroup1', newGroupTable.GroupNum);
         }
 
         // Technique Group 2
@@ -103,6 +115,8 @@ class XAPI_Setup_Customer
             newGroupTable.GroupName = techniqueField2Name;
             newGroupTable.insert();
             info(strFmt("Inserted technique group: %1", techniqueField2Name));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'TechnicGroup2', newGroupTable.GroupNum);
         }
 
         // Technique Group 3
@@ -121,6 +135,8 @@ class XAPI_Setup_Customer
             newGroupTable.GroupName = techniqueField3Name;
             newGroupTable.insert();
             info(strFmt("Inserted technique group: %1", techniqueField3Name));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'TechnicGroup3', newGroupTable.GroupNum);
         }
 
         // Technique Group 4
@@ -139,6 +155,8 @@ class XAPI_Setup_Customer
             newGroupTable.GroupName = techniqueField4Name;
             newGroupTable.insert();
             info(strFmt("Inserted technique group: %1", techniqueField4Name));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'TechnicGroup4', newGroupTable.GroupNum);
         }
     }
 
