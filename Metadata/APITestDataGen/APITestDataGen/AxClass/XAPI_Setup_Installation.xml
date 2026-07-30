@@ -19,6 +19,7 @@ class XAPI_Setup_Installation
     /// <param name = "_args">The specified arguments.</param>
     public static void main(Args _args)
     {
+        str apiName = enum2str(XAPI_APIS::CreateInstallation);
 
         EXU_CountyNum countyNum = 'TST_County';
         EXU_StreetNum streetNum = 'TST_Street';
@@ -52,6 +53,8 @@ class XAPI_Setup_Installation
             exuCounty.CountyName      = countyNum;
             exuCounty.insert();
             info(strFmt("Inserted County: %1", countyNum));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'CountyNum', exuCounty.CountyNum);
         }
 
         EXU_Street exuStreet = EXU_Street::find(countryRegionId, countyNum, streetNum);
@@ -64,6 +67,8 @@ class XAPI_Setup_Installation
             exuStreet.StreetName      = streetNum;
             exuStreet.insert();
             info(strFmt("Inserted Street: %1", streetNum));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'StreetNum', exuStreet.StreetNum);
         }
 
         EXU_StreetAddrNumber streetAddr;
@@ -108,6 +113,8 @@ class XAPI_Setup_Installation
             streetAddrLoc.AddrLocation      = addrLocation;
             streetAddrLoc.insert();
             info(strFmt("Inserted StreetAddrNumber (AddrLocation): %1, %2, %3", countryRegionId, countyNum, streetNum));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'AddrLocation', streetAddrLoc.AddrLocation);
         }
 
         info("Address data creation complete.");
@@ -132,6 +139,8 @@ class XAPI_Setup_Installation
 
             newDeliveryCategoryTable.insert();
             info(strFmt("Inserted DeliveryCategory: %1", deliveryCategory));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'deliveryCategory', newDeliveryCategoryTable.DeliveryCategory);
         }
 
         EXU_Category exuCategory, newExuCategory;
@@ -148,6 +157,8 @@ class XAPI_Setup_Installation
 
             newExuCategory.insert();
             info(strFmt("Inserted Category: %1", categoryNum));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'CategoryNum', newExuCategory.CategoryNum);
         }
 
         EXU_DeliveryRelationTable deliveryRelationTable, newDeliveryRelationTable;
@@ -202,6 +213,8 @@ class XAPI_Setup_Installation
 
             newReadingPlan.insert();
             info(strFmt("Inserted ReadingPlan: %1", groupNum));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'ReadingPlanNum', newReadingPlan.ReadingPlanNum);
         }
 
         EXU_SupplyNum supplyNum = "TST_SupplyNum";
