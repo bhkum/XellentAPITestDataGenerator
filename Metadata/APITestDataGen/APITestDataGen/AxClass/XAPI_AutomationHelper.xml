@@ -6,13 +6,51 @@
 final class XAPI_AutomationHelper
 {
  
-    public static str tenantId = "b1bc47a9-e2bc-4220-bdb5-7244799f5e49";
-    public static str clientId = "95ed2a99-26ba-449d-b0b4-4026b3a79bdc";
-    public static str clientSecret = "3dhMoZByfib47Sr0C5GvPru/ZWvy2Je6lBHU8+gS0Lw=";
-    public static str resourceUrl = "https://dev-1044-pppb2d158331e869ceddevaos.cloudax.dynamics.com/";
+   
 
 }
 ]]></Declaration>
-		<Methods />
+		<Methods>
+			<Method>
+				<Name>logKeyValue</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Records the value populated for a field of interest during pre-processing,
+    /// so it can be looked up later by API and field name. Upserts on the
+    /// API + Key alternate key - re-running a script updates the stored value
+    /// rather than creating duplicate rows.
+    /// </summary>
+    /// <param name = "_api">The API the field was populated for, e.g. enum2str(XAPI_APIS::CreateCustomer).</param>
+    /// <param name = "_key">The field name (or a qualified variant of it) being logged.</param>
+    /// <param name = "_value">The value that was populated for the field.</param>
+    public static void logKeyValue(str _api, str _key, str _value)
+    {
+        XAPI_KeyValueMapping mapping;
+
+        select firstonly mapping
+            where mapping.API == _api
+               && mapping.Key == _key;
+
+        if (!mapping.RecId)
+        {
+            mapping.clear();
+            mapping.API   = _api;
+            mapping.Key   = _key;
+            mapping.Value = _value;
+            mapping.insert();
+        }
+        else
+        {
+            ttsbegin;
+            mapping.selectForUpdate(true);
+            mapping.Value = _value;
+            mapping.update();
+            ttscommit;
+        }
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
 	</SourceCode>
 </AxClass>
