@@ -158,10 +158,30 @@ public class XAPI_APILogTable extends common
 			<ExtendedDataType>InfologData</ExtendedDataType>
 		</AxTableField>
 		<AxTableField xmlns=""
+			i:type="AxTableFieldEnum">
+			<Name>Status</Name>
+			<EnumType>XAPI_APIStatus</EnumType>
+			<Label>Status</Label>
+		</AxTableField>
+		<AxTableField xmlns=""
 			i:type="AxTableFieldString">
 			<Name>Response</Name>
 			<ExtendedDataType>DirMemo</ExtendedDataType>
 			<IgnoreEDTRelation>Yes</IgnoreEDTRelation>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>RequestBody</Name>
+			<ExtendedDataType>DirMemo</ExtendedDataType>
+			<IgnoreEDTRelation>Yes</IgnoreEDTRelation>
+			<Label>Request Body</Label>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>ErrorMessage</Name>
+			<ExtendedDataType>DirMemo</ExtendedDataType>
+			<IgnoreEDTRelation>Yes</IgnoreEDTRelation>
+			<Label>Error Message</Label>
 		</AxTableField>
 		<AxTableField xmlns=""
 			i:type="AxTableFieldEnum">

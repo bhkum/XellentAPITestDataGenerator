@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-	<Name>XAPI_API_Create</Name>
+	<Name>XAPI_API_Create_del</Name>
 	<SourceCode>
 		<Declaration><![CDATA[
-final class XAPI_API_Create
+final class XAPI_API_Create_del
 {
 }
+
 ]]></Declaration>
 		<Methods>
 			<Method>

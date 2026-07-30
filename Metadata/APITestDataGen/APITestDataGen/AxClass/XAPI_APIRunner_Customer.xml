@@ -9,22 +9,31 @@ class XAPI_APIRunner_Customer extends XAPI_APIRunnerBase
 ]]></Declaration>
 		<Methods>
 			<Method>
-				<Name>runPre</Name>
-				<Source><![CDATA[
-    protected void runPre()
-    {
-        XAPI_Setup_EGS_API_newCustomer::main(null);
-    }
-
-]]></Source>
-			</Method>
-			<Method>
 				<Name>init</Name>
 				<Source><![CDATA[
     protected void init()
     {
         api = XAPI_APIS::CreateCustomer;
         super();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>postRun</Name>
+				<Source><![CDATA[
+    protected void postRun()
+    {
+        EGS_API_DataContract_Response res;
+
+        if (!responseText)
+        {
+            return;
+        }
+
+        res      = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+        logKey   = "CustAccount";
+        logValue = res.parmMessage();
     }
 
 ]]></Source>
@@ -49,7 +58,6 @@ class XAPI_APIRunner_Customer extends XAPI_APIRunnerBase
         configMap.insert('<DimensionValue>', dv.DisplayValue);
 
         return this.prepareBody(configMap);
-        //this.sendPostRequest();
     }
 
 ]]></Source>

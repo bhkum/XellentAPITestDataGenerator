@@ -22,8 +22,16 @@ on cust.ACCOUNTNUM = ct.CUSTACCOUNT
 where inst.INSTREADINGMETHODNUM like  'TST%'
 and cust.CUSTGROUP like  'TST%'
 
-select * from XAPI_APILogTable
+select REQUESTBODY,* from XAPI_APILogTable
+where recid > 5637161092
 -------------------------------
 select * from custgroup where CUSTGROUP like 'Ts%'
 
 select * from XAPI_APIConfigurations
+
+
+--delete from XAPI_APIConfigurations
+
+--delete from  XAPI_APILogTable where archived = 0
+
+

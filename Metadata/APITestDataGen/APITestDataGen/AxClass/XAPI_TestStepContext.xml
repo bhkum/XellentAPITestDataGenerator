@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_TestStepContext</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+public final class XAPI_TestStepContext
+{
+    private str           suiteId;
+    private guid          sessionId;
+    private XAPI_TestCase testCase;
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>construct</Name>
+				<Source><![CDATA[
+    public static XAPI_TestStepContext construct(str _suiteId, guid _sessionId)
+    {
+        XAPI_TestStepContext ctx = new XAPI_TestStepContext();
+        ctx.suiteId   = _suiteId;
+        ctx.sessionId = _sessionId;
+        return ctx;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>setCurrentCase</Name>
+				<Source><![CDATA[
+    public void setCurrentCase(XAPI_TestCase _testCase)
+    {
+        testCase = _testCase;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>parmSuiteId</Name>
+				<Source><![CDATA[
+    public str parmSuiteId()
+    {
+        return suiteId;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>parmSessionId</Name>
+				<Source><![CDATA[
+    public guid parmSessionId()
+    {
+        return sessionId;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>parmTestCase</Name>
+				<Source><![CDATA[
+    public XAPI_TestCase parmTestCase()
+    {
+        return testCase;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>parmSequence</Name>
+				<Source><![CDATA[
+    public int parmSequence()
+    {
+        return testCase.Sequence;
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

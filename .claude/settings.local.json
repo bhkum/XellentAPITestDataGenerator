@@ -18,7 +18,10 @@
       "PowerShell(Get-ChildItem -Path 'J:\\\\AosService\\\\PackagesLocalDirectory\\\\APITestDataGen\\\\APITestDataGen\\\\AxClass' -ErrorAction SilentlyContinue | ForEach-Object { Write-Output $_.Name })",
       "PowerShell(Get-ChildItem -Path 'C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxClass' -ErrorAction SilentlyContinue | ForEach-Object { Write-Output $_.Name })",
       "PowerShell(git *)",
-      "PowerShell($item = Get-Item 'C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen' -Force -ErrorAction SilentlyContinue; if \\($item\\) { Write-Output \\(\"LinkType={0}\" -f $item.LinkType\\); Write-Output \\(\"Target={0}\" -f \\($item.Target -join ','\\)\\); Write-Output \\(\"Attributes={0}\" -f $item.Attributes\\) } else { Write-Output 'NOT FOUND' })"
+      "PowerShell($item = Get-Item 'C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen' -Force -ErrorAction SilentlyContinue; if \\($item\\) { Write-Output \\(\"LinkType={0}\" -f $item.LinkType\\); Write-Output \\(\"Target={0}\" -f \\($item.Target -join ','\\)\\); Write-Output \\(\"Attributes={0}\" -f $item.Attributes\\) } else { Write-Output 'NOT FOUND' })",
+      "Bash(awk 'NR==146,NR==158' \"C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxTable\\\\XAPI_TestCase.xml\")",
+      "Bash(awk 'NR==148' \"C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxTable\\\\XAPI_TestCase.xml\")",
+      "Bash(awk 'NR==228,NR==234' \"C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxForm\\\\XAPI_TestSuiteForm.xml\")"
     ]
   }
 }

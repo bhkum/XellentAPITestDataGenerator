@@ -41,15 +41,25 @@
       <Name>XAPI_APIRunnerBase</Name>
       <Link>Classes\XAPI_APIRunnerBase</Link>
     </Content>
-    <Content Include="AxClass\XAPI_APIRunnerFacade">
-      <SubType>Content</SubType>
-      <Name>XAPI_APIRunnerFacade</Name>
-      <Link>Classes\XAPI_APIRunnerFacade</Link>
-    </Content>
     <Content Include="AxClass\XAPI_APIRunner_Customer">
       <SubType>Content</SubType>
       <Name>XAPI_APIRunner_Customer</Name>
       <Link>Classes\XAPI_APIRunner_Customer</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_APIRunner_Installation">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIRunner_Installation</Name>
+      <Link>Classes\XAPI_APIRunner_Installation</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_APIRunner_Contract">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIRunner_Contract</Name>
+      <Link>Classes\XAPI_APIRunner_Contract</Link>
+    </Content>
+    <Content Include="AxClass\XAPI_APIRunner_ContractPart">
+      <SubType>Content</SubType>
+      <Name>XAPI_APIRunner_ContractPart</Name>
+      <Link>Classes\XAPI_APIRunner_ContractPart</Link>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.Common.targets" />
