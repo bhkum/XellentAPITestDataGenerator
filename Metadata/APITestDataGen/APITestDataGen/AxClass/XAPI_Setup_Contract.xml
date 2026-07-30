@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Setup_Contract</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_Setup_Contract
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Class entry point. The system will call this method when a designated menu
+    /// is selected or when execution starts and this class is set as the startup class.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
+    public static void main(Args _args)
+    {
+
+        EXU_ContractTemplateNum contractTemplateNum = 'TST_Template';
+        EXU_BillingPlanNum      billingPlanNum      = 'TST_Billing';     
+
+        EXU_BillingPlan billingPlan, newBillingPlan;
+        select firstonly billingPlan;
+        select firstonly newBillingPlan
+            where newBillingPlan.BillingPlanNum == billingPlanNum;
+        if (billingPlan.RecId && !newBillingPlan.RecId)
+        {
+            buf2Buf(billingPlan, newBillingPlan);
+            newBillingPlan.BillingPlanNum = billingPlanNum;
+            newBillingPlan.insert();
+            info(strFmt("Inserted BillingPlan: %1", billingPlanNum));
+        }
+
+        EXU_ContractTemplate contractTemplate, newContractTemplate;
+        select firstonly contractTemplate
+            where contractTemplate.ContractType == EXU_ContractType::Installation;
+        select firstonly newContractTemplate
+            where newContractTemplate.ContractTemplateNum == contractTemplateNum;
+        if (contractTemplate.RecId && !newContractTemplate.RecId)
+        {
+            buf2Buf(contractTemplate, newContractTemplate);
+            newContractTemplate.ContractTemplateNum = contractTemplateNum;
+            newContractTemplate.BillingPlanNum      = billingPlanNum; 
+            newContractTemplate.insert();
+            info(strFmt("Inserted ContractTemplate: %1", contractTemplateNum));
+        }
+
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

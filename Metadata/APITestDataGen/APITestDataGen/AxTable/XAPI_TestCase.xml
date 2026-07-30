@@ -156,6 +156,12 @@ public class XAPI_TestCase extends common
 			<Label>TestCaseId</Label>
 			<Mandatory>Yes</Mandatory>
 		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>Description</Name>
+			<Label>Description</Label>
+			<StringSize>-1</StringSize>
+		</AxTableField>
 	</Fields>
 	<FullTextIndexes />
 	<Indexes>

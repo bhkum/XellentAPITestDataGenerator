@@ -93,6 +93,9 @@ public class XAPI_APIConfigurations extends common
 					<DataField>API</DataField>
 				</AxTableFieldGroupField>
 				<AxTableFieldGroupField>
+					<DataField>Description</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
 					<DataField>URL</DataField>
 				</AxTableFieldGroupField>
 				<AxTableFieldGroupField>
@@ -119,8 +122,14 @@ public class XAPI_APIConfigurations extends common
 		</AxTableField>
 		<AxTableField xmlns=""
 			i:type="AxTableFieldString">
+			<Name>Description</Name>
+			<Label>Description</Label>
+			<StringSize>-1</StringSize>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
 			<Name>URL</Name>
-			<Label>URL</Label>
+			<Label>Endpoint</Label>
 			<StringSize>-1</StringSize>
 		</AxTableField>
 		<AxTableField xmlns=""
@@ -133,7 +142,6 @@ public class XAPI_APIConfigurations extends common
 			i:type="AxTableFieldString">
 			<Name>PreProcessClass</Name>
 			<Label>Pre-process class</Label>
-			<Mandatory>No</Mandatory>
 			<StringSize>100</StringSize>
 		</AxTableField>
 		<AxTableField xmlns=""
@@ -147,7 +155,6 @@ public class XAPI_APIConfigurations extends common
 			i:type="AxTableFieldString">
 			<Name>PostProcessBatchClass</Name>
 			<Label>Post-process batch class</Label>
-			<Mandatory>No</Mandatory>
 			<StringSize>100</StringSize>
 		</AxTableField>
 	</Fields>
@@ -155,7 +162,6 @@ public class XAPI_APIConfigurations extends common
 	<Indexes>
 		<AxTableIndex>
 			<Name>APIIdx</Name>
-			<AllowDuplicates>No</AllowDuplicates>
 			<AlternateKey>Yes</AlternateKey>
 			<Fields>
 				<AxTableIndexField>

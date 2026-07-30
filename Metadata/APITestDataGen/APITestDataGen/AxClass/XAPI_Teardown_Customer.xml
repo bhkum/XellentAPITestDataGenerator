@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Teardown_Customer</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_Teardown_Customer
+{
+
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Class entry point. The system will call this method when a designated menu 
+    /// is selected or when execution starts and this class is set as the startup class.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
+    public static void main(Args _args)
+    
+    {
+        CustGroupId custGroupId = 'TST_CustGrp';
+
+        CustPaymMode paymMode = "TST_PaymMd";
+
+        str techniqueField1Name = "TST_Tech1";
+        str techniqueField2Name = "TST_Tech2";
+        str techniqueField3Name = "TST_Tech3";
+        str techniqueField4Name = "TST_Tech4";
+
+        CustGroup newCustGroup;
+        CustPaymModeTable newpaymModeTable;
+        EXU_GroupTable newGroupTable;
+
+        // Delete Technique Group 4
+        newGroupTable.clear();
+        select firstonly forupdate newGroupTable
+where newGroupTable.GroupCode == EXU_GroupCode::CustTechnicGroup4
+   && newGroupTable.GroupNum  == techniqueField4Name;
+
+        if (newGroupTable.RecId)
+        {
+            newGroupTable.delete();
+            info(strFmt("Deleted technique group: %1", techniqueField4Name));
+        }
+
+        // Delete Technique Group 3
+        newGroupTable.clear();
+        select firstonly forupdate newGroupTable
+where newGroupTable.GroupCode == EXU_GroupCode::CustTechnicGroup3
+   && newGroupTable.GroupNum  == techniqueField3Name;
+
+        if (newGroupTable.RecId)
+        {
+            newGroupTable.delete();
+            info(strFmt("Deleted technique group: %1", techniqueField3Name));
+        }
+
+        // Delete Technique Group 2
+        newGroupTable.clear();
+        select firstonly forupdate newGroupTable
+where newGroupTable.GroupCode == EXU_GroupCode::CustTechnicGroup2
+   && newGroupTable.GroupNum  == techniqueField2Name;
+
+        if (newGroupTable.RecId)
+        {
+            newGroupTable.delete();
+            info(strFmt("Deleted technique group: %1", techniqueField2Name));
+        }
+
+        // Delete Technique Group 1
+        newGroupTable.clear();
+        select firstonly forupdate newGroupTable
+where newGroupTable.GroupCode == EXU_GroupCode::CustTechnicGroup1
+   && newGroupTable.GroupNum  == techniqueField1Name;
+
+        if (newGroupTable.RecId)
+        {
+            newGroupTable.delete();
+            info(strFmt("Deleted technique group: %1", techniqueField1Name));
+        }
+
+        // Delete PaymMode
+        newpaymModeTable.clear();
+        select firstonly forupdate newpaymModeTable
+where newpaymModeTable.PaymMode == paymMode;
+
+        if (newpaymModeTable.RecId)
+        {
+            newpaymModeTable.delete();
+            info(strFmt("Deleted PaymMode: %1", paymMode));
+        }
+
+        // Delete CustGroup
+        newCustGroup.clear();
+        select firstonly forupdate newCustGroup
+where newCustGroup.CustGroup == custGroupId;
+
+        if (newCustGroup.RecId)
+        {
+            newCustGroup.delete();
+            info(strFmt("Deleted CustGroup: %1", custGroupId));
+        }
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

@@ -31,7 +31,20 @@ class XAPI_APIRunner_ContractPart extends XAPI_APIRunnerBase
             return;
         }
 
-        res      = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+        res = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+
+        if (status == XAPI_APIStatus::Error)
+        {
+            return;
+        }
+
+        if (res.parmStatus() && strLwr(res.parmStatus()) != 'ok')
+        {
+            status       = XAPI_APIStatus::Error;
+            errorMessage = res.parmMessage();
+            return;
+        }
+
         logKey   = "ContractPartNum";
         logValue = res.parmMessage();
     }
@@ -43,34 +56,44 @@ class XAPI_APIRunner_ContractPart extends XAPI_APIRunnerBase
 				<Source><![CDATA[
     protected str body()
     {
-        XAPI_APILogTable        logRow;
         EXU_UtilityInstallation uinst;
         Map                     configMap;
+        EXU_ContractNum         conNum;
+        str                     instNum;
 
         configMap = new Map(Types::String, Types::String);
         configMap.insert('<DataAreaId>', curExt());
 
-        select firstonly logRow
-            order by RecId desc
-            where logRow.ApiName == XAPI_APIS::CreateCustomer
-               && logRow.Key     == 'CustAccount';
-        configMap.insert('<custAccount>', logRow.Value);
+        var accNum = XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount');
+        
+        CustTable custTable = CustTable::find(accNum);
 
-        select firstonly logRow
-            order by RecId desc
-            where logRow.ApiName == XAPI_APIS::CreateContract
-               && logRow.Key     == 'ContractNum';
-        configMap.insert('<Contract>', logRow.Value);
+        configMap.insert('<AlternativeCustomerNumber>', custTable.EXU_AlternativeCustomerNumber);
+        configMap.insert('<custAccount>', accNum);
 
-        select firstonly logRow
-            order by RecId desc
-            where logRow.ApiName == XAPI_APIS::CreateInstallation
-               && logRow.Key     == 'InstNum';
-        configMap.insert('<InstNum>', logRow.Value);
+        conNum = XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateContract, 'ContractNum');
+        configMap.insert('<Contract>', conNum);
+
+        instNum = XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateInstallation, 'InstNum');
+        configMap.insert('<InstallationNum>', instNum);
 
         select firstonly uinst
-            where uinst.InstNum == logRow.Value;
+            where uinst.InstNum == instNum;
         configMap.insert('<deliveryCategory>', uinst.DeliveryCategory);
+
+        EXU_ContractPartTable partTable;
+        select firstonly partTable
+            where partTable.ContractNum == conNum;
+        configMap.insert('<productNum>', partTable.ProductNum);
+        
+        str dateStr = date2Str(partTable.Startdate, 
+                                321, 
+                                DateDay::Digits2, 
+                                DateSeparator::Hyphen, 
+                                DateMonth::Digits2, 
+                                DateSeparator::Hyphen, 
+                                DateYear::Digits4); // Todo: move it to util
+        configMap.insert('<startdate>', dateStr);
 
         return this.prepareBody(configMap);
     }

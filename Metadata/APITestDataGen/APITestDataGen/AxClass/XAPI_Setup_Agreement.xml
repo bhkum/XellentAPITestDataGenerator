@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Setup_Agreement</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_Setup_Agreement
+{
+}
+
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Class entry point. The system will call this method when a designated menu 
+    /// is selected or when execution starts and this class is set as the startup class.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
+    public static void main(Args _args)
+    {
+        // ── Company & test identifiers ────────────────────────────────────────
+        str                     companyId               = curExt();
+
+        EXU_DeliveryCategory    deliveryCategory        = 'TST_EL';
+        str                     categoryNum             = 'TST_CAT';
+        EXU_DeliveryGroupNum    deliveryGroupNum        = 'TST_RATE';
+        EXU_ProductNum          productNum              = 'TST_PROD';
+        ItemId                  itemId                  = 'TST_ITEM';
+        str                     contractTemplateNum     = 'TST_TMPL';
+        str                     supplyModelNum          = 'TST_SUPM';
+        str                     priceManagementCode     = 'TST_PM';
+        str                     netArea                 = 'TST_NET';
+        str                     netOwner                = 'TST_NETOWNER';
+        CustGroupId             custGroupId             = 'TST_CustGrp';
+        str                     custGroupInStr          = 'TST_CAT';    // value sent in JSON "custGroup" field (C003)
+
+        // ── 1. Delivery Category ─────────────────────────────────────────────
+        EXU_DeliveryCategoryTable deliveryCategoryTemplate, newDeliveryCategory;
+        select firstonly deliveryCategoryTemplate;
+        select firstonly newDeliveryCategory
+        where newDeliveryCategory.DeliveryCategory == deliveryCategory;
+        if (deliveryCategoryTemplate.RecId && !newDeliveryCategory.RecId)
+        {
+            ttsbegin;
+            buf2Buf(deliveryCategoryTemplate, newDeliveryCategory);
+            newDeliveryCategory.DeliveryCategory  = deliveryCategory;
+            newDeliveryCategory.CompanyId         = companyId;
+            newDeliveryCategory.UseLiberalization = NoYes::Yes;
+            newDeliveryCategory.Attachment        = EXU_DeliveryCategoryAttachment::Agreement;
+            newDeliveryCategory.insert();
+            ttscommit;
+            info(strFmt("Inserted EXU_DeliveryCategoryTable: %1 | CompanyId: %2", deliveryCategory, companyId));
+        }
+
+        // ── 2. Delivery Relation (company ↔ delivery category) ───────────────
+        // Required by checkIfExternalOrInternal() – a missing row here is what
+        // produces "Company accounts 'OAB' is not related to delivery type 'TST_EL'".
+        EXU_DeliveryRelationTable deliveryRelationTemplate, newDeliveryRelation;
+        select firstonly deliveryRelationTemplate
+        where deliveryRelationTemplate.CompanyId == companyId;
+        if (!deliveryRelationTemplate.RecId)
+        select firstonly deliveryRelationTemplate;
+        select firstonly newDeliveryRelation
+        where newDeliveryRelation.DeliveryCategory == deliveryCategory
+           && newDeliveryRelation.CompanyId        == companyId;
+        if (deliveryRelationTemplate.RecId && !newDeliveryRelation.RecId)
+        {
+            ttsbegin;
+            buf2Buf(deliveryRelationTemplate, newDeliveryRelation);
+            newDeliveryRelation.DeliveryCategory = deliveryCategory;
+            newDeliveryRelation.CompanyId        = companyId;
+            newDeliveryRelation.insert();
+            ttscommit;
+            info(strFmt("Inserted EXU_DeliveryRelationTable: %1 | %2", deliveryCategory, companyId));
+        }
+
+        // ── 3. Category (keyed on DeliveryCategory + CategoryNum) ────────────
+        // Validates C021 in getErrMsg:
+        //   if (!eXU_Category::find(input.C027, input.C021)) → error
+        eXU_Category categoryTemplate, newCategory;
+        select firstonly categoryTemplate;
+        select firstonly newCategory
+        where newCategory.DeliveryCategory == deliveryCategory
+           && newCategory.CategoryNum      == categoryNum;
+        if (categoryTemplate.RecId && !newCategory.RecId)
+        {
+            ttsbegin;
+            buf2Buf(categoryTemplate, newCategory);
+            newCategory.DeliveryCategory = deliveryCategory;
+            newCategory.CategoryNum      = categoryNum;
+            newCategory.insert();
+            ttscommit;
+            info(strFmt("Inserted eXU_Category: %1 | %2", deliveryCategory, categoryNum));
+        }
+
+        // ── 4. Net Area ──────────────────────────────────────────────────────
+        // Required by:
+        //   a) checkIfExternalOrInternal() – auto-fills netOwner from NetCompany when JSON field is blank
+        //   b) getErrMsg C011: EMS_SupplierNetAreaTable::findByDate must return a row
+        //   c) C012 (netOwner) mandatory check – set via NetCompany if not provided in JSON
+        EMS_SupplierNetAreaTable supplierNetAreaTemplate, newSupplierNetArea;
+        select firstonly supplierNetAreaTemplate;
+        select firstonly newSupplierNetArea
+        where newSupplierNetArea.DeliveryCategory == deliveryCategory
+           && newSupplierNetArea.NetArea          == netArea;
+        if (supplierNetAreaTemplate.RecId && !newSupplierNetArea.RecId)
+        {
+            ttsbegin;
+            buf2Buf(supplierNetAreaTemplate, newSupplierNetArea);
+            newSupplierNetArea.DeliveryCategory = deliveryCategory;
+            newSupplierNetArea.NetArea          = netArea;
+            newSupplierNetArea.NetCompany       = str2Num(netOwner);
+            newSupplierNetArea.insert();
+            ttscommit;
+            info(strFmt("Inserted EMS_SupplierNetAreaTable: %1 | %2 | NetCompany: %3",
+                    deliveryCategory, netArea, netOwner));
+        }
+
+        // ── 5. Rate Code (DeliveryGroupTable – RateCode type) ────────────────
+        // Validates C032 (deliveryGroupNum_RateCode) in getErrMsg
+        EXU_DeliveryGroupTable deliveryGroupTemplate, newDeliveryGroup;
+        select firstonly deliveryGroupTemplate;
+        select firstonly newDeliveryGroup
+        where newDeliveryGroup.DeliveryGroupNum == deliveryGroupNum;
+        if (deliveryGroupTemplate.RecId && !newDeliveryGroup.RecId)
+        {
+            ttsbegin;
+            buf2Buf(deliveryGroupTemplate, newDeliveryGroup);
+            newDeliveryGroup.DeliveryCategory  = deliveryCategory;
+            newDeliveryGroup.DeliveryGroupCode = EXU_DeliveryGroupCode::RateCode;
+            newDeliveryGroup.DeliveryGroupNum  = deliveryGroupNum;
+            newDeliveryGroup.DeliveryGroupName = deliveryGroupNum;
+            newDeliveryGroup.EndDate           = dateMax();
+            newDeliveryGroup.insert();
+            ttscommit;
+            info(strFmt("Inserted EXU_DeliveryGroupTable (RateCode): %1", deliveryGroupNum));
+        }
+
+        // ── 6. Contract Template ─────────────────────────────────────────────
+        // Validates C023 in getErrMsg – providing it directly avoids needing
+        // the MALL ConvInStr fallback via C026.
+        EXU_ContractTemplate contractTemplateRec, newContractTemplate;
+        select firstonly contractTemplateRec
+        where contractTemplateRec.ContractType == EXU_ContractType::Installation;
+        if (!contractTemplateRec.RecId)
+        select firstonly contractTemplateRec;
+        select firstonly newContractTemplate
+        where newContractTemplate.ContractTemplateNum == contractTemplateNum;
+        if (contractTemplateRec.RecId && !newContractTemplate.RecId)
+        {
+            ttsbegin;
+            buf2Buf(contractTemplateRec, newContractTemplate);
+            newContractTemplate.ContractTemplateNum = contractTemplateNum;
+            newContractTemplate.insert();
+            ttscommit;
+            info(strFmt("Inserted EXU_ContractTemplate: %1", contractTemplateNum));
+        }
+
+        // ── 7. Supply Model ──────────────────────────────────────────────────
+        // Validates C024 (supplyNum) in getErrMsg
+        EXU_supplyModel supplyModelTemplate, newSupplyModel;
+        select firstonly supplyModelTemplate;
+        select firstonly newSupplyModel
+        where newSupplyModel.SupplyNum == supplyModelNum;
+        if (supplyModelTemplate.RecId && !newSupplyModel.RecId)
+        {
+            ttsbegin;
+            buf2Buf(supplyModelTemplate, newSupplyModel);
+            newSupplyModel.SupplyNum = supplyModelNum;
+            newSupplyModel.insert();
+            ttscommit;
+            info(strFmt("Inserted EXU_supplyModel: %1", supplyModelNum));
+        }
+
+        // ── 8. InventTable (fixed service / individual service item) ─────────
+        // Validates C031 in CI_PRICE rows (C002 = '1' or '2'):
+        //   if (!InventTable::find(input.C031)) → @EGU38215
+        InventTable inventTable;
+        if (!InventTable::find(itemId))
+        {
+            ttsbegin;
+            inventTable.clear();
+            inventTable.initValue();
+            inventTable.ItemId   = itemId;
+            inventTable.ItemType = ItemType::Item;
+            inventTable.insert();
+            ttscommit;
+            info(strFmt("Inserted InventTable: %1", itemId));
+        }
+
+        // ── 9. Product Table ─────────────────────────────────────────────────
+        // CI_PRICE validation: eXU_productTable::find(C001).CompanyId != C004 → @EGS1141
+        // C004 in CI_PRICE = parmCompanyId() = JSON "companyId" — must match curExt().
+        EXU_ProductTable productTemplate, newProduct;
+        select firstonly productTemplate;
+        select firstonly newProduct
+        where newProduct.ProductNum == productNum;
+        if (productTemplate.RecId && !newProduct.RecId)
+        {
+            ttsbegin;
+            buf2Buf(productTemplate, newProduct);
+            newProduct.CompanyId                 = companyId;
+            newProduct.DeliveryCategory          = deliveryCategory;
+            newProduct.ProductNum                = productNum;
+            newProduct.DeliveryGroupNum_RateCode = deliveryGroupNum;
+            newProduct.insert();
+            ttscommit;
+            info(strFmt("Inserted EXU_ProductTable: %1 | CompanyId: %2", productNum, companyId));
+        }
+
+        // ── 10. EXU_RateTable ────────────────────────────────────────────────
+        // Validates C032 + C031 combination in getErrMsg:
+        //   RateCode must exist AND be linked to the product.
+        EXU_RateTable rateTableTemplate, newRateTable;
+        select firstonly rateTableTemplate
+        where rateTableTemplate.DeliveryCategory == deliveryCategory;
+        if (!rateTableTemplate.RecId)
+        select firstonly rateTableTemplate;
+        select firstonly newRateTable
+        where newRateTable.DeliveryCategory          == deliveryCategory
+           && newRateTable.ProductNum                == productNum
+           && newRateTable.DeliveryGroupNum_RateCode == deliveryGroupNum;
+        if (!newRateTable.RecId)
+        {
+            ttsbegin;
+            buf2Buf(rateTableTemplate, newRateTable);
+            newRateTable.DeliveryCategory          = deliveryCategory;
+            newRateTable.ProductNum                = productNum;
+            newRateTable.DeliveryGroupNum_RateCode = deliveryGroupNum;
+            newRateTable.CompanyId                 = companyId;
+            newRateTable.StartDate                 = mkDate(1, 1, 2020);
+            newRateTable.insert();
+            ttscommit;
+            info(strFmt("Inserted EXU_RateTable: %1 | %2 | %3", deliveryCategory, productNum, deliveryGroupNum));
+        }
+
+        // ── 11. EGS_MASS_ConvInString – C003 customer group mapping ──────────
+        // getErrMsg: EGS_MASS_ConvInString::find(CUSTINST,'C003',input.C003).ConvStr
+        // maps the JSON "custGroup" value → internal CustGroupId.
+        // Without this row validation returns @EGS1365.
+        EGS_MASS_ConvInString convInStrTemplate, newConvInStr;
+        select firstonly convInStrTemplate;
+        select firstonly newConvInStr
+        where newConvInStr.MASS_ImportType == EGS_MASS_ImportType::CUSTINST
+           && newConvInStr.InField         == 'C003'
+           && newConvInStr.InString        == custGroupInStr;
+        if (!newConvInStr.RecId)
+        {
+            ttsbegin;
+            buf2Buf(convInStrTemplate, newConvInStr);
+            newConvInStr.MASS_ImportType = EGS_MASS_ImportType::CUSTINST;
+            newConvInStr.InField         = 'C003';
+            newConvInStr.InString        = custGroupInStr;
+            newConvInStr.ConvStr         = custGroupId;
+            newConvInStr.insert();
+            ttscommit;
+            info(strFmt("Inserted EGS_MASS_ConvInString: CUSTINST | C003 | %1 → %2",
+                    custGroupInStr, custGroupId));
+        }
+
+        // ── 12. EGS_MASS_Params – required by C003 validation chain ──────────
+        // After ConvInStr maps C003 → custGroupId, getErrMsg checks:
+        //   if (!EGS_MASS_Params::find(_custGroup).CustGroup) → @EGS1366
+        EGS_MASS_Params massParamsTemplate, newMassParams;
+        select firstonly massParamsTemplate;
+        select firstonly newMassParams
+        where newMassParams.CustGroup == custGroupId;
+        if (!newMassParams.RecId)
+        {
+            ttsbegin;
+            buf2Buf(massParamsTemplate, newMassParams);
+            newMassParams.CustGroup = custGroupId;
+            newMassParams.insert();
+            ttscommit;
+            info(strFmt("Inserted EGS_MASS_Params: %1", custGroupId));
+        }
+
+        // ── 13. EXU_ProductExtendTable – Product ↔ PriceManagementCode link ──
+        // CI_PRICE validation (C002 = '' / '0' / '2'):
+        //   select where ProductNum == C001 && PriceManagementCode == C013
+        //   if RecId == 0 → @EGS1136
+        EXU_ProductExtendTable productExtendTemplate, newProductExtend;
+        select firstonly productExtendTemplate;
+        select firstonly newProductExtend
+        where newProductExtend.ProductNum          == productNum
+           && newProductExtend.PriceManagementCode == priceManagementCode;
+        if (!newProductExtend.RecId)
+        {
+            ttsbegin;
+            newProductExtend.clear();
+            newProductExtend.initValue();
+            newProductExtend.ProductNum          = productNum;
+            newProductExtend.PriceManagementCode = priceManagementCode;
+            newProductExtend.insert();
+            ttscommit;
+            info(strFmt("Inserted EXU_ProductExtendTable: %1 | %2", productNum, priceManagementCode));
+        }
+
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

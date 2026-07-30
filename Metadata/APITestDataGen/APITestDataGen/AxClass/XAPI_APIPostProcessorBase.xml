@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APIPostProcessorBase</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+abstract class XAPI_APIPostProcessorBase
+{
+    protected XAPI_APIS api;
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>run</Name>
+				<Source><![CDATA[
+    public abstract void run() {}
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>parmApi</Name>
+				<Source><![CDATA[
+    public XAPI_APIS parmApi(XAPI_APIS _api = api)
+    {
+        api = _api;
+        return api;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>construct</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Returns the post-processor for the given API, or null if none is registered.
+    /// </summary>
+    public static XAPI_APIPostProcessorBase construct(XAPI_APIS _api)
+    {
+        XAPI_APIPostProcessorBase postProc;
+
+        switch (_api)
+        {
+            case XAPI_APIS::CreateContractPart:
+                postProc = new XAPI_APIPostProcessor_ContractPart();
+                break;
+
+            default:
+                return null;
+        }
+
+        postProc.parmApi(_api);
+        return postProc;
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

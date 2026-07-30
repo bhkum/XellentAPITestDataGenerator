@@ -21,7 +21,15 @@
       "PowerShell($item = Get-Item 'C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen' -Force -ErrorAction SilentlyContinue; if \\($item\\) { Write-Output \\(\"LinkType={0}\" -f $item.LinkType\\); Write-Output \\(\"Target={0}\" -f \\($item.Target -join ','\\)\\); Write-Output \\(\"Attributes={0}\" -f $item.Attributes\\) } else { Write-Output 'NOT FOUND' })",
       "Bash(awk 'NR==146,NR==158' \"C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxTable\\\\XAPI_TestCase.xml\")",
       "Bash(awk 'NR==148' \"C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxTable\\\\XAPI_TestCase.xml\")",
-      "Bash(awk 'NR==228,NR==234' \"C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxForm\\\\XAPI_TestSuiteForm.xml\")"
+      "Bash(awk 'NR==228,NR==234' \"C:\\\\Users\\\\bhkum\\\\source\\\\repos\\\\XellentAPITestDataGenerator\\\\Metadata\\\\APITestDataGen\\\\APITestDataGen\\\\AxForm\\\\XAPI_TestSuiteForm.xml\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(python3 *)",
+      "Bash(Select-Object -First 10)",
+      "PowerShell(ls \"J:\\\\AosService\\\\PackagesLocalDirectory\" -Directory | Where-Object {$_.Name -match \"^\\(Foundation|Directory|CRM|Common\\)\"} | Select-Object -ExpandProperty Name)",
+      "Bash(rtk find *)",
+      "Bash(xargs grep -l \"getEmail\\\\|getPhone\\\\|primaryEmail\")",
+      "Bash(rtk grep *)"
     ]
   }
 }

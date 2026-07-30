@@ -39,12 +39,14 @@ abstract class XAPI_APIRunnerBase
 				<Name>execute</Name>
 				<Source><![CDATA[
     /// <summary>
-    /// Orchestrator entry point. Runs the api call and writes one XAPI_APILogTable
-    /// row stamped with the suite-run SessionId and Sequence from the context.
+    /// Orchestrator entry point. Runs the API call, writes one master XAPI_APILogTable
+    /// row and one XAPI_APILogValues child row (LogType = APIRunner) stamped with the
+    /// suite-run SessionId and Sequence from the context.
     /// </summary>
-    public void execute(XAPI_TestStepContext _ctx)
+    public XAPI_APIStatus execute(XAPI_TestStepContext _ctx)
     {
-        XAPI_APILogTable logRow;
+        XAPI_APILogTable  logRow;
+        XAPI_APILogValues logValues;
 
         testCase = _ctx.parmTestCase();
 
@@ -57,19 +59,27 @@ abstract class XAPI_APIRunnerBase
         }
         catch
         {
-            // Deserialization failures must not block the log row.
+            // Deserialization failures must not block the log rows.
         }
 
         logRow.SessionId    = _ctx.parmSessionId();
         logRow.Sequence     = _ctx.parmSequence();
         logRow.ApiName      = api;
         logRow.Status       = status;
-        logRow.Key          = logKey;
-        logRow.Value        = logValue;
         logRow.RequestBody  = requestBody;
         logRow.Response     = responseText;
-        logRow.ErrorMessage = errorMessage;
         logRow.insert();
+
+        logValues.SessionId    = _ctx.parmSessionId();
+        logValues.Sequence     = _ctx.parmSequence();
+        logValues.LogType      = XAPI_LogType::APIRunner;
+        logValues.FieldName    = logKey;
+        logValues.FieldValue   = logValue;
+        logValues.Status       = status;
+        logValues.ErrorMessage = errorMessage;
+        logValues.insert();
+
+        return status;
     }
 
 ]]></Source>
@@ -143,11 +153,15 @@ abstract class XAPI_APIRunnerBase
 				<Source><![CDATA[
     protected void sendPostRequest()
     {
-        str                       bearerToken;
-        System.Net.HttpWebRequest request;
-        System.IO.StreamWriter    writer;
-        System.IO.StreamReader    reader;
-        System.Exception          ex;
+        str                                   bearerToken;
+        System.Net.HttpWebRequest             request;
+        System.IO.StreamWriter                writer;
+        System.IO.StreamReader                reader;
+        System.Exception                      ex;
+        System.Text.RegularExpressions.Regex  rcRegex;
+        System.Text.RegularExpressions.Match  rcMatch;
+        System.Text.RegularExpressions.Regex  msgRegex;
+        System.Text.RegularExpressions.Match  msgMatch;
 
         status       = XAPI_APIStatus::Success;
         requestBody  = this.body();
@@ -175,6 +189,16 @@ abstract class XAPI_APIRunnerBase
             reader = new System.IO.StreamReader(request.GetResponse().GetResponseStream());
             responseText = reader.ReadToEnd();
             reader.Close();
+
+            rcRegex = new System.Text.RegularExpressions.Regex('"ResponseCode"\\s*:\\s*"([^"]+)"');
+            rcMatch = rcRegex.Match(responseText);
+            if (rcMatch.get_Success() && rcMatch.Groups.get_Item(1).get_Value() != 'Ok')
+            {
+                status   = XAPI_APIStatus::Error;
+                msgRegex = new System.Text.RegularExpressions.Regex('"Message"\\s*:\\s*"([^"]+)"');
+                msgMatch = msgRegex.Match(responseText);
+                errorMessage = msgMatch.get_Success() ? msgMatch.Groups.get_Item(1).get_Value() : responseText;
+            }
         }
         catch (Exception::CLRError)
         {

@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Teardown_APIRecords</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+/// <summary>
+/// Master teardown orchestrator — deletes all records created by API runners and
+/// then calls the individual TST_ setup teardown classes in the correct dependency
+/// order.  Run this once after a full test session to return the environment to a
+/// clean state.
+///
+/// Deletion order (most-dependent child first):
+///   1  Campaign reply records          XAPI_Teardown_CampaignReply
+///   2  Customer topic subscriptions    XAPI_Teardown_CustomerTopic
+///   3a Agreement API records           teardownAgreement()
+///   3b Agreement TST_ reference data   XAPI_Teardown_Agreement
+///   4  Meter journals / meter / groups teardownMeter()
+///   5  ContractPart TST_ setup         XAPI_Teardown_ContractPart
+///   7  Contract record                 teardownContract()
+///   8  Contract TST_ setup             XAPI_Teardown_Contract
+///   9  CustInvoiceAddress TST_ setup   XAPI_Teardown_CustInvoiceAddress
+///  10  Installation del-point + record teardownInstallation()
+///  11  Installation TST_ setup         XAPI_Teardown_Installation
+///  12  Customer records                teardownCustomers()
+///  13  Customer TST_ setup             XAPI_Teardown_Customer
+/// </summary>
+class XAPI_Teardown_APIRecords
+{
+ 
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    public static void main(Args _args)
+    {
+        info("=== XAPI Full Teardown — Start ===");
+
+        // ----------------------------------------------------------
+        // Step 1: Campaign reply records
+        // ----------------------------------------------------------
+        info("--- Step 1: Campaign reply ---");
+        XAPI_Teardown_CampaignReply::main(null);
+
+        // ----------------------------------------------------------
+        // Step 2: Customer topic subscriptions + TST_ topics
+        // ----------------------------------------------------------
+        info("--- Step 2: Customer topic ---");
+        XAPI_Teardown_CustomerTopic::main(null);
+
+        // ----------------------------------------------------------
+        // Step 3a: Agreement API records — EGS_MASS_Input, EXU_AgreementTable,
+        //          EXU_DelPoint — resolved dynamically via logged AgreementNum
+        //          because the metering point is randomly generated each run.
+        // Step 3b: Agreement TST_ reference data (products, delivery category,
+        //          rate table, etc.) via the existing teardown class.
+        // ----------------------------------------------------------
+        info("--- Step 3a: Agreement API records ---");
+        XAPI_Teardown_APIRecords::teardownAgreement();
+
+        info("--- Step 3b: Agreement TST_ setup ---");
+        XAPI_Teardown_Agreement::main(null);
+
+        // ----------------------------------------------------------
+        // Step 4: Meter journals, meter table, test groups
+        //         (reads InstNum and meterNum from the session log)
+        // ----------------------------------------------------------
+        info("--- Step 4: Meter ---");
+        XAPI_Teardown_APIRecords::teardownMeter();
+
+        // ----------------------------------------------------------
+        // Step 5: ContractPart TST_ products and delivery groups
+        //         (EXU_ContractPartTable rows are cascade-deleted when
+        //          the contract is deleted in Step 7)
+        // ----------------------------------------------------------
+        info("--- Step 5: Contract part TST_ setup ---");
+        XAPI_Teardown_ContractPart::main(null);
+
+        // ----------------------------------------------------------
+        // Step 7: EXU_ContractTable row for the test contract
+        // ----------------------------------------------------------
+        info("--- Step 7: Contract record ---");
+        XAPI_Teardown_APIRecords::teardownContract();
+
+        // ----------------------------------------------------------
+        // Step 8: Contract TST_ billing plans and templates
+        // ----------------------------------------------------------
+        info("--- Step 8: Contract TST_ setup ---");
+        XAPI_Teardown_Contract::main(null);
+
+        // ----------------------------------------------------------
+        // Step 9: CustInvoiceAddress TST_ zip code
+        // ----------------------------------------------------------
+        info("--- Step 9: CustInvoiceAddress TST_ setup ---");
+        XAPI_Teardown_CustInvoiceAddress::main(null);
+
+        // ----------------------------------------------------------
+        // Step 10: EXU_DelPoint(s) then EXU_UtilityInstallation
+        // ----------------------------------------------------------
+        info("--- Step 10: Installation records ---");
+        XAPI_Teardown_APIRecords::teardownInstallation();
+
+        // ----------------------------------------------------------
+        // Step 11: Installation TST_ address / delivery category
+        // ----------------------------------------------------------
+        info("--- Step 11: Installation TST_ setup ---");
+        XAPI_Teardown_Installation::main(null);
+
+        // ----------------------------------------------------------
+        // Step 12: All CustTable records created during the session
+        // ----------------------------------------------------------
+        info("--- Step 12: Customer records ---");
+        XAPI_Teardown_APIRecords::teardownCustomers();
+
+        // ----------------------------------------------------------
+        // Step 13: Customer TST_ groups and payment modes
+        // ----------------------------------------------------------
+        info("--- Step 13: Customer TST_ setup ---");
+        XAPI_Teardown_Customer::main(null);
+
+        info("=== XAPI Full Teardown — Complete ===");
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>teardownAgreement</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Deletes the EGS_MASS_Input staging rows, EXU_AgreementTable record and
+    /// EXU_DelPoint record that were created by the CreateAgreement API runner.
+    ///
+    /// The metering point is generated randomly by XAPI_MeteringPointGenerator
+    /// on each run and is never stored statically, so it cannot be hardcoded.
+    /// Instead, the logged AgreementNum is used to find the delivery point via
+    /// EXU_DelPoint.AttachmentNum = AgreementNum, from which the MeteringPoint
+    /// is read at runtime.
+    ///
+    /// XAPI_Teardown_Agreement::main() is still called afterwards to clean up
+    /// the TST_ reference data (products, delivery category, rate table, etc.).
+    /// Its hardcoded metering point will simply find nothing and skip cleanly.
+    /// </summary>
+    private static void teardownAgreement()
+    {
+        XAPI_APILogTable    logTableRow;
+        XAPI_APILogValues   logValuesRow;
+        str                 agreementNum;
+        EXU_AgreementTable  agreementTable;
+        EXU_DelPoint        delPoint;
+        str                 meteringPoint;
+        EGS_MASS_Input      massInput;
+
+        while select logTableRow
+            where logTableRow.ApiName  == XAPI_APIS::CreateAgreement
+               && logTableRow.Archived == NoYes::No
+        {
+            select firstonly logValuesRow
+                where logValuesRow.SessionId == logTableRow.SessionId
+                   && logValuesRow.Sequence  == logTableRow.Sequence
+                   && logValuesRow.FieldName == 'AgreementNum';
+
+            if (!logValuesRow.RecId)
+            {
+                continue;
+            }
+
+            agreementNum = logValuesRow.FieldValue;
+
+            // Resolve metering point via EXU_DelPoint.AttachmentNum = AgreementNum
+            select firstonly delPoint
+                where delPoint.AttachmentNum == agreementNum;
+
+            if (!delPoint.RecId)
+            {
+                info(strFmt("Agreement teardown: no EXU_DelPoint found for agreement %1 — skipped.", agreementNum));
+                continue;
+            }
+
+            meteringPoint = delPoint.MeteringPoint;
+
+            // 1 — EGS_MASS_Input staging records (must go first)
+            ttsbegin;
+            while select forupdate massInput
+                where massInput.C010 == meteringPoint
+            {
+                massInput.delete();
+                info(strFmt("Agreement teardown: deleted EGS_MASS_Input (Group_id: %1) for metering point %2.",
+                    massInput.Group_id, meteringPoint));
+            }
+            ttscommit;
+
+            // 2 — EXU_AgreementTable
+            select firstonly forupdate agreementTable
+                where agreementTable.AgreementNum == agreementNum;
+            if (agreementTable.RecId)
+            {
+                ttsbegin;
+                agreementTable.delete();
+                ttscommit;
+                info(strFmt("Agreement teardown: deleted agreement %1.", agreementNum));
+            }
+
+            // 3 — EXU_DelPoint
+            select firstonly forupdate delPoint
+                where delPoint.AttachmentNum == agreementNum;
+            if (delPoint.RecId)
+            {
+                ttsbegin;
+                delPoint.delete();
+                ttscommit;
+                info(strFmt("Agreement teardown: deleted EXU_DelPoint for metering point %1.", meteringPoint));
+            }
+
+            info(strFmt("Agreement teardown complete for agreement %1 (metering point %2).",
+                agreementNum, meteringPoint));
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>teardownMeter</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Deletes the meter mounting journals, meter table row, counter, test groups,
+    /// reading import parameter and reading method group that were created by
+    /// XAPI_Setup_MeterReading and XAPI_APIRunner_MeterReading.
+    /// Looks up InstNum and meterNum from the session log so no hardcoded values
+    /// are needed.
+    /// </summary>
+    private static void teardownMeter()
+    {
+        XAPI_APILogTable    logTableRow;
+        XAPI_APILogValues   logValuesRow;
+        EXU_MeterNum         meterNum;
+        EXU_MeterType        meterType        = 'TST_MT';
+        EXU_GroupNum         readingMethodNum = 'TST_RMN';
+
+        EXU_CompanyId          companyId = curExt();
+        EXU_DeliveryCategory   deliveryCategory;
+        EXU_TestGroupNum       testGroupNum;
+
+        EXU_MeterJournalTable           journalTable;
+        EXU_MeterJournalTrans           journalTrans;
+        EXU_MeterJournalTrans_Readings  journalReadings;
+        EXU_Relations                   relations;
+        EXU_MeterStatusLog              meterStatusLog;
+        EXU_MeterTable                  meterTable;
+        EXU_MeterCounterTable           meterCounterTable;
+        EXU_MeterCounterTable           billingCounterRef;
+        EMS_QuantityCode_MeterTimeFrame qcMeterTimeFrame;
+        EXU_TestGroupExtendTable        testGroupExtendTable;
+        EXU_TestGroupTable              testGroupTable;
+        EGS_ReadingImportParameter      readingImportParam;
+        EXU_GroupTable                  groupTable;
+        EXU_MeterJournalId              journalId;
+        container                       journalIds;
+        int                             i;
+
+        while select logTableRow
+            where logTableRow.ApiName  == XAPI_APIS::CreateMeterReading
+               && logTableRow.Archived == NoYes::No
+        {
+            select firstonly logValuesRow
+                where logValuesRow.SessionId == logTableRow.SessionId
+                   && logValuesRow.Sequence  == logTableRow.Sequence
+                   && logValuesRow.FieldName == 'meterNum';
+
+            if (!logValuesRow.RecId)
+            {
+                continue;
+            }
+
+            meterNum = logValuesRow.FieldValue;
+
+            // Get deliveryCategory directly from the meter record — no need for InstNum
+            select firstonly meterTable
+                where meterTable.MeterNum  == meterNum
+                   && meterTable.CompanyId == companyId;
+
+            if (!meterTable.RecId)
+            {
+                info(strFmt("Meter teardown: meter %1 not found — skipped.", meterNum));
+                continue;
+            }
+
+            deliveryCategory = meterTable.DeliveryCategory;
+            testGroupNum     = EXU_DeliveryRelationTable::Find(deliveryCategory, companyId).TestGroupNum;
+
+        // 1 — Collect mounting journal IDs for this meter
+        journalIds = conNull();
+        while select journalTrans
+            where journalTrans.MeterNum == meterNum
+            exists join journalTable
+            where journalTable.JournalId   == journalTrans.JournalId
+               && journalTable.JournalType == EXU_MeterJournalType::Mounting
+        {
+            journalIds += [journalTrans.JournalId];
+        }
+
+        for (i = 1; i <= conLen(journalIds); i++)
+        {
+            journalId = conPeek(journalIds, i);
+
+            ttsbegin;
+            delete_from journalReadings
+                where journalReadings.MeterJournalId == journalId;
+            ttscommit;
+
+            ttsbegin;
+            delete_from journalTrans
+                where journalTrans.JournalId == journalId;
+            ttscommit;
+
+            select forupdate journalTable
+                where journalTable.JournalId == journalId;
+            if (journalTable.RecId)
+            {
+                ttsbegin;
+                journalTable.doDelete();
+                ttscommit;
+                info(strFmt("Meter teardown: journal %1 deleted.", journalId));
+            }
+        }
+
+        // 2 — EXU_Relations
+        ttsbegin;
+        while select forupdate relations
+            where relations.DeliveryCategory == deliveryCategory
+               && relations.CompanyId        == companyId
+               && relations.MeterNum         == meterNum
+        {
+            relations.doDelete();
+        }
+        ttscommit;
+
+        // 3 — EXU_MeterStatusLog
+        ttsbegin;
+        delete_from meterStatusLog
+            where meterStatusLog.DeliveryCategory == deliveryCategory
+               && meterStatusLog.CompanyId        == companyId
+               && meterStatusLog.MeterNum         == meterNum;
+        ttscommit;
+
+        // 4 — EMS_QuantityCode_MeterTimeFrame (SE + non-gas only)
+        if (EMS_Toolbox::isEDIEL_SE() && !EXU_DeliveryCategoryTable::isDeliveryTypeGas(deliveryCategory))
+        {
+            select firstonly billingCounterRef
+                where billingCounterRef.MeterNum         == meterNum
+                   && billingCounterRef.DeliveryCategory == deliveryCategory
+                   && billingCounterRef.CompanyId        == companyId
+                   && billingCounterRef.CounterType      == EXU_CounterType::Billing;
+
+            if (billingCounterRef.RecId)
+            {
+                select firstonly forupdate qcMeterTimeFrame
+                    where qcMeterTimeFrame.DeliveryCategory  == deliveryCategory
+                       && qcMeterTimeFrame.CompanyId         == companyId
+                       && qcMeterTimeFrame.MeterTimeFrame_SE == billingCounterRef.EMS_MeterTimeFrame_SE
+                       && qcMeterTimeFrame.QuantityCodeValue == billingCounterRef.QuantityCodeValue;
+                if (qcMeterTimeFrame.RecId)
+                {
+                    ttsbegin;
+                    qcMeterTimeFrame.delete();
+                    ttscommit;
+                    info(strFmt("Meter teardown: EMS_QuantityCode_MeterTimeFrame deleted for %1.", deliveryCategory));
+                }
+            }
+        }
+
+        // 5 — EXU_MeterCounterTable (billing counter)
+        ttsbegin;
+        delete_from meterCounterTable
+            where meterCounterTable.DeliveryCategory == deliveryCategory
+               && meterCounterTable.CompanyId        == companyId
+               && meterCounterTable.MeterNum         == meterNum;
+        ttscommit;
+        info(strFmt("Meter teardown: billing counter deleted for meter %1.", meterNum));
+
+        // 6 — EXU_MeterTable
+        select forupdate meterTable
+            where meterTable.MeterNum         == meterNum
+               && meterTable.DeliveryCategory == deliveryCategory
+               && meterTable.CompanyId        == companyId;
+        if (meterTable.RecId)
+        {
+            meterTable.delete();
+            info(strFmt("Meter teardown: meter %1 deleted.", meterNum));
+        }
+
+        // 7 — EXU_TestGroupExtendTable
+        select firstonly forupdate testGroupExtendTable
+            where testGroupExtendTable.DeliveryCategory   == deliveryCategory
+               && testGroupExtendTable.CompanyId          == companyId
+               && testGroupExtendTable.TestGroupNum       == testGroupNum
+               && testGroupExtendTable.MeterType          == meterType
+               && testGroupExtendTable.SharedMeterStockId == '';
+        if (testGroupExtendTable.RecId)
+        {
+            ttsbegin;
+            testGroupExtendTable.delete();
+            ttscommit;
+            info(strFmt("Meter teardown: EXU_TestGroupExtendTable deleted: %1 / %2.", testGroupNum, meterType));
+        }
+
+        // 8 — EXU_TestGroupTable (matched by the script-specific name)
+        select firstonly forupdate testGroupTable
+            where testGroupTable.TestGroupNum     == testGroupNum
+               && testGroupTable.DeliveryCategory == deliveryCategory
+               && testGroupTable.CompanyId        == companyId
+               && testGroupTable.Name             == strFmt('Script test group (%1)', testGroupNum);
+        if (testGroupTable.RecId)
+        {
+            ttsbegin;
+            testGroupTable.delete();
+            ttscommit;
+            info(strFmt("Meter teardown: EXU_TestGroupTable deleted: %1.", testGroupNum));
+        }
+
+        // 9 — EGS_ReadingImportParameter
+        readingImportParam = EGS_ReadingImportParameter::find(
+            EXU_ReadingsImportType::Internet, deliveryCategory, companyId, true);
+        if (readingImportParam.RecId)
+        {
+            ttsbegin;
+            readingImportParam.delete();
+            ttscommit;
+            info(strFmt("Meter teardown: EGS_ReadingImportParameter deleted for %1.", deliveryCategory));
+        }
+
+        // 10 — EXU_GroupTable ReadingMethod (matched by the script-specific name)
+        select firstonly forupdate groupTable
+            where groupTable.GroupCode == EXU_GroupCode::ReadingMethod
+               && groupTable.GroupNum  == readingMethodNum
+               && groupTable.GroupName == strFmt('Test reading method (%1)', readingMethodNum);
+        if (groupTable.RecId)
+        {
+            ttsbegin;
+            groupTable.delete();
+            ttscommit;
+            info(strFmt("Meter teardown: EXU_GroupTable deleted: ReadingMethod / %1.", readingMethodNum));
+        }
+
+            info(strFmt("Meter teardown complete for meter %1.", meterNum));
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>teardownContract</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Deletes every EXU_ContractTable record created during the test session.
+    /// EXU_ContractPartTable rows are cascade-deleted by the framework.
+    /// </summary>
+    private static void teardownContract()
+    {
+        XAPI_APILogTable  logTableRow;
+        XAPI_APILogValues logValuesRow;
+        EXU_ContractNum   contractNum;
+        EXU_ContractTable contractTable;
+
+        while select logTableRow
+            where logTableRow.ApiName  == XAPI_APIS::CreateContract
+               && logTableRow.Archived == NoYes::No
+        {
+            select firstonly logValuesRow
+                where logValuesRow.SessionId == logTableRow.SessionId
+                   && logValuesRow.Sequence  == logTableRow.Sequence
+                   && logValuesRow.FieldName == 'ContractNum';
+
+            if (!logValuesRow.RecId)
+            {
+                continue;
+            }
+
+            contractNum   = logValuesRow.FieldValue;
+            contractTable = EXU_ContractTable::find(contractNum, true);
+
+            if (contractTable.RecId)
+            {
+                ttsbegin;
+                contractTable.delete();
+                ttscommit;
+                info(strFmt("Contract teardown: deleted contract %1.", contractNum));
+            }
+            else
+            {
+                info(strFmt("Contract teardown: %1 not found — skipped.", contractNum));
+            }
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>teardownInstallation</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Deletes the EXU_DelPoint(s) and EXU_UtilityInstallation record for every
+    /// installation created during the test session.
+    /// The delivery point is linked via EXU_DelPoint.AttachmentNum = InstNum.
+    /// Must run after the meter teardown (meter is mounted on the delivery point).
+    /// </summary>
+    private static void teardownInstallation()
+    {
+        XAPI_APILogTable        logTableRow;
+        XAPI_APILogValues       logValuesRow;
+        EXU_InstNum             instNum;
+        EXU_UtilityInstallation uinst;
+        EXU_DelPoint            delPoint;
+        int                     delPointCount;
+
+        while select logTableRow
+            where logTableRow.ApiName  == XAPI_APIS::CreateInstallation
+               && logTableRow.Archived == NoYes::No
+        {
+            select firstonly logValuesRow
+                where logValuesRow.SessionId == logTableRow.SessionId
+                   && logValuesRow.Sequence  == logTableRow.Sequence
+                   && logValuesRow.FieldName == 'InstNum';
+
+            if (!logValuesRow.RecId)
+            {
+                continue;
+            }
+
+            instNum = logValuesRow.FieldValue;
+
+            select firstonly uinst
+                where uinst.InstNum == instNum;
+
+            if (!uinst.RecId)
+            {
+                info(strFmt("Installation teardown: installation %1 not found — skipped.", instNum));
+                continue;
+            }
+
+            // 1 — Delete all delivery points linked to this installation
+            //     Relationship: EXU_DelPoint.AttachmentNum = EXU_UtilityInstallation.InstNum
+            delPointCount = 0;
+            ttsbegin;
+            while select forupdate delPoint
+                where delPoint.AttachmentNum    == instNum
+                   && delPoint.DeliveryCategory == uinst.DeliveryCategory
+                   && delPoint.CompanyId        == uinst.CompanyId
+            {
+                delPoint.delete();
+                delPointCount++;
+                info(strFmt("Installation teardown: deleted EXU_DelPoint (MeteringPoint: %1) for installation %2.",
+                    delPoint.MeteringPoint, instNum));
+            }
+            ttscommit;
+
+            if (!delPointCount)
+            {
+                info(strFmt("Installation teardown: no delivery points found for installation %1.", instNum));
+            }
+
+            // 2 — Delete the installation record
+            select firstonly forupdate uinst
+                where uinst.InstNum == instNum;
+
+            if (uinst.RecId)
+            {
+                ttsbegin;
+                uinst.delete();
+                ttscommit;
+                info(strFmt("Installation teardown: deleted installation %1.", instNum));
+            }
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>teardownCustomers</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Deletes every CustTable record created during the test session.
+    /// Covers both the owner and any guest customers created by BrightAddUser.
+    /// CustTable.delete() lets the D365 framework cascade to DirPartyTable,
+    /// LogisticsPostalAddress, smmBusRelTable and other related records.
+    /// Must run last — all contracts, installations and roles must already be gone.
+    /// </summary>
+    private static void teardownCustomers()
+    {
+        XAPI_APILogTable  logTableRow;
+        XAPI_APILogValues logValuesRow;
+        str               custAccount;
+        CustTable         custTable;
+
+        while select logTableRow
+            where logTableRow.ApiName  == XAPI_APIS::CreateCustomer
+               && logTableRow.Archived == NoYes::No
+        {
+            select firstonly logValuesRow
+                where logValuesRow.SessionId == logTableRow.SessionId
+                   && logValuesRow.Sequence  == logTableRow.Sequence
+                   && logValuesRow.FieldName == 'CustAccount';
+
+            if (!logValuesRow.RecId)
+            {
+                continue;
+            }
+
+            custAccount = logValuesRow.FieldValue;
+            custTable   = CustTable::find(custAccount, true);
+
+            if (custTable.RecId)
+            {
+                custTable.delete();
+                info(strFmt("Customer teardown: deleted customer %1.", custAccount));
+            }
+            else
+            {
+                info(strFmt("Customer teardown: %1 not found — skipped.", custAccount));
+            }
+        }
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

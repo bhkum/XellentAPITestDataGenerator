@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
 	<Name>XAPI_API_AutomationFacade</Name>
 	<SourceCode>
@@ -126,10 +126,10 @@ public class XAPI_API_AutomationFacade
 				<Source><![CDATA[
     public static void cleanup_dependentData()
     {
-        XAPI_NewContractDelDataGen::main(null);
-        XAPI_NewInstallationDelDataGen::main(null);
-        XAPI_NewCustomerDelDataGen::main(null);
-        XAPI_NewContractPartDataGen::main(null);
+        XAPI_Teardown_Contract::main(null);
+        XAPI_Teardown_Installation::main(null);
+        XAPI_Teardown_Customer::main(null);
+        XAPI_Setup_ContractPart::main(null);
     }
 
 ]]></Source>
@@ -140,10 +140,10 @@ public class XAPI_API_AutomationFacade
     // Creation
     public static void create_Customer()
     {
-        XAPI_NewCustomerDataGen::main(null);
+        XAPI_Setup_Customer::main(null);
 
-        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateCustomer);
-        api.callAPI();
+        //XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateCustomer);
+        //api.callAPI();
     }
 
 ]]></Source>
@@ -153,10 +153,10 @@ public class XAPI_API_AutomationFacade
 				<Source><![CDATA[
     public static void create_Installation()
     {
-        XAPI_NewInstallationDataGen::main(null);
+        XAPI_Setup_Installation::main(null);
 
-        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateInstallation);
-        api.callAPI();
+        //XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateInstallation);
+        //api.callAPI();
     }
 
 ]]></Source>
@@ -166,10 +166,10 @@ public class XAPI_API_AutomationFacade
 				<Source><![CDATA[
     public static void create_Contract()
     {
-        XAPI_NewContractDataGen::main(null);
+        XAPI_Setup_Contract::main(null);
 
-        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateContract);
-        api.callAPI();
+        //XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateContract);
+        //api.callAPI();
     }
 
 ]]></Source>
@@ -179,9 +179,9 @@ public class XAPI_API_AutomationFacade
 				<Source><![CDATA[
     public static void create_ContractPart()
     {
-        XAPI_NewContractPartDataGen::main(null);
-        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateContractPart);
-        api.callAPI();
+        //XAPI_Setup_ContractPart::main(null);
+        //XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateContractPart);
+        //api.callAPI();
     }
 
 ]]></Source>
@@ -191,9 +191,9 @@ public class XAPI_API_AutomationFacade
 				<Source><![CDATA[
     public static void create_MeterReading()
     {
-        XAPI_NewMeterReadingDataGen::main(null);
-        XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateMeterReading);
-        api.callAPI();
+        //XAPI_Setup_MeterReading::main(null);
+        //XAPI_APICallerBase api = XAPI_APICallerBase::construct(XAPI_APIS::CreateMeterReading);
+        //api.callAPI();
     }
 
 ]]></Source>

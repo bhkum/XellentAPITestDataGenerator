@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APIRunner_BrightGetCost</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_APIRunner_BrightGetCost extends XAPI_APIRunnerBase
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>init</Name>
+				<Source><![CDATA[
+    protected void init()
+    {
+        api = XAPI_APIS::GetCost;
+        super();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>body</Name>
+				<Source><![CDATA[
+    protected str body()
+    {
+        Map configMap = new Map(Types::String, Types::String);
+
+        configMap.insert('<DataAreaId>',    curExt());
+        configMap.insert('<custAccount>',    XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount'));
+        configMap.insert('<delPointRecId>',        XAPI_APILogTable::getValueByKey(XAPI_APIS::GetLocations, 'DelPointRecId'));
+
+        return this.prepareBody(configMap);
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

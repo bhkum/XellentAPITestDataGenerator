@@ -5,13 +5,18 @@
 	<UseEnumValue>No</UseEnumValue>
 	<EnumValues>
 		<AxEnumValue>
+			<Name>NotRun</Name>
+			<Label>Not Run</Label>
+		</AxEnumValue>
+		<AxEnumValue>
 			<Name>Success</Name>
 			<Label>Success</Label>
+			<Value>1</Value>
 		</AxEnumValue>
 		<AxEnumValue>
 			<Name>Error</Name>
 			<Label>Error</Label>
-			<Value>1</Value>
+			<Value>2</Value>
 		</AxEnumValue>
 	</EnumValues>
 	<IsExtensible>true</IsExtensible>

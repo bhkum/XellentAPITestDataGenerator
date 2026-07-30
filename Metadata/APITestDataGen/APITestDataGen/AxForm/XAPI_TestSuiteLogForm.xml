@@ -13,6 +13,16 @@ public class XAPI_TestSuiteLogForm extends FormRun
 ]]></Source>
 			</Method>
 			<Method>
+				<Name>init</Name>
+				<Source><![CDATA[
+    public void init()
+    {
+        super();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
 				<Name>applySessionFilter</Name>
 				<Source><![CDATA[
     /// <summary>
@@ -59,6 +69,86 @@ public class XAPI_TestSuiteLogForm extends FormRun
 
 ]]></Source>
 					</Method>
+					<Method>
+						<Name>selectionChanged</Name>
+						<Source><![CDATA[
+        public void selectionChanged()
+        {
+            super();
+            XAPI_APILogValues_ds.executeQuery();
+        }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>delete</Name>
+						<Source><![CDATA[
+        public void delete()
+        {
+            XAPI_APILogValues   logValues;
+
+            ttsbegin;
+            delete_from logValues
+                where logValues.SessionId == XAPI_APILogTable.SessionId
+                   && logValues.Sequence  == XAPI_APILogTable.Sequence;
+            super();
+            ttscommit;
+        }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>requestBodyHtml</Name>
+						<Source><![CDATA[
+        public display str requestBodyHtml()
+        {
+            return XAPI_JsonHtmlFormatter::toColoredHtml(XAPI_APILogTable.RequestBody);
+        }
+
+]]></Source>
+					</Method>
+					<Method>
+						<Name>responseHtml</Name>
+						<Source><![CDATA[
+        public display str responseHtml()
+        {
+            return XAPI_JsonHtmlFormatter::toColoredHtml(XAPI_APILogTable.Response);
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+				<Fields />
+			</DataSource>
+			<DataSource>
+				<Name>XAPI_APILogValues</Name>
+				<Methods>
+					<Method>
+						<Name>executeQuery</Name>
+						<Source><![CDATA[
+        public void executeQuery()
+        {
+            QueryBuildDataSource qbds = this.queryBuildDataSource();
+            qbds.clearRanges();
+
+            if (XAPI_APILogTable.RecId)
+            {
+                qbds.addRange(fieldNum(XAPI_APILogValues, SessionId))
+                    .value(guid2Str(XAPI_APILogTable.SessionId));
+                qbds.addRange(fieldNum(XAPI_APILogValues, Sequence))
+                    .value(int2Str(XAPI_APILogTable.Sequence));
+            }
+            else
+            {
+                qbds.addRange(fieldNum(XAPI_APILogValues, SessionId))
+                    .value(SysQuery::valueEmptyString());
+            }
+
+            super();
+        }
+
+]]></Source>
+					</Method>
 				</Methods>
 				<Fields />
 			</DataSource>
@@ -77,6 +167,36 @@ public class XAPI_TestSuiteLogForm extends FormRun
 
             XAPI_APILogTable::archive();
             XAPI_APILogTable_ds.research();
+        }
+
+]]></Source>
+					</Method>
+				</Methods>
+			</Control>
+			<Control>
+				<Name>ClearAllButton</Name>
+				<Type>Button</Type>
+				<Methods>
+					<Method>
+						<Name>clicked</Name>
+						<Source><![CDATA[
+        public void clicked()
+        {
+            XAPI_APILogValues   logValues;
+            XAPI_APILogTable    logTable;
+
+            super();
+
+            if (Box::okCancel("Clear all log records? This cannot be undone.", DialogButton::Cancel, "Clear log") == DialogButton::Ok)
+            {
+                ttsbegin;
+                delete_from logValues;
+                delete_from logTable;
+                ttscommit;
+
+                XAPI_APILogTable_ds.research();
+                info("Log cleared.");
+            }
         }
 
 ]]></Source>
@@ -145,6 +265,16 @@ public class XAPI_TestSuiteLogForm extends FormRun
 			<Fields />
 			<ReferencedDataSources />
 			<AllowCreate>No</AllowCreate>
+			<AllowEdit>No</AllowEdit>
+			<DataSourceLinks />
+			<DerivedDataSources />
+		</AxFormDataSource>
+		<AxFormDataSource xmlns="">
+			<Name>XAPI_APILogValues</Name>
+			<Table>XAPI_APILogValues</Table>
+			<Fields />
+			<ReferencedDataSources />
+			<AllowCreate>No</AllowCreate>
 			<AllowDelete>No</AllowDelete>
 			<AllowEdit>No</AllowEdit>
 			<DataSourceLinks />
@@ -152,6 +282,7 @@ public class XAPI_TestSuiteLogForm extends FormRun
 		</AxFormDataSource>
 	</DataSources>
 	<Design>
+		<Caption xmlns="">Test Suite Log</Caption>
 		<DataSource xmlns="">XAPI_APILogTable</DataSource>
 		<Controls xmlns="">
 			<AxFormControl xmlns=""
@@ -188,17 +319,37 @@ public class XAPI_TestSuiteLogForm extends FormRun
 											i:nil="true" />
 										<Text>Archive</Text>
 									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormCommandButtonControl">
+										<Name>DeleteButton</Name>
+										<Type>CommandButton</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<Command>DeleteRecord</Command>
+									</AxFormControl>
+									<AxFormControl xmlns=""
+										i:type="AxFormButtonControl">
+										<Name>ClearAllButton</Name>
+										<AutoDeclaration>Yes</AutoDeclaration>
+										<Type>Button</Type>
+										<FormControlExtension
+											i:nil="true" />
+										<Text>Clear All</Text>
+									</AxFormControl>
 								</Controls>
 							</AxFormControl>
 						</Controls>
 						<AlignChild>No</AlignChild>
 						<AlignChildren>No</AlignChildren>
 						<ArrangeMethod>Vertical</ArrangeMethod>
+						<Caption>Execution</Caption>
+						<DataSource>XAPI_APILogTable</DataSource>
 					</AxFormControl>
 				</Controls>
 				<AlignChild>No</AlignChild>
 				<AlignChildren>No</AlignChildren>
 				<ArrangeMethod>Vertical</ArrangeMethod>
+				<Caption>Runner</Caption>
 				<DataSource>XAPI_APILogTable</DataSource>
 			</AxFormControl>
 			<AxFormControl xmlns=""
@@ -278,33 +429,6 @@ public class XAPI_TestSuiteLogForm extends FormRun
 					</AxFormControl>
 					<AxFormControl xmlns=""
 						i:type="AxFormStringControl">
-						<Name>LogGrid_Key</Name>
-						<Type>String</Type>
-						<FormControlExtension
-							i:nil="true" />
-						<DataField>Key</DataField>
-						<DataSource>XAPI_APILogTable</DataSource>
-					</AxFormControl>
-					<AxFormControl xmlns=""
-						i:type="AxFormStringControl">
-						<Name>LogGrid_Value</Name>
-						<Type>String</Type>
-						<FormControlExtension
-							i:nil="true" />
-						<DataField>Value</DataField>
-						<DataSource>XAPI_APILogTable</DataSource>
-					</AxFormControl>
-					<AxFormControl xmlns=""
-						i:type="AxFormStringControl">
-						<Name>LogGrid_Message</Name>
-						<Type>String</Type>
-						<FormControlExtension
-							i:nil="true" />
-						<DataField>Message</DataField>
-						<DataSource>XAPI_APILogTable</DataSource>
-					</AxFormControl>
-					<AxFormControl xmlns=""
-						i:type="AxFormStringControl">
 						<Name>LogGrid_RequestBody</Name>
 						<Type>String</Type>
 						<FormControlExtension
@@ -323,18 +447,80 @@ public class XAPI_TestSuiteLogForm extends FormRun
 						<DataSource>XAPI_APILogTable</DataSource>
 						<MultiLine>Yes</MultiLine>
 					</AxFormControl>
+				</Controls>
+				<DataSource>XAPI_APILogTable</DataSource>
+				<MultiSelect>No</MultiSelect>
+				<ShowRowLabels>No</ShowRowLabels>
+				<Style>Tabular</Style>
+			</AxFormControl>
+			<AxFormControl xmlns=""
+				i:type="AxFormGridControl">
+				<Name>LogValuesGrid</Name>
+				<AllowEdit>No</AllowEdit>
+				<Type>Grid</Type>
+				<VerticalSpacing>-1</VerticalSpacing>
+				<FormControlExtension
+					i:nil="true" />
+				<Controls>
+					<AxFormControl xmlns=""
+						i:type="AxFormComboBoxControl">
+						<Name>LogValuesGrid_LogType</Name>
+						<Type>ComboBox</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>LogType</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+						<Items />
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormComboBoxControl">
+						<Name>LogValuesGrid_Status</Name>
+						<Type>ComboBox</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Status</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+						<Items />
+					</AxFormControl>
 					<AxFormControl xmlns=""
 						i:type="AxFormStringControl">
-						<Name>LogGrid_ErrorMessage</Name>
+						<Name>LogValuesGrid_FieldName</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>FieldName</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogValuesGrid_FieldValue</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>FieldValue</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogValuesGrid_Message</Name>
+						<Type>String</Type>
+						<FormControlExtension
+							i:nil="true" />
+						<DataField>Message</DataField>
+						<DataSource>XAPI_APILogValues</DataSource>
+					</AxFormControl>
+					<AxFormControl xmlns=""
+						i:type="AxFormStringControl">
+						<Name>LogValuesGrid_ErrorMessage</Name>
 						<Type>String</Type>
 						<FormControlExtension
 							i:nil="true" />
 						<DataField>ErrorMessage</DataField>
-						<DataSource>XAPI_APILogTable</DataSource>
+						<DataSource>XAPI_APILogValues</DataSource>
 						<MultiLine>Yes</MultiLine>
 					</AxFormControl>
 				</Controls>
-				<DataSource>XAPI_APILogTable</DataSource>
+				<DataSource>XAPI_APILogValues</DataSource>
 				<MultiSelect>No</MultiSelect>
 				<ShowRowLabels>No</ShowRowLabels>
 				<Style>Tabular</Style>

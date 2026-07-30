@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APIRunner_BrightGetUserRoles</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_APIRunner_BrightGetUserRoles extends XAPI_APIRunnerBase
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>init</Name>
+				<Source><![CDATA[
+    protected void init()
+    {
+        api = XAPI_APIS::GetUserRoles;
+        super();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>postRun</Name>
+				<Source><![CDATA[
+    protected void postRun()
+    {
+        System.String sysResponseText;
+        int           lastRecidPos;
+        int           colonPos, q1, q2;
+        str           segment;
+
+        if (!responseText)
+        {
+            return;
+        }
+
+        // LastIndexOf gives the last "recid" occurrence in the UserRoles array
+        // (the most recently added user role). strScan cannot search for a literal
+        // substring — it scans for any character in a set — so we use System.String.
+        sysResponseText = responseText;
+        lastRecidPos    = sysResponseText.LastIndexOf('"recid"');
+
+        if (lastRecidPos >= 0)
+        {
+            // Convert from 0-based CLR index to 1-based X++ position.
+            segment  = subStr(responseText, lastRecidPos + 1, strLen(responseText) - lastRecidPos);
+            colonPos = strScan(segment, ':', 1, strLen(segment));
+            q1       = strScan(segment, '"', colonPos + 1, strLen(segment) - colonPos);
+            q2       = strScan(segment, '"', q1 + 1,       strLen(segment) - q1);
+            logKey   = 'UserRoles';
+            logValue = subStr(segment, q1 + 1, q2 - q1 - 1);
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>body</Name>
+				<Source><![CDATA[
+    protected str body()
+    {
+        Map configMap = new Map(Types::String, Types::String);
+
+        configMap.insert('<DataAreaId>',  curExt());
+        configMap.insert('<custAccount>', XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount'));
+
+        return this.prepareBody(configMap);
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

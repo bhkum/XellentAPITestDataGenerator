@@ -24,16 +24,28 @@ class XAPI_APIRunner_Installation extends XAPI_APIRunnerBase
 				<Source><![CDATA[
     protected void postRun()
     {
-        EGS_API_DataContract_Response_Installation res;
+        EGS_API_DataContract_Response_Installation  res;
+        str                                         resStatus;
 
         if (!responseText)
         {
             return;
         }
 
-        res      = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response_Installation), responseText);
-        logKey   = "InstNum";
-        logValue = res.parmInstallationNum();
+        res       = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response_Installation), responseText);
+        resStatus = res.parmStatus();
+
+        if (!res.parmInstallationNum())
+        {
+            // API returned HTTP 200 but no InstallationNum was produced — logical failure.
+            status       = XAPI_APIStatus::Error;
+            errorMessage = strFmt("Status %1: %2", resStatus, res.parmMessage());
+        }
+        else
+        {
+            logKey   = "InstNum";
+            logValue = res.parmInstallationNum();
+        }
     }
 
 ]]></Source>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APIRunner_BrightAddUserRole</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_APIRunner_BrightAddUserRole extends XAPI_APIRunnerBase
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>init</Name>
+				<Source><![CDATA[
+    protected void init()
+    {
+        api = XAPI_APIS::AddUserRoles;
+        super();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>postRun</Name>
+				<Source><![CDATA[
+    protected void postRun()
+    {
+        EGS_API_DataContract_Response res;
+
+        if (!responseText)
+        {
+            return;
+        }
+
+        // Both success and failure return HTTP 200 with JSON. The base class regex
+        // incorrectly flags success (non-empty ResponseCode != "Ok") as Error, and
+        // misses failure (empty ResponseCode). Always re-evaluate from parmStatus().
+        res = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+
+        if (!res.parmStatus())
+        {
+            return;
+        }
+
+        if (strLwr(res.parmStatus()) == 'ok')
+        {
+            status       = XAPI_APIStatus::Success;
+            errorMessage = '';
+        }
+        else
+        {
+            status       = XAPI_APIStatus::Error;
+            errorMessage = res.parmMessage();
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>body</Name>
+				<Source><![CDATA[
+    protected str body()
+    {
+        XAPI_APILogValues           ownerLogValues;
+        XAPI_APILogValues           guestLogValues;
+        XAPI_APILogTable            logTable;
+        CustTable                   ownerCustTable;
+        CustTable                   guestCustTable;
+        DirPersonName               guestPersonName;
+        DirPartyContactInfoView     emailInfo;
+        DirPartyContactInfoView     phoneInfo;
+        Map                         configMap;
+
+        configMap = new Map(Types::String, Types::String);
+        configMap.insert('<DataAreaId>', curExt());
+
+        // Owner = most recent CreateCustomer entry (Inviter)
+        select firstonly ownerLogValues
+            order by ownerLogValues.RecId desc
+            where ownerLogValues.FieldName == 'CustAccount'
+            join logTable
+                where logTable.SessionId == ownerLogValues.SessionId
+                   && logTable.Sequence  == ownerLogValues.Sequence
+                   && logTable.ApiName   == XAPI_APIS::CreateCustomer
+                   && logTable.Archived  == NoYes::No;
+        ownerCustTable = CustTable::find(ownerLogValues.FieldValue);
+
+        // Guest = second most recent CreateCustomer entry (Role: guest)
+        select firstonly guestLogValues
+            order by guestLogValues.RecId desc
+            where guestLogValues.RecId     <  ownerLogValues.RecId
+               && guestLogValues.FieldName == 'CustAccount'
+            join logTable
+                where logTable.SessionId == guestLogValues.SessionId
+                   && logTable.Sequence  == guestLogValues.Sequence
+                   && logTable.ApiName   == XAPI_APIS::CreateCustomer
+                   && logTable.Archived  == NoYes::No;
+        guestCustTable = CustTable::find(guestLogValues.FieldValue);
+
+        select firstonly guestPersonName
+            order by guestPersonName.ValidFrom desc
+            where guestPersonName.Person == guestCustTable.Party;
+
+        select firstonly emailInfo
+            where emailInfo.Party     == guestCustTable.Party
+               && emailInfo.Type      == LogisticsElectronicAddressMethodType::Email
+               && emailInfo.IsPrimary == true;
+
+        select firstonly phoneInfo
+            where phoneInfo.Party     == guestCustTable.Party
+               && phoneInfo.Type      == LogisticsElectronicAddressMethodType::Phone
+               && phoneInfo.IsPrimary == true;
+
+        configMap.insert('<FirstName>',                 guestPersonName.FirstName);
+        configMap.insert('<LastName>',                  guestPersonName.LastName);
+        configMap.insert('<Email>',                     emailInfo.Locator);
+        configMap.insert('<Phone>',                     phoneInfo.Locator);
+        configMap.insert('<Name>',                      guestCustTable.name());
+        configMap.insert('<AlternativeCustomerNumber>', guestCustTable.EXU_AlternativeCustomerNumber);
+
+        configMap.insert('<RecId>', ownerCustTable.AccountNum);
+
+        return this.prepareBody(configMap);
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Setup_ContractPart</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_Setup_ContractPart
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Class entry point. The system will call this method when a designated menu 
+    /// is selected or when execution starts and this class is set as the startup class.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
+    public static void main(Args _args)
+    {
+        EXU_DeliveryCategory delCat = "TST_DelCat";
+        EXU_DeliveryGroupNum deliveryGroupNum = "TST_DeliveryGroup";
+        EXU_ProductNum       productNum = "TST_Product";
+        ItemId               itemId = "TST_Item";
+        str                  priceManagementCode = "TST_PM";
+
+        EXU_DeliveryGroupTable deliveryGroupTable, newDeliveryGroupTable;
+        EXU_ProductTable       productTable, newProductTable;
+        InventTable            inventTable;
+        EXU_ProductExtendTable productExtendTable;
+
+        select firstonly deliveryGroupTable;
+        select firstonly newDeliveryGroupTable
+            where newDeliveryGroupTable.DeliveryGroupNum == deliveryGroupNum;
+
+        if (!newDeliveryGroupTable.RecId)
+        {
+            ttsbegin;
+            buf2Buf(deliveryGroupTable, newDeliveryGroupTable);
+            newDeliveryGroupTable.DeliveryCategory   = delCat;
+            newDeliveryGroupTable.DeliveryGroupCode  = EXU_DeliveryGroupCode::RateCode;
+            newDeliveryGroupTable.DeliveryGroupNum   = deliveryGroupNum;
+            newDeliveryGroupTable.DeliveryGroupName  = deliveryGroupNum;
+            newDeliveryGroupTable.EndDate            = dateMax();
+            newDeliveryGroupTable.insert();
+            ttscommit;
+
+            info(strFmt("Inserted DeliveryGroupTable: %1", deliveryGroupNum));
+        }
+
+
+        select firstonly productTable
+            where productTable.RegistrationEndDate == dateNull();
+        select firstonly newProductTable
+            where newProductTable.ProductNum == productNum;
+
+        if (!newProductTable.RecId)
+        {
+            ttsbegin;
+            buf2Buf(productTable, newProductTable);
+            newProductTable.CompanyId                  = curExt();
+            newProductTable.DeliveryCategory           = delCat;
+            newProductTable.ProductNum                 = productNum;
+            newProductTable.DeliveryGroupNum_RateCode  = deliveryGroupNum;
+            newProductTable.insert();
+            ttscommit;
+
+            info(strFmt("Inserted EXU_ProductTable: %1", productNum));
+        }
+
+
+        if (!InventTable::find(itemId))
+        {
+            ttsbegin;
+            inventTable.clear();
+            inventTable.initValue();
+            inventTable.ItemId   = itemId;
+            inventTable.ItemType = ItemType::Item;
+            inventTable.insert();
+            ttscommit;
+
+            info(strFmt("Inserted InventTable: %1", itemId));
+        }
+
+
+        select firstonly productExtendTable
+            where productExtendTable.ProductNum          == productNum
+               && productExtendTable.PriceManagementCode == priceManagementCode;
+
+        if (!productExtendTable.RecId)
+        {
+            ttsbegin;
+            productExtendTable.clear();
+            productExtendTable.initValue();
+            productExtendTable.ProductNum          = productNum;
+            productExtendTable.PriceManagementCode = priceManagementCode;
+            productExtendTable.ProductType         = itemId;
+            productExtendTable.insert();
+            ttscommit;
+
+            info(strFmt("Inserted EXU_ProductExtendTable: %1 | %2",
+                productNum, priceManagementCode));
+        }
+
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

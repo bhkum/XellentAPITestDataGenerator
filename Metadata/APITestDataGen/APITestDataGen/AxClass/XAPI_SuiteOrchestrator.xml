@@ -13,10 +13,10 @@ final class XAPI_SuiteOrchestrator
 				<Source><![CDATA[
     /// <summary>
     /// Runs every test case in the given suite in Sequence order. For each case
-    /// the orchestrator dispatches to three class names stored on the case row:
-    ///   - PreProcessClass        (required) - runnable class, static main(Args)
-    ///   - RunnerClass            (required) - extends XAPI_APIRunnerBase, executes the API call and logs it
-    ///   - PostProcessBatchClass  (optional) - runnable class, static main(Args)
+    /// the orchestrator dispatches to three phases:
+    ///   - PreProcessClass  (required) - runnable class, static main(Args)
+    ///   - RunnerClass      (required) - extends XAPI_APIRunnerBase, executes the API call and logs it
+    ///   - Post-process     (optional) - resolved via XAPI_APIPostProcessorBase::construct(API)
     /// Independent suites continue past failures; Chained suites stop on the first failure.
     /// </summary>
     /// <param name = "_suiteId">Suite to run.</param>
@@ -27,6 +27,7 @@ final class XAPI_SuiteOrchestrator
         XAPI_TestStepContext context;
         XAPI_SuiteType       suiteType;
         boolean              chainBroken;
+        boolean              stepFailed;
 
         select firstonly suite
             where suite.SuiteId == _suiteId;
@@ -49,38 +50,115 @@ final class XAPI_SuiteOrchestrator
                 break;
             }
 
+            stepFailed = false;
             context.setCurrentCase(testCase);
+
+            // --- Pre-process phase ---
+            XAPI_APILogValues preLog;
+            preLog.SessionId = context.parmSessionId();
+            preLog.Sequence  = testCase.Sequence;
+            preLog.LogType   = XAPI_LogType::PreProcess;
 
             try
             {
                 if (testCase.PreProcessClass != '')
                 {
+                    //throw Error("No preprocess class found");
                     XAPI_SuiteOrchestrator::runMain(testCase.PreProcessClass);
                 }
-                else
-                {
-                    throw Error("No preprocess class found");
-                }
 
-                XAPI_SuiteOrchestrator::runStep(testCase.RunnerClass, context);
 
-                if (testCase.PostProcessBatchClass != '')
-                {
-                    XAPI_SuiteOrchestrator::runMain(testCase.PostProcessBatchClass);
-                }
-
-                info(strFmt("Suite %1 - Seq %2 [%3] completed.",
-                    _suiteId, testCase.Sequence, testCase.RunnerClass));
+                preLog.Status  = XAPI_APIStatus::Success;
+                preLog.Message = strFmt("PreProcess %1 completed.", testCase.PreProcessClass);
             }
             catch (Exception::Error)
             {
-                warning(strFmt("Suite %1 - Seq %2 [%3] failed.",
-                    _suiteId, testCase.Sequence, testCase.RunnerClass));
+                preLog.Status       = XAPI_APIStatus::Error;
+                preLog.Message      = strFmt("PreProcess %1 failed.", testCase.PreProcessClass);
+                preLog.ErrorMessage = infolog().text();
 
+                stepFailed = true;
                 if (suiteType == XAPI_SuiteType::Chained)
                 {
                     chainBroken = true;
                 }
+            }
+            preLog.insert();
+
+            // --- API Runner phase (logs its own rows via execute()) ---
+            if (!stepFailed)
+            {
+                XAPI_APIStatus runnerStatus;
+                try
+                {
+                    runnerStatus = XAPI_SuiteOrchestrator::runStep(testCase.RunnerClass, context);
+                }
+                catch (Exception::Error)
+                {
+                    runnerStatus = XAPI_APIStatus::Error;
+                    warning(strFmt("Suite %1 - Seq %2 [%3] runner failed.",
+                        _suiteId, testCase.Sequence, testCase.RunnerClass));
+                }
+
+                if (runnerStatus == XAPI_APIStatus::Error)
+                {
+                    stepFailed = true;
+                    if (suiteType == XAPI_SuiteType::Chained)
+                    {
+                        chainBroken = true;
+                    }
+                }
+            }
+            else
+            {
+                XAPI_APILogValues notRunLog;
+                notRunLog.SessionId = context.parmSessionId();
+                notRunLog.Sequence  = testCase.Sequence;
+                notRunLog.LogType   = XAPI_LogType::APIRunner;
+                notRunLog.Status    = XAPI_APIStatus::NotRun;
+                notRunLog.insert();
+            }
+
+            // --- Post-process phase ---
+            if (testCase.PostProcessBatchClass != '')
+            {
+                XAPI_APILogValues postLog;
+                postLog.SessionId = context.parmSessionId();
+                postLog.Sequence  = testCase.Sequence;
+                postLog.LogType   = XAPI_LogType::PostProcess;
+
+                if (!stepFailed)
+                {
+                    try
+                    {
+                        XAPI_SuiteOrchestrator::runPostStep(testCase.PostProcessBatchClass);
+
+                        postLog.Status  = XAPI_APIStatus::Success;
+                        postLog.Message = strFmt("PostProcess %1 completed.", testCase.PostProcessBatchClass);
+                    }
+                    catch (Exception::Error)
+                    {
+                        postLog.Status       = XAPI_APIStatus::Error;
+                        postLog.Message      = strFmt("PostProcess %1 failed.", testCase.PostProcessBatchClass);
+                        postLog.ErrorMessage = infolog().text();
+
+                        if (suiteType == XAPI_SuiteType::Chained)
+                        {
+                            chainBroken = true;
+                        }
+                    }
+                }
+                else
+                {
+                    postLog.Status = XAPI_APIStatus::NotRun;
+                }
+                postLog.insert();
+            }
+
+            if (!stepFailed)
+            {
+                info(strFmt("Suite %1 - Seq %2 [%3] completed.",
+                    _suiteId, testCase.Sequence, testCase.RunnerClass));
             }
         }
 
@@ -123,7 +201,7 @@ final class XAPI_SuiteOrchestrator
     /// Instantiates the named class (must extend XAPI_APIRunnerBase) and invokes
     /// execute(context). Throws if the class can't be resolved or doesn't conform.
     /// </summary>
-    private static void runStep(str _className, XAPI_TestStepContext _ctx)
+    private static XAPI_APIStatus runStep(str _className, XAPI_TestStepContext _ctx)
     {
         ClassId            classId;
         SysDictClass       dictClass;
@@ -147,7 +225,32 @@ final class XAPI_SuiteOrchestrator
             throw error(strFmt("Class %1 does not extend XAPI_APIRunnerBase.", _className));
         }
 
-        runner.execute(_ctx);
+        return runner.execute(_ctx);
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runPostStep</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Instantiates the named post-process class and invokes its run() method.
+    /// </summary>
+    private static void runPostStep(str _className)
+    {
+        ClassId      classId;
+        SysDictClass dictClass;
+        Object       obj;
+
+        classId = className2Id(_className);
+        if (!classId)
+        {
+            throw error(strFmt("Class %1 not found.", _className));
+        }
+
+        dictClass = new SysDictClass(classId);
+        obj       = dictClass.makeObject();
+        dictClass.callObject('run', obj);
     }
 
 ]]></Source>

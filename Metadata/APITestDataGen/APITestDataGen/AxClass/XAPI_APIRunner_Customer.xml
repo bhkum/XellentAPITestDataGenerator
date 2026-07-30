@@ -31,7 +31,22 @@ class XAPI_APIRunner_Customer extends XAPI_APIRunnerBase
             return;
         }
 
-        res      = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+        res = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+
+        // Base class sendPostRequest() may have already flagged an error via
+        // the "ResponseCode" regex — if so, leave logKey/logValue empty.
+        if (status == XAPI_APIStatus::Error)
+        {
+            return;
+        }
+
+        if (res.parmStatus() && strLwr(res.parmStatus()) != 'ok')
+        {
+            status       = XAPI_APIStatus::Error;
+            errorMessage = res.parmMessage();
+            return;
+        }
+
         logKey   = "CustAccount";
         logValue = res.parmMessage();
     }

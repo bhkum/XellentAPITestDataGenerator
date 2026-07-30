@@ -16,18 +16,6 @@
 				</AxMenuElement>
 				<AxMenuElement xmlns=""
 					i:type="AxMenuElementMenuItem">
-					<Name>XAPI_API_Delete</Name>
-					<MenuItemName>XAPI_API_Delete</MenuItemName>
-					<MenuItemType>Action</MenuItemType>
-				</AxMenuElement>
-				<AxMenuElement xmlns=""
-					i:type="AxMenuElementMenuItem">
-					<Name>XAPI_API_Create</Name>
-					<MenuItemName>XAPI_API_Create</MenuItemName>
-					<MenuItemType>Action</MenuItemType>
-				</AxMenuElement>
-				<AxMenuElement xmlns=""
-					i:type="AxMenuElementMenuItem">
 					<Name>XAPI_TestSuiteForm</Name>
 					<MenuItemName>XAPI_TestSuiteForm</MenuItemName>
 				</AxMenuElement>
@@ -50,15 +38,8 @@
 				</AxMenuElement>
 				<AxMenuElement xmlns=""
 					i:type="AxMenuElementMenuItem">
-					<Name>XAPI_Setup_EGS_API_newCustomer</Name>
-					<MenuItemName>XAPI_Setup_EGS_API_newCustomer</MenuItemName>
-					<MenuItemType>Action</MenuItemType>
-				</AxMenuElement>
-				<AxMenuElement xmlns=""
-					i:type="AxMenuElementMenuItem">
-					<Name>XAPI_Teardown_EGS_API_newCustomer</Name>
-					<MenuItemName>XAPI_Teardown_EGS_API_newCustomer</MenuItemName>
-					<MenuItemType>Action</MenuItemType>
+					<Name>XAPI_ExecuteScripts</Name>
+					<MenuItemName>XAPI_ExecuteScripts</MenuItemName>
 				</AxMenuElement>
 			</Elements>
 		</AxMenuElement>

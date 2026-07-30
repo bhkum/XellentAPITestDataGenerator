@@ -15,6 +15,8 @@ Project("{FC65038C-1B2F-41E1-A629-BED71D161FFF}") = "TestSuite-v1 (VAR) [API Tes
 EndProject
 Project("{FC65038C-1B2F-41E1-A629-BED71D161FFF}") = "Refactor_v2 (VAR) [API Test Data Gen]", "Refactor_v2\Refactor_v2.rnrproj", "{CC8CBF12-93AB-46D7-9DB2-86223DA50672}"
 EndProject
+Project("{FC65038C-1B2F-41E1-A629-BED71D161FFF}") = "DelTemp (VAR) [API Test Data Gen]", "DelTemp\DelTemp.rnrproj", "{5BB09D64-63B2-43E7-8566-36086E8BADB1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,8 @@ Global
 		{992F323D-ECA4-433F-908A-B23498E54159}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CC8CBF12-93AB-46D7-9DB2-86223DA50672}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CC8CBF12-93AB-46D7-9DB2-86223DA50672}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BB09D64-63B2-43E7-8566-36086E8BADB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BB09D64-63B2-43E7-8566-36086E8BADB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

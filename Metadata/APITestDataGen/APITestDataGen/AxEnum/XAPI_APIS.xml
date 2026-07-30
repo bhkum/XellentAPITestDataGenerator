@@ -20,7 +20,7 @@
 		</AxEnumValue>
 		<AxEnumValue>
 			<Name>CreateCustContactInfo</Name>
-			<Label>Contact Info</Label>
+			<Label> Customer Contact Info</Label>
 			<Value>3</Value>
 		</AxEnumValue>
 		<AxEnumValue>
@@ -32,6 +32,181 @@
 			<Name>CreateContractPart</Name>
 			<Label>Contract Part</Label>
 			<Value>5</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>AddUserRoles</Name>
+			<Label>Add User Roles</Label>
+			<Value>6</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetAgreements</Name>
+			<Label>Get Agreements</Label>
+			<Value>7</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetCost</Name>
+			<Label>Cost</Label>
+			<Value>8</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetLocations</Name>
+			<Label>Locations</Label>
+			<Value>9</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetMeasurements</Name>
+			<Label>Measurements</Label>
+			<Value>10</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetProducts</Name>
+			<Label>Products</Label>
+			<Value>11</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetUserRoles</Name>
+			<Label>User Roles</Label>
+			<Value>12</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>RemoveUserRoles</Name>
+			<Label>Remove User Roles</Label>
+			<Value>13</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>SearchCustomers</Name>
+			<Label>Search Customers</Label>
+			<Value>14</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>UpdateUser</Name>
+			<Label>Update User</Label>
+			<Value>15</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>CreateCustomerTopic</Name>
+			<Label>Customer Topic</Label>
+			<Value>16</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>CreateCustInvoiceAddress</Name>
+			<Label>Customer Invoice Address</Label>
+			<Value>17</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>CreateCampaignReply</Name>
+			<Label>Campaign Reply</Label>
+			<Value>18</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>CreateAgreement</Name>
+			<Label>Create Agreement</Label>
+			<Value>19</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetTimeValuesPerTimeResolution</Name>
+			<Label>Time Values </Label>
+			<Value>20</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetCustomers</Name>
+			<Label>Get Customers</Label>
+			<Value>21</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetInstallations</Name>
+			<Label>Get Installations</Label>
+			<Value>22</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetInstallationDetail</Name>
+			<Label>Get Installation Detail</Label>
+			<Value>23</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetContracts</Name>
+			<Label>Get Contracts</Label>
+			<Value>24</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetProductAndPrices</Name>
+			<Label>Get Product And Prices</Label>
+			<Value>25</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetSubscriptionTypes</Name>
+			<Label>Get Subscription Types</Label>
+			<Value>26</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetSubscriptions</Name>
+			<Label>Get Subscriptions</Label>
+			<Value>27</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetTimeValues</Name>
+			<Label>Get Time Values</Label>
+			<Value>28</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBillingAddressInfo</Name>
+			<Label>Get Billing Address Info</Label>
+			<Value>29</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetConsDevelopmentSum</Name>
+			<Label>Get Cons Development Sum</Label>
+			<Value>30</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetMeterReadings</Name>
+			<Label>Get Meter Readings</Label>
+			<Value>31</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetPurchaseDetail</Name>
+			<Label>Get Purchase Detail</Label>
+			<Value>32</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetPurchases</Name>
+			<Label>Get Purchases</Label>
+			<Value>33</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBusRelActivities</Name>
+			<Label>Get BusRel Activities</Label>
+			<Value>34</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBusRelDocuments</Name>
+			<Label>Get BusRel Documents</Label>
+			<Value>35</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBusRelContactPerson</Name>
+			<Label>Get BusRel Contact Person</Label>
+			<Value>36</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBusRelExpectedConsumption</Name>
+			<Label>Get BusRel Expected Consumption</Label>
+			<Value>37</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBusRelInfo</Name>
+			<Label>Get BusRel Info</Label>
+			<Value>38</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBusRelInstallationInfo</Name>
+			<Label>Get BusRel Installation Info</Label>
+			<Value>39</Value>
+		</AxEnumValue>
+		<AxEnumValue>
+			<Name>GetBusRelResponsibilitiesInfo</Name>
+			<Label>Get BusRel Responsibilities Info</Label>
+			<Value>40</Value>
 		</AxEnumValue>
 	</EnumValues>
 	<IsExtensible>true</IsExtensible>

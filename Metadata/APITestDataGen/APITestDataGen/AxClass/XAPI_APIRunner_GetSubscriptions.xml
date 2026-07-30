@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_APIRunner_GetSubscriptions</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_APIRunner_GetSubscriptions extends XAPI_APIRunnerBase
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>init</Name>
+				<Source><![CDATA[
+    protected void init()
+    {
+        api = XAPI_APIS::GetSubscriptions;
+        super();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>postRun</Name>
+				<Source><![CDATA[
+    protected void postRun()
+    {
+        EGS_API_DataContract_Response res;
+
+        if (!responseText)
+        {
+            return;
+        }
+
+        res = FormJsonSerializer::deserializeObject(classNum(EGS_API_DataContract_Response), responseText);
+
+        if (status == XAPI_APIStatus::Error)
+        {
+            return;
+        }
+
+        if (res.parmStatus() && strLwr(res.parmStatus()) != 'ok')
+        {
+            status       = XAPI_APIStatus::Error;
+            errorMessage = res.parmMessage();
+            return;
+        }
+
+        logKey   = "Subscriptions";
+        logValue = res.parmMessage();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>body</Name>
+				<Source><![CDATA[
+    protected str body()
+    {
+        Map configMap;
+
+        configMap = new Map(Types::String, Types::String);
+        configMap.insert('<DataAreaId>',  curExt());
+        configMap.insert('<CustAccount>', XAPI_APILogTable::getValueByKey(XAPI_APIS::CreateCustomer, 'CustAccount'));
+
+        return this.prepareBody(configMap);
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>
