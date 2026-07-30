@@ -5,7 +5,18 @@
 		<Declaration><![CDATA[
 abstract class XAPI_APIRunnerBase
 {
+    protected XAPI_APIConfigurations apiConfig;
     
+    // API
+    private str tenantId = XAPI_AutomationHelper::tenantId;
+    private str clientId = XAPI_AutomationHelper::clientId;
+    private str clientSecret = XAPI_AutomationHelper::clientSecret;
+    protected str  resourceUrl = XAPI_AutomationHelper::resourceUrl;
+
+    protected str responseText;
+    protected XAPI_APIS api;
+   // protected str body;
+
 }
 ]]></Declaration>
 		<Methods>
@@ -17,9 +28,10 @@ abstract class XAPI_APIRunnerBase
 ]]></Source>
 			</Method>
 			<Method>
-				<Name>runAPI</Name>
+				<Name>body</Name>
 				<Source><![CDATA[
-    abstract protected void runAPI(){}
+    // api 
+    abstract protected str body() {}
 
 ]]></Source>
 			</Method>
@@ -36,6 +48,27 @@ abstract class XAPI_APIRunnerBase
 ]]></Source>
 			</Method>
 			<Method>
+				<Name>init</Name>
+				<Source><![CDATA[
+    protected void init()
+    {
+        select firstonly apiConfig 
+            where apiConfig.API == api;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>runAPI</Name>
+				<Source><![CDATA[
+    protected void runAPI()
+    {
+        this.sendPostRequest();
+    }
+
+]]></Source>
+			</Method>
+			<Method>
 				<Name>postRun</Name>
 				<Source><![CDATA[
     protected void postRun() {}
@@ -47,16 +80,175 @@ abstract class XAPI_APIRunnerBase
 				<Source><![CDATA[
     public static XAPI_APIRunnerBase construct(XAPI_APIS _api)
     {
+        XAPI_APIRunnerBase base; 
         switch(_api)
         {
             case XAPI_APIS::CreateCustomer:
-                throw error("dd");
+                base = new XAPI_APIRunner_Customer();
                 break;
 
             default:
                 throw error("Invalid arguement");
 
         }
+        return base;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>prepareBody</Name>
+				<Source><![CDATA[
+    // call api section
+    protected str prepareBody(Map _fields)
+    {
+        XAPI_APIConfigurations conif;
+        select firstonly conif where conif.API == api;
+        str body = conif.JSON;
+        MapEnumerator enumerator = _fields.getEnumerator();
+        while (enumerator.moveNext())
+        {
+            str placeholder = enumerator.currentKey();
+            str value = enumerator.currentValue();
+            body = strReplace(body, placeholder, value);
+        }
+        return body;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>sendPostRequest</Name>
+				<Source><![CDATA[
+    protected void sendPostRequest()
+    {
+        str bearerToken;
+        
+        if (strLen(bearerToken) == 0)
+        {
+            bearerToken = this.GetAccessToken();
+
+            if (strLen(bearerToken) == 0)
+            {
+                responseText = '';
+            }
+        }
+
+        System.Net.HttpWebRequest request;
+        System.Net.HttpWebResponse response;
+        System.IO.StreamWriter streamWriter;
+        System.IO.StreamReader streamReader;
+
+        try
+        {
+            request = System.Net.WebRequest::Create(apiConfig.URL) as System.Net.HttpWebRequest;
+            request.set_Method("POST");
+            request.set_ContentType("application/json");
+
+            request.get_Headers().Set("Authorization", "Bearer " + bearerToken);
+
+            streamWriter = new System.IO.StreamWriter(request.GetRequestStream());
+            streamWriter.Write(this.body());
+            streamWriter.Flush();
+            streamWriter.Close();
+
+            response = request.GetResponse() as System.Net.HttpWebResponse;
+            streamReader = new System.IO.StreamReader(response.GetResponseStream());
+
+            responseText = streamReader.ReadToEnd();
+            streamReader.Close();
+        }
+        catch (Exception::CLRError)
+        {
+            System.Exception ex = CLRInterop::getLastException();
+            System.Net.WebException webEx;
+            System.IO.StreamReader errorReader;
+            str errorText = "";
+
+            if (ex is System.Net.WebException)
+            {
+                webEx = ex as System.Net.WebException;
+
+                if (webEx.get_Response() != null)
+                {
+                    errorReader = new System.IO.StreamReader(webEx.get_Response().GetResponseStream());
+                    errorText = errorReader.ReadToEnd();
+                    errorReader.Close();
+                }
+            }
+
+        }
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>GetAccessToken</Name>
+				<Source><![CDATA[
+    protected str GetAccessToken()
+    {
+        System.Net.HttpWebRequest request;
+        System.Net.HttpWebResponse response;
+        System.IO.StreamWriter streamWriter;
+        System.IO.StreamReader streamReader;
+        str url = "https://login.microsoftonline.com/" + tenantId + "/oauth2/token";
+        System.Text.RegularExpressions.Regex regex;
+        System.Text.RegularExpressions.Match match;
+
+        System.Uri uri = new System.Uri("http://dummy"); // helper for encoding
+        str encodedSecret = System.Net.WebUtility::UrlEncode(clientSecret);
+        str postData = "grant_type=client_credentials"
+           + "&client_id=" + clientId
+           + "&client_secret=" + encodedSecret
+           + "&resource=" + resourceUrl;
+
+        try
+        {
+            request = System.Net.WebRequest::Create(url) as System.Net.HttpWebRequest;
+            request.set_Method("POST");
+            request.set_ContentType("application/x-www-form-urlencoded");
+
+            streamWriter = new System.IO.StreamWriter(request.GetRequestStream());
+            streamWriter.Write(postData);
+            streamWriter.Flush();
+            streamWriter.Close();
+
+            response = request.GetResponse() as System.Net.HttpWebResponse;
+            streamReader = new System.IO.StreamReader(response.GetResponseStream());
+            responseText = streamReader.ReadToEnd();
+            streamReader.Close();
+
+        }
+        catch (Exception::CLRError)
+        {
+            System.Exception ex = CLRInterop::getLastException();
+            System.Net.WebException webEx;
+            System.IO.StreamReader errorReader;
+            str errorText = "";
+
+            if (ex is System.Net.WebException)
+            {
+                webEx = ex as System.Net.WebException;
+
+                if (webEx.get_Response())
+                {
+                    errorReader = new System.IO.StreamReader(webEx.get_Response().GetResponseStream());
+                    errorText = errorReader.ReadToEnd();
+                    errorReader.Close();
+                }
+            }
+            return "";
+        }
+
+        regex = new System.Text.RegularExpressions.Regex("\"access_token\"\\s*:\\s*\"([^\"]+)\"");
+        match = regex.Match(responseText);
+
+        if (match.Success)
+        {
+            return match.Groups.get_Item(1).get_Value();
+        }
+
+        return "";
     }
 
 ]]></Source>
