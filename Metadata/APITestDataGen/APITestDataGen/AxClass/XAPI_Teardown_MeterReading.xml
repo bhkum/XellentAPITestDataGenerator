@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Teardown_MeterReading</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_Teardown_MeterReading
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Class entry point. The system will call this method when a designated menu 
+    /// is selected or when execution starts and this class is set as the startup class.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
+    public static void main(Args _args)
+    {
+        // === INPUTS — must match the EXU_MeterGen run you want to undo ===
+        EXU_MeterNum          meterNum         = '';       // Enter the meter number for the meter that is mounted on the installation number to be deleted
+        EXU_InstNum           installationNum  = '19739';  // Enter the installation number to be deleted
+        EXU_MeterType         meterType        = 'TST_MT';
+        EXU_GroupNum          readingMethodNum = 'TST_RMN';
+
+        EXU_CompanyId          companyId = curExt();
+        EXU_DeliveryCategory   deliveryCategory;
+        EXU_TestGroupNum       testGroupNum;
+
+        EXU_MeterTable                  meterTable;
+        EXU_MeterCounterTable           meterCounterTable;
+        EXU_MeterStatusLog              meterStatusLog;
+        EXU_Relations                   relations;
+        EXU_MeterJournalTable           journalTable;
+        EXU_MeterJournalTrans           journalTrans;
+        EXU_MeterJournalTrans_Readings  journalReadings;
+        EXU_TestGroupTable              testGroupTable;
+        EXU_TestGroupExtendTable        testGroupExtendTable;
+        EGS_ReadingImportParameter      readingImportParam;
+        EXU_GroupTable                  groupTable;
+
+        container journalIds;
+        int       i;
+
+        deliveryCategory = EXU_MeterJournalTrans::findUniqueDeliveryCategory(installationNum);
+        if (!deliveryCategory)
+        {
+            error(strFmt("No unique delivery category found for installation %1.", installationNum));
+            return;
+        }
+
+        testGroupNum = EXU_DeliveryRelationTable::Find(deliveryCategory, companyId).TestGroupNum;
+
+        // 1 — journal readings
+        journalIds = conNull();
+        while select journalTrans
+         where journalTrans.MeterNum == meterNum
+         exists join journalTable
+         where journalTable.JournalId   == journalTrans.JournalId
+            && journalTable.JournalType == EXU_MeterJournalType::Mounting
+        {
+            journalIds += [journalTrans.JournalId];
+        }
+
+        for (i = 1; i <= conLen(journalIds); i++)
+        {
+            EXU_MeterJournalId journalId = conPeek(journalIds, i);
+
+            ttsbegin;
+            delete_from journalReadings
+             where journalReadings.MeterJournalId == journalId;
+            ttscommit;
+
+            ttsbegin;
+            delete_from journalTrans
+             where journalTrans.JournalId == journalId;
+            ttscommit;
+
+            // doDelete() bypasses the custom handler that blocks deletion of posted journals
+            select forupdate journalTable
+             where journalTable.JournalId == journalId;
+            if (journalTable.RecId)
+            {
+                ttsbegin;
+                journalTable.doDelete();
+                ttscommit;
+                info(strFmt("Journal %1 deleted.", journalId));
+            }
+        }
+
+        // 2 — EXU_Relations
+        ttsbegin;
+        while select forupdate relations
+         where relations.DeliveryCategory == deliveryCategory
+            && relations.CompanyId        == companyId
+            && relations.MeterNum         == meterNum
+        {
+            relations.doDelete();
+        }
+        ttscommit;
+
+        // 3 — EXU_MeterStatusLog
+        ttsbegin;
+        delete_from meterStatusLog
+         where meterStatusLog.DeliveryCategory == deliveryCategory
+            && meterStatusLog.CompanyId        == companyId
+            && meterStatusLog.MeterNum         == meterNum;
+        ttscommit;
+
+        // 4 — EMS_QuantityCode_MeterTimeFrame (conditionally inserted by generator — SE + non-gas only)
+        //     Must be deleted before the billing counter, which holds the MeterTimeFrame_SE key.
+        if (EMS_Toolbox::isEDIEL_SE() && !EXU_DeliveryCategoryTable::isDeliveryTypeGas(deliveryCategory))
+        {
+            EXU_MeterCounterTable           billingCounterRef;
+            EMS_QuantityCode_MeterTimeFrame qcMeterTimeFrame;
+
+            select firstonly billingCounterRef
+             where billingCounterRef.MeterNum         == meterNum
+                && billingCounterRef.DeliveryCategory == deliveryCategory
+                && billingCounterRef.CompanyId        == companyId
+                && billingCounterRef.CounterType      == EXU_CounterType::Billing;
+
+            if (billingCounterRef.RecId)
+            {
+                select firstonly forupdate qcMeterTimeFrame
+                 where qcMeterTimeFrame.DeliveryCategory  == deliveryCategory
+                    && qcMeterTimeFrame.CompanyId         == companyId
+                    && qcMeterTimeFrame.MeterTimeFrame_SE == billingCounterRef.EMS_MeterTimeFrame_SE
+                    && qcMeterTimeFrame.QuantityCodeValue == billingCounterRef.QuantityCodeValue;
+                if (qcMeterTimeFrame.RecId)
+                {
+                    ttsbegin;
+                    qcMeterTimeFrame.delete();
+                    ttscommit;
+                    info(strFmt("EMS_QuantityCode_MeterTimeFrame deleted for %1.", deliveryCategory));
+                }
+            }
+        }
+
+        // 5 — EXU_MeterCounterTable (billing counter inserted in step 6 of generator)
+        ttsbegin;
+        delete_from meterCounterTable
+         where meterCounterTable.DeliveryCategory == deliveryCategory
+            && meterCounterTable.CompanyId        == companyId
+            && meterCounterTable.MeterNum         == meterNum;
+        ttscommit;
+
+        // 6 — EXU_MeterTable
+        // EXU_MeterTable.delete() manages its own tts; Restricted actions on
+        // EXU_MeterJournalTrans / EXU_Relations pass because those were cleared above.
+        select forupdate meterTable
+         where meterTable.MeterNum         == meterNum
+            && meterTable.DeliveryCategory == deliveryCategory
+            && meterTable.CompanyId        == companyId;
+        if (meterTable.RecId)
+        {
+            meterTable.delete();
+            info(strFmt("Meter %1 deleted.", meterNum));
+        }
+
+        // 7 — EXU_TestGroupExtendTable (inserted in step 5 of generator)
+        select firstonly forupdate testGroupExtendTable
+         where testGroupExtendTable.DeliveryCategory   == deliveryCategory
+            && testGroupExtendTable.CompanyId          == companyId
+            && testGroupExtendTable.TestGroupNum       == testGroupNum
+            && testGroupExtendTable.MeterType          == meterType
+            && testGroupExtendTable.SharedMeterStockId == '';
+        if (testGroupExtendTable.RecId)
+        {
+            ttsbegin;
+            testGroupExtendTable.delete();
+            ttscommit;
+            info(strFmt("EXU_TestGroupExtendTable deleted: %1 / %2.", testGroupNum, meterType));
+        }
+
+        // 8 — EXU_TestGroupTable (inserted in step 4 of generator, Name set by script)
+        select firstonly forupdate testGroupTable
+         where testGroupTable.TestGroupNum     == testGroupNum
+            && testGroupTable.DeliveryCategory == deliveryCategory
+            && testGroupTable.CompanyId        == companyId
+            && testGroupTable.Name             == strFmt('Script test group (%1)', testGroupNum);
+        if (testGroupTable.RecId)
+        {
+            ttsbegin;
+            testGroupTable.delete();
+            ttscommit;
+            info(strFmt("EXU_TestGroupTable deleted: %1.", testGroupNum));
+        }
+
+        // 9 — EGS_ReadingImportParameter (inserted in step 7 of generator)
+        readingImportParam = EGS_ReadingImportParameter::find(
+         EXU_ReadingsImportType::Internet, deliveryCategory, companyId, true);
+        if (readingImportParam.RecId)
+        {
+            ttsbegin;
+            readingImportParam.delete();
+            ttscommit;
+            info(strFmt("EGS_ReadingImportParameter deleted for %1.", deliveryCategory));
+        }
+
+        // 10 — EXU_GroupTable ReadingMethod (inserted in step 8 of generator, GroupName set by script)
+        select firstonly forupdate groupTable
+         where groupTable.GroupCode == EXU_GroupCode::ReadingMethod
+            && groupTable.GroupNum  == readingMethodNum
+            && groupTable.GroupName == strFmt('Test reading method (%1)', readingMethodNum);
+        if (groupTable.RecId)
+        {
+            ttsbegin;
+            groupTable.delete();
+            ttscommit;
+            info(strFmt("EXU_GroupTable deleted: ReadingMethod / %1.", readingMethodNum));
+        }
+
+        info("Cleanup complete.");
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

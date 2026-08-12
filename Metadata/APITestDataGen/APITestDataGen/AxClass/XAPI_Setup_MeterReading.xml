@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Setup_MeterReading</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+internal final class XAPI_Setup_MeterReading
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Class entry point. The system will call this method when a designated menu 
+    /// is selected or when execution starts and this class is set as the startup class.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
+    public static void main(Args _args)
+    {
+        str apiName = enum2str(XAPI_APIS::CreateMeterReading);
+
+        // InstNum is seeded into XAPI_KeyValueMapping before this script runs (pre-processing step),
+        // not written via XAPI_APILogTable/archive — read it the same way deliveryCategory is read below.
+        EXU_InstNum           installationNum   =   XAPI_AutomationHelper::getKeyValue(enum2str(XAPI_APIS::CreateMeterReading), 'InstNum');
+        Transdate             mountingDate      = today();
+        EXU_QuantityCodeValue quantityCodeValue = 'kWh';
+        EXU_GroupNum          readingMethodNum  = 'TST_RMN';
+
+        EXU_CompanyId               companyId         = curExt();
+
+        // DeliveryCategory - not created here, sourced from the value the Installation setup logged
+        EXU_DeliveryCategory        deliveryCategory  = XAPI_AutomationHelper::getKeyValue(enum2str(XAPI_APIS::CreateInstallation), 'deliveryCategory');
+        EXU_DelPointNum             delPointNum;
+        EXU_TestGroupNum            testGroupNum;
+        EXU_MeterNum                meterNum;
+        EXU_MeterTable              meterTemplate;
+
+        EXU_TestGroupTable          testGroupTable;
+        EXU_TestGroupExtendTable    testGroupExtendTable;
+
+        EXU_MeterJournalFactory                     factory;
+        EXU_MeterJournal                            journal;
+        EXU_MeterJournalTransaction                 trans;
+        EXU_MeterJournalTrans                       transData;
+        EXU_MeterJrnlApproverGroup                  approvers;  // null = no approver rules
+
+        EXU_MeterJournalReadingList                 readingList;
+        EXU_MeterJournalReadingListEnumerator       readingEnum;
+        EXU_MeterJournalReading                     reading;
+
+        XAPI_AutomationHelper::logKeyValue(apiName, 'deliveryCategory', deliveryCategory);
+
+        delPointNum = EXU_MeterJournalTrans::findUniqueDelPoint(deliveryCategory, companyId, installationNum);
+        if (!delPointNum)
+        {
+            error(strFmt("No unique delivery point found for installation %1 / company %2.", installationNum, companyId));
+            return;
+        }
+
+        meterTemplate.DeliveryCategory  = deliveryCategory;
+        meterTemplate.CompanyId         = companyId;
+        meterTemplate.MeterStatus       = EXU_MeterStatus::Available;
+        meterTemplate.PurchaseDate      = str2Date('01/01/2026', 123);
+        meterTemplate.FabricationYear   = '2026';
+        meterTemplate.MeterType         = 'TST_MT';
+
+
+        ttsbegin;
+        meterTemplate.createMeters(meterTemplate, '', 2);
+        ttscommit;
+
+        meterNum = meterTemplate.MeterNum;
+        info(strFmt("Generated MeterNum: %1", meterNum));
+
+        XAPI_AutomationHelper::logKeyValue(apiName, 'meterNum', meterNum);
+
+        XAPI_APILogTable  meterMasterLog;
+        XAPI_APILogValues meterLog;
+        guid              meterSessionId = newGuid();
+
+        meterMasterLog.SessionId = meterSessionId;
+        meterMasterLog.ApiName   = XAPI_APIS::CreateMeterReading;
+        meterMasterLog.Status    = XAPI_APIStatus::Success;
+        meterMasterLog.insert();
+
+        meterLog.SessionId  = meterSessionId;
+        meterLog.Sequence   = 0;
+        meterLog.LogType    = XAPI_LogType::PreProcess;
+        meterLog.FieldName  = 'meterNum';
+        meterLog.FieldValue = meterNum;
+        meterLog.Status     = XAPI_APIStatus::Success;
+        meterLog.insert();
+
+        testGroupNum = EXU_MeterTable::find(meterNum, deliveryCategory, companyId).TestGroupNum;
+        if (!testGroupNum)
+        {
+            testGroupNum = EXU_DeliveryRelationTable::Find(deliveryCategory, companyId).TestGroupNum;
+        }
+        if (!testGroupNum)
+        {
+            error(strFmt("Cannot determine TestGroupNum for meter %1 / delivery category %2.",
+             meterNum, deliveryCategory));
+            return;
+        }
+
+        if (!EXU_TestGroupTable::exist(testGroupNum, deliveryCategory, companyId, ''))
+        {
+            ttsbegin;
+            testGroupTable.clear();
+            testGroupTable.TestGroupNum      = testGroupNum;
+            testGroupTable.DeliveryCategory  = deliveryCategory;
+            testGroupTable.CompanyId         = companyId;
+            testGroupTable.Name              = strFmt('Script test group (%1)', testGroupNum);
+            testGroupTable.StartDate         = str2Date('01/01/2000', 123);
+            testGroupTable.EndDate           = str2Date('31/12/2099', 123);
+            testGroupTable.MaximumQty        = 9999;
+            testGroupTable.insert();
+            ttscommit;
+            info(strFmt("EXU_TestGroupTable inserted: %1", testGroupNum));
+        }
+        else
+        {
+            testGroupTable = EXU_TestGroupTable::find(testGroupNum, deliveryCategory, companyId, '');
+            if (testGroupTable.MaximumQty == 0)
+            {
+                ttsbegin;
+                testGroupTable = EXU_TestGroupTable::find(testGroupNum, deliveryCategory, companyId, '', true);
+                testGroupTable.MaximumQty = 9999;
+                testGroupTable.update();
+                ttscommit;
+                info(strFmt("EXU_TestGroupTable MaximumQty updated to 9999 for: %1", testGroupNum));
+            }
+
+        }
+
+        select firstonly testGroupExtendTable
+    where testGroupExtendTable.DeliveryCategory   == deliveryCategory
+    && testGroupExtendTable.CompanyId          == companyId
+    && testGroupExtendTable.TestGroupNum       == testGroupNum
+    && testGroupExtendTable.MeterType          == meterTemplate.MeterType
+    && testGroupExtendTable.SharedMeterStockId == '';
+
+        if (!testGroupExtendTable.RecId)
+        {
+            ttsbegin;
+            testGroupExtendTable.clear();
+            testGroupExtendTable.TestGroupNum       = testGroupNum;
+            testGroupExtendTable.DeliveryCategory   = deliveryCategory;
+            testGroupExtendTable.CompanyId          = companyId;
+            testGroupExtendTable.MeterType          = meterTemplate.MeterType;
+            testGroupExtendTable.SharedMeterStockId = '';
+            testGroupExtendTable.insert();
+            ttscommit;
+            info(strFmt("EXU_TestGroupExtendTable inserted: %1 / MeterType: %2", testGroupNum, meterTemplate.MeterType));
+        }
+
+
+        {
+            EXU_MeterCounterTable   billingCounter;
+            EXU_CounterNum          nextCounterNum;
+
+            select firstonly billingCounter
+        where billingCounter.MeterNum         == meterNum
+        && billingCounter.DeliveryCategory == deliveryCategory
+        && billingCounter.CompanyId        == companyId
+        && billingCounter.CounterType      == EXU_CounterType::Billing;
+
+            if (!billingCounter.RecId)
+            {
+                if (!quantityCodeValue)
+                {
+                    error(strFmt("QuantityCodeValue is not set. Set quantityCodeValue for delivery category %1 and retry.", deliveryCategory));
+                    return;
+                }
+
+                nextCounterNum = EXU_MeterCounterTable::getMaxCounterNum(meterNum, deliveryCategory, companyId);
+                // DeliveryCategory and CompanyId must be set before initValue() so initValuePost()
+                // resolves EMS_MeterTimeFrame_SE against the correct delivery category utility type.
+                billingCounter.clear();
+                billingCounter.DeliveryCategory      = deliveryCategory;
+                billingCounter.CompanyId             = companyId;
+                billingCounter.initValue();
+                billingCounter.MeterNum              = meterNum;
+                billingCounter.CounterNum            = nextCounterNum;
+                billingCounter.QuantityCodeValue     = quantityCodeValue;
+                billingCounter.CounterType           = EXU_CounterType::Billing;
+                billingCounter.NumberSize            = 7;
+
+                if (EMS_Toolbox::isEDIEL_SE() &&
+            !EXU_DeliveryCategoryTable::isDeliveryTypeGas(deliveryCategory) &&
+            !EMS_QuantityCode_MeterTimeFrame::find(deliveryCategory, companyId, billingCounter.EMS_MeterTimeFrame_SE).RecId)
+                {
+                    EMS_QuantityCode_MeterTimeFrame qcMeterTimeFrame;
+                    ttsbegin;
+                    qcMeterTimeFrame.clear();
+                    qcMeterTimeFrame.initValue();
+                    qcMeterTimeFrame.DeliveryCategory  = deliveryCategory;
+                    qcMeterTimeFrame.CompanyId         = companyId;
+                    qcMeterTimeFrame.MeterTimeFrame_SE = billingCounter.EMS_MeterTimeFrame_SE;
+                    qcMeterTimeFrame.QuantityCodeValue = quantityCodeValue;
+                    qcMeterTimeFrame.insert();
+                    ttscommit;
+                    info(strFmt("EMS_QuantityCode_MeterTimeFrame inserted for %1", deliveryCategory));
+                }
+
+                ttsbegin;
+                if (billingCounter.validateWrite())
+                {
+                    billingCounter.insert();
+                    info(strFmt("Billing counter %1 inserted for meter %2 (QuantityCodeValue: %3).",
+                    nextCounterNum, meterNum, quantityCodeValue));
+                }
+                else
+                {
+                    error(strFmt("validateWrite() failed — Billing counter not inserted for meter %1.", meterNum));
+                    ttsabort;
+                    return;
+                }
+                ttscommit;
+            }
+            else
+            {
+                info(strFmt("Billing counter already exists for meter %1 (CounterNum: %2).",
+                meterNum, billingCounter.CounterNum));
+            }
+        }
+
+        {
+            EGS_ReadingImportParameter  readingImportParam;
+
+            readingImportParam = EGS_ReadingImportParameter::find(
+        EXU_ReadingsImportType::Internet, deliveryCategory, companyId);
+
+            if (!readingImportParam.RecId)
+            {
+                ttsbegin;
+                readingImportParam.clear();
+                readingImportParam.initValue();
+                readingImportParam.ImportType       = EXU_ReadingsImportType::Internet;
+                readingImportParam.DeliveryCategory = deliveryCategory;
+                readingImportParam.CompanyId        = companyId;
+                readingImportParam.Active           = NoYes::Yes;
+                readingImportParam.insert();
+                ttscommit;
+                info(strFmt("EGS_ReadingImportParameter inserted for %1.", deliveryCategory));
+            }
+            else if (!readingImportParam.Active)
+            {
+                ttsbegin;
+                readingImportParam = EGS_ReadingImportParameter::find(EXU_ReadingsImportType::Internet, deliveryCategory, companyId, true);
+                readingImportParam.Active = NoYes::Yes;
+                readingImportParam.update();
+                ttscommit;
+                info(strFmt("EGS_ReadingImportParameter activated for %1.", deliveryCategory));
+            }
+        }
+
+        if (!EXU_GroupTable::exist(EXU_GroupCode::ReadingMethod, readingMethodNum))
+        {
+            EXU_GroupTable  newGroupTable;
+            ttsbegin;
+            newGroupTable.GroupCode = EXU_GroupCode::ReadingMethod;
+            newGroupTable.GroupNum  = readingMethodNum;
+            newGroupTable.GroupName = strFmt('Test reading method (%1)', readingMethodNum);
+            newGroupTable.insert();
+            ttscommit;
+            info(strFmt("EXU_GroupTable inserted: ReadingMethod / %1.", readingMethodNum));
+        }
+
+
+        // Mäta_180 (Meter Journal Id) is Continuous = Yes. NumberSeq::getNumInternalV2() must run with
+        // ttsLevel() == 0 here. Forcing it onto the main connection via
+        // parmSessionAllowsAutomaticNumberSequenceGeneration(true) plus an open ttsbegin looks like the
+        // documented workaround for @SYS26203 ("does not support setup 'continuous'"), but when the
+        // "non-blocking number sequence" system setting is on, that main-connection path selects
+        // NumberSequenceTable without FORUPDATE and then calls .update() on it, throwing "record was
+        // not selected for update". Leaving newJournal() outside any open transaction lets NumberSeq use
+        // its own dedicated connection/transaction instead, which handles continuous sequences correctly.
+        // journal.save() (EXU_MeterJournal::dbSave) opens its own ttsbegin/ttscommit internally, so no
+        // wrapping is needed here either
+
+        factory = new EXU_MeterJournalFactory();
+        journal = factory.newJournal(EXU_MeterJournalType::Mounting, installationNum);
+
+        trans = factory.newTransaction(journal,
+                 installationNum,
+                 deliveryCategory,
+                 companyId,
+                 delPointNum,
+                 mountingDate,
+                 meterNum);
+
+        transData           = trans.data();
+        transData.LineNum   = 1;
+        transData.MeterCode = EXU_MeterCode::Billing;
+        trans.data(transData);
+
+        readingList = factory.newReadingsFromMeter(trans, meterNum);
+
+        journal.transactions().add(trans);
+
+        journal.save();
+
+        info(strFmt("Journal %1 saved.", journal.data().JournalId));
+
+        readingEnum = readingList.getEnumerator();
+        while (readingEnum.moveNext())
+        {
+            reading = readingEnum.current();
+            reading.save();
+        }
+        info(strFmt("Reading lines saved for journal %1.", journal.data().JournalId));
+
+        if (journal.post(approvers))
+        {
+            info(strFmt("Meter %1 successfully mounted on installation %2. Journal: %3.", meterNum, installationNum, journal.data().JournalId));
+        }
+        else
+        {
+            error(strFmt("Posting failed for journal %1. Review the infolog for details.", journal.data().JournalId));
+        }
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>

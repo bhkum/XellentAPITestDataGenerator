@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxTable xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_ExecuteScripts</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+public class XAPI_ExecuteScripts extends common
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>shouldThrowExceptionOnZeroDelete</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Determines if concurrent deletes should throw exception.
+    /// </summary>
+    /// <returns>true, if exception should be thrown; otherwise, false.</returns>
+    public boolean shouldThrowExceptionOnZeroDelete()
+    {
+        return true;
+    }
+
+]]></Source>
+			</Method>
+			<Method>
+				<Name>ensureAllApisExist</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Inserts one row per XAPI_APIS enum value that doesn't already have a row,
+    /// so every API is visible in the XAPI_ExecuteScripts form without requiring
+    /// the user to add rows manually. Description is copied from the matching
+    /// XAPI_APIConfigurations row - on insert, and to backfill any existing row
+    /// whose Description is still blank.
+    /// </summary>
+    public static void ensureAllApisExist()
+    {
+        SysDictEnum             dictEnum = new SysDictEnum(enumNum(XAPI_APIS));
+        XAPI_ExecuteScripts     scripts;
+        XAPI_APIConfigurations  apiConfig;
+        XAPI_APIS               api;
+        int                     i;
+
+        for (i = 0; i < dictEnum.values(); i++)
+        {
+            api = dictEnum.index2Value(i);
+
+            select firstonly apiConfig
+                where apiConfig.API == api;
+
+            select firstonly scripts
+                where scripts.APIName == api;
+
+            if (!scripts.RecId)
+            {
+                scripts.clear();
+                scripts.APIName    = api;
+                scripts.Description = apiConfig.Description;
+                scripts.insert();
+            }
+            else if (!scripts.Description && apiConfig.Description)
+            {
+                ttsbegin;
+                scripts.selectForUpdate(true);
+                scripts.Description = apiConfig.Description;
+                scripts.update();
+                ttscommit;
+            }
+        }
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+	<SubscriberAccessLevel>
+		<Read>Allow</Read>
+	</SubscriberAccessLevel>
+	<AllowRowVersionChangeTracking>Yes</AllowRowVersionChangeTracking>
+	<DeleteActions />
+	<FieldGroups>
+		<AxTableFieldGroup>
+			<Name>AutoReport</Name>
+			<Fields>
+				<AxTableFieldGroupField>
+					<DataField>APIName</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
+					<DataField>Description</DataField>
+				</AxTableFieldGroupField>
+			</Fields>
+		</AxTableFieldGroup>
+		<AxTableFieldGroup>
+			<Name>AutoLookup</Name>
+			<Fields />
+		</AxTableFieldGroup>
+		<AxTableFieldGroup>
+			<Name>AutoIdentification</Name>
+			<AutoPopulate>Yes</AutoPopulate>
+			<Fields>
+				<AxTableFieldGroupField>
+					<DataField>APIName</DataField>
+				</AxTableFieldGroupField>
+			</Fields>
+		</AxTableFieldGroup>
+		<AxTableFieldGroup>
+			<Name>AutoSummary</Name>
+			<Fields />
+		</AxTableFieldGroup>
+		<AxTableFieldGroup>
+			<Name>AutoBrowse</Name>
+			<Fields />
+		</AxTableFieldGroup>
+		<AxTableFieldGroup>
+			<Name>Main</Name>
+			<Label>Main</Label>
+			<Fields>
+				<AxTableFieldGroupField>
+					<DataField>APIName</DataField>
+				</AxTableFieldGroupField>
+				<AxTableFieldGroupField>
+					<DataField>Description</DataField>
+				</AxTableFieldGroupField>
+			</Fields>
+		</AxTableFieldGroup>
+	</FieldGroups>
+	<Fields>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldEnum">
+			<Name>APIName</Name>
+			<Label>API name</Label>
+			<EnumType>XAPI_APIS</EnumType>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>Description</Name>
+			<Label>Description</Label>
+			<StringSize>-1</StringSize>
+		</AxTableField>
+		<AxTableField xmlns=""
+			i:type="AxTableFieldString">
+			<Name>API</Name>
+			<Label>API</Label>
+			<StringSize>-1</StringSize>
+		</AxTableField>
+	</Fields>
+	<FullTextIndexes />
+	<Indexes>
+		<AxTableIndex>
+			<Name>APINameIdx</Name>
+			<AlternateKey>Yes</AlternateKey>
+			<Fields>
+				<AxTableIndexField>
+					<DataField>APIName</DataField>
+				</AxTableIndexField>
+			</Fields>
+		</AxTableIndex>
+	</Indexes>
+	<Mappings />
+	<Relations />
+	<StateMachines />
+</AxTable>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AxClass xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+	<Name>XAPI_Setup_Customer</Name>
+	<SourceCode>
+		<Declaration><![CDATA[
+class XAPI_Setup_Customer
+{
+}
+]]></Declaration>
+		<Methods>
+			<Method>
+				<Name>main</Name>
+				<Source><![CDATA[
+    /// <summary>
+    /// Class entry point. The system will call this method when a designated menu 
+    /// is selected or when execution starts and this class is set as the startup class.
+    /// </summary>
+    /// <param name = "_args">The specified arguments.</param>
+    public static void main(Args _args)
+    {
+        CustGroupId custGroupId = 'TST_CustGrp';
+        Description name = 'Test Customer Group for API Testing';
+        str apiName = enum2str(XAPI_APIS::CreateCustomer);
+
+        // AdditionalName - passed straight through to the API payload, no setup required
+        str additionalName = "TST_AdditionalName";
+        XAPI_AutomationHelper::logKeyValue(apiName, 'AdditionalName', additionalName);
+
+        // CustGroup Creation
+
+        CustGroup custGroup, newCustGroup;
+
+        select firstonly custGroup;
+        select firstonly newCustGroup
+        where newCustGroup.CustGroup == custGroupId;
+
+        if (custGroup.RecId && !newCustGroup.RecId)
+
+        {
+            buf2Buf(custGroup, newCustGroup);
+
+            newCustGroup.CustGroup = custGroupId;
+            newCustGroup.Name = name;
+
+            newCustGroup.insert();
+            info(strFmt("Inserted CustGroup: %1", custGroupId));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'CustGroup', newCustGroup.CustGroup);
+            // tablename = custgroup, fieldname = custgroup, api = createcustomer, json_body_identifier = CustGroup
+        }
+
+        // PaymMode
+
+        CustPaymMode paymMode = "TST_PaymMd";
+
+        CustPaymModeTable paymModeTable, newPaymModeTable;
+
+        select firstonly paymModeTable;
+        select firstonly newPaymModeTable
+    where newPaymModeTable.PaymMode == paymMode;
+
+        if (paymModeTable.RecId && !newPaymModeTable.RecId)
+        {
+            buf2Buf(paymModeTable, newPaymModeTable);
+            newPaymModeTable.PaymMode = paymMode;
+            newPaymModeTable.insert();
+            info(strFmt("Inserted PaymMode: %1", paymMode));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'PaymMode', newPaymModeTable.PaymMode);
+        }
+
+        // Technique Group Fields
+
+        CustParameters custParameters;
+        EXU_GroupTable groupTable, newGroupTable;
+
+        custParameters = CustParameters::find();
+        custParameters.selectForUpdate(true);
+
+        str techniqueField1Name = "TST_Tech1";
+        str techniqueField2Name = "TST_Tech2";
+        str techniqueField3Name = "TST_Tech3";
+        str techniqueField4Name = "TST_Tech4";
+
+        // Technique Group 1
+        select firstonly groupTable;
+        select firstonly newGroupTable
+    where newGroupTable.GroupCode == EXU_GroupCode::CustTechnicGroup1
+       && newGroupTable.GroupNum  == techniqueField1Name;
+
+        if (groupTable.RecId && !newGroupTable.RecId)
+        {
+            buf2Buf(groupTable, newGroupTable);
+            newGroupTable.GroupCode = EXU_GroupCode::CustTechnicGroup1;
+            newGroupTable.GroupNum  = techniqueField1Name;
+            newGroupTable.GroupName = techniqueField1Name;
+            newGroupTable.insert();
+            info(strFmt("Inserted technique group: %1", techniqueField1Name));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'TechnicGroup1', newGroupTable.GroupNum);
+        }
+
+        // Technique Group 2
+        groupTable.clear();
+        newGroupTable.clear();
+        select firstonly groupTable;
+        select firstonly newGroupTable
+    where newGroupTable.GroupCode == EXU_GroupCode::CustTechnicGroup2
+       && newGroupTable.GroupNum  == techniqueField2Name;
+
+        if (groupTable.RecId && !newGroupTable.RecId)
+        {
+            buf2Buf(groupTable, newGroupTable);
+            newGroupTable.GroupCode = EXU_GroupCode::CustTechnicGroup2;
+            newGroupTable.GroupNum  = techniqueField2Name;
+            newGroupTable.GroupName = techniqueField2Name;
+            newGroupTable.insert();
+            info(strFmt("Inserted technique group: %1", techniqueField2Name));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'TechnicGroup2', newGroupTable.GroupNum);
+        }
+
+        // Technique Group 3
+        groupTable.clear();
+        newGroupTable.clear();
+        select firstonly groupTable;
+        select firstonly newGroupTable
+    where newGroupTable.GroupCode == EXU_GroupCode::CustTechnicGroup3
+       && newGroupTable.GroupNum  == techniqueField3Name;
+
+        if (groupTable.RecId && !newGroupTable.RecId)
+        {
+            buf2Buf(groupTable, newGroupTable);
+            newGroupTable.GroupCode = EXU_GroupCode::CustTechnicGroup3;
+            newGroupTable.GroupNum  = techniqueField3Name;
+            newGroupTable.GroupName = techniqueField3Name;
+            newGroupTable.insert();
+            info(strFmt("Inserted technique group: %1", techniqueField3Name));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'TechnicGroup3', newGroupTable.GroupNum);
+        }
+
+        // Technique Group 4
+        groupTable.clear();
+        newGroupTable.clear();
+        select firstonly groupTable;
+        select firstonly newGroupTable
+    where newGroupTable.GroupCode == EXU_GroupCode::CustTechnicGroup4
+       && newGroupTable.GroupNum  == techniqueField4Name;
+
+        if (groupTable.RecId && !newGroupTable.RecId)
+        {
+            buf2Buf(groupTable, newGroupTable);
+            newGroupTable.GroupCode = EXU_GroupCode::CustTechnicGroup4;
+            newGroupTable.GroupNum  = techniqueField4Name;
+            newGroupTable.GroupName = techniqueField4Name;
+            newGroupTable.insert();
+            info(strFmt("Inserted technique group: %1", techniqueField4Name));
+
+            XAPI_AutomationHelper::logKeyValue(apiName, 'TechnicGroup4', newGroupTable.GroupNum);
+        }
+    }
+
+]]></Source>
+			</Method>
+		</Methods>
+	</SourceCode>
+</AxClass>
